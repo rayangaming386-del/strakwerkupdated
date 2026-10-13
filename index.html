@@ -211,6 +211,20 @@ h1,h2,h3{font-family:var(--f-display); margin:0; text-wrap:balance; line-height:
 .pd-out span{padding:6px 10px; border-radius:8px; background:rgba(255,255,255,.04); border:1px solid var(--line); color:var(--muted)}
 .pd-out span b{color:var(--text); font-weight:700}
 
+.bh{display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr); gap:22px; align-items:stretch; height:100%}
+.bh-text{display:flex; flex-direction:column; gap:10px}
+.bh-tiers{display:grid; gap:10px; margin-top:auto; padding-top:14px}
+.bh-tier{padding:13px 14px; border-radius:12px; border:1px solid var(--line-2); background:rgba(255,255,255,.02)}
+.bh-tier.pro{border-color:rgba(207,174,105,.45); background:rgba(207,174,105,.06)}
+.bh-top{display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:4px}
+.bh-top span{font-family:var(--f-mono); color:var(--gold); font-weight:600}
+.bh-tier small{display:block; color:var(--muted); font-size:.85rem; line-height:1.5}
+.bh-shot{margin:0; display:flex; flex-direction:column; gap:8px}
+.bh-frame{position:relative; height:340px; overflow:hidden; border-radius:14px; border:1px solid var(--line-2); background:#13151B; box-shadow:0 30px 60px -30px rgba(0,0,0,.8)}
+.bh-frame::after{content:""; position:absolute; inset:auto 0 0 0; height:70px; background:linear-gradient(transparent,#13151B); pointer-events:none}
+.bh-frame img{display:block; width:100%; height:auto; will-change:transform}
+.bh-shot figcaption{font-size:.78rem; color:var(--muted); text-align:center}
+@media (max-width:620px){ .bh{grid-template-columns:1fr} .bh-frame{height:300px} }
 .admin{display:grid; grid-template-columns:90px 1fr; border:1px solid var(--line-2); border-radius:12px; overflow:hidden; background:var(--bg); font-size:.78rem}
 .admin aside{background:var(--card-2); padding:12px 10px; display:grid; gap:8px; align-content:start}
 .admin aside i{display:block; height:7px; border-radius:4px; background:var(--line-2)}
@@ -592,7 +606,7 @@ body.mbar-on .wa-fab{transform:scale(0)}
         </div>
         <div class="float f1">
           <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 14h4"/></svg></span>
-          <span>Beheerpaneel<small>Zelf aanpassen</small></span><span class="amt">+€75</span>
+          <span>Beheerpaneel<small>Basis of geavanceerd</small></span><span class="amt">v.a. €50</span>
         </div>
         <div class="float f2">
           <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 12h.01M10 12h8"/></svg></span>
@@ -725,7 +739,7 @@ body.mbar-on .wa-fab{transform:scale(0)}
             <div class="case-kind"><span>Retrofit &amp; webshop</span><span>Rijswijk</span></div>
             <p>Retrofit-specialist voor VW, Audi, SEAT en Škoda. Met webshop, voertuigzoeker en een eigen beheerpaneel waarin de eigenaar zelf producten en teksten aanpast.</p>
             <ul class="chips">
-              <li class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>Beheerpaneel</li>
+              <li class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>Geavanceerd beheerpaneel</li>
               <li class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>Webshop</li>
               <li class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>Voertuigzoeker</li>
             </ul>
@@ -758,15 +772,25 @@ body.mbar-on .wa-fab{transform:scale(0)}
           </div>
         </div>
         <div class="tile t-b">
-          <h3>Beheerpaneel</h3>
-          <p>Zelf teksten, foto's en producten aanpassen. Geen code, geen wachttijd.</p>
-          <div class="viz admin" aria-hidden="true">
-            <aside><i class="on"></i><i></i><i></i><i></i></aside>
-            <main>
-              <div class="ar"><span>Homepage</span><span class="tag">Live</span></div>
-              <div class="ar"><span>Producten (24)</span><span class="tag">Live</span></div>
-              <div class="ar"><span>Nieuwe actie</span><span class="tag w">Concept</span></div>
-            </main>
+          <div class="bh">
+            <div class="bh-text">
+              <h3>Beheerpaneel</h3>
+              <p>Zelf je site aanpassen, zonder code en zonder wachttijd. Kies het niveau dat bij je past.</p>
+              <div class="bh-tiers">
+                <div class="bh-tier">
+                  <div class="bh-top"><b>Basis</b><span>+€50</span></div>
+                  <small>Teksten, foto's, bedrijfsgegevens en openingstijden zelf aanpassen.</small>
+                </div>
+                <div class="bh-tier pro">
+                  <div class="bh-top"><b>Geavanceerd</b><span>+€75</span></div>
+                  <small>Letterlijk alles: producten, merken &amp; modellen, diensten, portfolio, reviews, SEO en je webshop met bestellingen en voorraad.</small>
+                </div>
+              </div>
+            </div>
+            <figure class="bh-shot">
+              <div class="bh-frame"><img id="bhImg" src="assets/work/cartronic-beheer.webp" alt="Menu van het geavanceerde beheerpaneel van CarTronic" width="520" height="1574" loading="lazy"></div>
+              <figcaption>Geavanceerd beheer, live bij CarTronic</figcaption>
+            </figure>
           </div>
         </div>
         <div class="tile t-c">
@@ -916,7 +940,7 @@ Locatie: Rijswijk<small>09:41 ✓✓</small></div>
       <div class="faq-list">
         <details><summary>Wat krijg ik voor €200?</summary><p>Een complete website tot 3 pagina's: mobiel-first, met contactformulier, WhatsApp-knop, basis-SEO en je eigen domein met SSL. Alles daarbovenop kies je zelf bij de opties.</p></details>
         <details><summary>Hoe snel staat mijn site online?</summary><p>Een basissite staat meestal binnen 7 dagen online. Grotere opties zoals een webshop of beheerpaneel kosten iets meer tijd. Dat hoor je vooraf.</p></details>
-        <details><summary>Kan ik later zelf dingen aanpassen?</summary><p>Ja. Met het beheerpaneel pas je zelf teksten, foto's en producten aan, zonder code. Zonder beheerpaneel regel ik kleine aanpassingen voor je.</p></details>
+        <details><summary>Kan ik later zelf dingen aanpassen?</summary><p>Ja. Met het basis beheerpaneel (€50) pas je zelf teksten en foto's aan. Met het geavanceerde beheerpaneel (€75) pas je letterlijk alles aan, van producten tot je webshop. Allebei zonder code. Zonder beheerpaneel regel ik kleine aanpassingen voor je.</p></details>
         <details><summary>Ik heb al een domein of website. Kan dat?</summary><p>Ja. Ik koppel je bestaande domein aan de nieuwe site of verhuis het voor je. Je e-mail blijft gewoon werken.</p></details>
         <details><summary>Kan ik later nog opties toevoegen?</summary><p>Altijd. Je betaalt dan alleen de prijs van de optie die je erbij neemt.</p></details>
       </div>
@@ -985,7 +1009,8 @@ const CONFIG = {
   cartronicUrl: "https://cartronic.vercel.app",   // later: https://cartronic.nl
   groups: [
     { title: "Functies", items: [
-      { id:"beheer",   name:"Beheerpaneel",            price:75,  desc:"Zelf teksten, foto's en producten aanpassen, zonder code.", live:"cartronic" },
+      { id:"beheer",   name:"Beheerpaneel basis",      price:50,  desc:"Zelf teksten, foto's en bedrijfsgegevens aanpassen, zonder code.", excl:"beheerpro" },
+      { id:"beheerpro",name:"Beheerpaneel geavanceerd",price:75, desc:"Letterlijk alles zelf aanpassen: producten, merken, diensten, SEO en webshop.", live:"cartronic", excl:"beheer" },
       { id:"kenteken", name:"Kentekencheck (RDW)",     price:50,  desc:"Klant typt een kenteken, merk en model verschijnen direct.", live:"vagpro" },
       { id:"aanvraag", name:"Aanvraag via WhatsApp",   price:35,  desc:"Formulier dat aanvragen kant-en-klaar naar je WhatsApp stuurt.", live:"detak" },
       { id:"booking",  name:"Afspraken plannen",       price:75,  desc:"Klanten kiezen zelf een datum en tijd." },
@@ -1007,7 +1032,7 @@ const CONFIG = {
   presets: {
     vagpro:    { kenteken:1, pagina:3 },
     detak:     { kenteken:1, aanvraag:1, taal:2, regio:1, pagina:3 },
-    cartronic: { beheer:1, webshop:1, pagina:2 },
+    cartronic: { beheerpro:1, webshop:1, pagina:2 },
     reset:     {}
   }
 };
@@ -1048,7 +1073,7 @@ CONFIG.groups.forEach(g => {
   optRoot.appendChild(wrap);
 });
 function setQty(it, n){ state[it.id] = Math.max(0, Math.min(it.max || 10, n)); clearPresets(); render(); }
-optRoot.addEventListener("change", e => { const id = e.target.dataset.opt; if (!id) return; state[id] = e.target.checked ? 1 : 0; clearPresets(); render(); });
+optRoot.addEventListener("change", e => { const id = e.target.dataset.opt; if (!id) return; state[id] = e.target.checked ? 1 : 0; const ex = items.find(i => i.id === id)?.excl; if (ex && state[id]) state[ex] = 0; clearPresets(); render(); });
 optRoot.addEventListener("click", e => {
   const inc = e.target.closest("[data-inc]"), dec = e.target.closest("[data-dec]");
   if (inc) { const it = items.find(i => i.id === inc.dataset.inc); setQty(it, state[it.id] + 1); }
@@ -1104,6 +1129,16 @@ function render(){
   else { shown.v = once; paint(); }
 }
 render();
+
+/* Beheerpaneel: menu scrollt mee door het frame */
+(() => {
+  const img = document.getElementById("bhImg"); if (!img || !hasGsap || reduce) return;
+  gsap.registerPlugin(ScrollTrigger);
+  const dist = () => Math.max(0, img.offsetHeight - img.parentElement.offsetHeight);
+  gsap.to(img, { y: () => -dist(), ease: "none",
+    scrollTrigger: { trigger: img.parentElement, start: "top 85%", end: "bottom 15%", scrub: .6, invalidateOnRefresh: true } });
+  img.addEventListener("load", () => ScrollTrigger.refresh(), { once: true });
+})();
 
 /* Kenteken-demo: automatisch hoofdletters en streepjes */
 const pd = document.getElementById("pd");
