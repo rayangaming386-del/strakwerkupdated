@@ -1,1 +1,56 @@
-{ "cleanUrls": true, "trailingSlash": false }
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/service-starter",
+      "destination": "/#prijzen",
+      "permanent": true
+    },
+    {
+      "source": "/service-starter.html",
+      "destination": "/#prijzen",
+      "permanent": true
+    },
+    {
+      "source": "/service-pro",
+      "destination": "/#prijzen",
+      "permanent": true
+    },
+    {
+      "source": "/service-pro.html",
+      "destination": "/#prijzen",
+      "permanent": true
+    },
+    {
+      "source": "/service-ecom",
+      "destination": "/#prijzen",
+      "permanent": true
+    },
+    {
+      "source": "/service-ecom.html",
+      "destination": "/#prijzen",
+      "permanent": true
+    },
+    {
+      "source": "/service-onderhoud",
+      "destination": "/#prijzen",
+      "permanent": true
+    },
+    {
+      "source": "/service-onderhoud.html",
+      "destination": "/#prijzen",
+      "permanent": true
+    },
+    {
+      "source": "/service-boost",
+      "destination": "/#features",
+      "permanent": true
+    },
+    {
+      "source": "/service-boost.html",
+      "destination": "/#features",
+      "permanent": true
+    }
+  ]
+}
