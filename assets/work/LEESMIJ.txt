@@ -1,6 +1,5 @@
-Zet hier screenshots van je projecten (homepage, 1600x1000 px, liggend):
-  vagpro.webp
-  detak.webp
-  cartronic.webp
-Zolang een bestand ontbreekt, toont de site automatisch een nette mock-up.
-(.png of .jpg mag ook: pas dan in index.html de bestandsnaam aan.)
+Schermafbeeldingen van projecten:
+  Desktop (1600x905, zonder scrollbalk):  vagpro.webp, detak.webp, detak-de.webp, cartronic.webp, cartronic-dashboard.webp
+  Mobiel (zonder status- en adresbalk):   vagpro-mobiel.webp, detak-mobiel.webp, cartronic-mobiel.webp
+  Beheermenu (lang, scrollt mee):         cartronic-beheer.webp
+Zolang een telefoon-screenshot ontbreekt, toont de site automatisch een nette mock-up.

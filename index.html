@@ -117,7 +117,7 @@ h1,h2,h3{font-family:var(--f-display); margin:0; text-wrap:balance; line-height:
 .laptop{position:absolute; left:0; top:6%; width:88%}
 .phone{position:absolute; right:0; bottom:0; width:30%}
 .win{background:var(--card); border:1px solid var(--line-2); border-radius:16px; overflow:hidden; padding:6px; box-shadow:0 40px 80px -30px rgba(0,0,0,.8), 0 0 0 1px rgba(0,0,0,.4)}
-.screen{position:relative; aspect-ratio:16/10; overflow:hidden; background:#0c0f13; border-radius:11px}
+.screen{position:relative; aspect-ratio:1600/905; overflow:hidden; background:#0c0f13; border-radius:11px}
 .screen > img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:top; z-index:2}
 .handset{background:#05070A; border-radius:clamp(18px, 3vw, 30px); padding:clamp(5px, .8vw, 8px); box-shadow:0 40px 80px -24px rgba(0,0,0,.9), 0 0 0 1px var(--line-2)}
 .handset .screen{aspect-ratio:9/19.5; border-radius:clamp(13px, 2.3vw, 23px)}
@@ -180,6 +180,13 @@ h1,h2,h3{font-family:var(--f-display); margin:0; text-wrap:balance; line-height:
 .is-horizontal .track{display:flex; width:max-content; gap:clamp(56px, 6vw, 100px); padding-right:var(--gutter)}
 .is-horizontal .case{width:min(calc(100vw - var(--gutter)*2 - 90px), 1120px); flex:none}
 .case-visual{position:relative}
+.screen > img.alt{z-index:3; opacity:0; transition:opacity .6s ease}
+.screen.show-alt > img.alt{opacity:1}
+.shot-tabs{position:absolute; left:3%; bottom:-56px; display:flex; gap:4px; padding:4px; border-radius:99px; background:rgba(20,25,34,.88); border:1px solid var(--line-2); z-index:4}
+.shot-tabs button{font:600 .78rem/1 var(--f-body); color:var(--muted); background:none; border:0; padding:8px 14px; border-radius:99px; cursor:pointer; transition:background .25s, color .25s}
+.shot-tabs button[aria-pressed="true"]{background:var(--gold); color:#0B0C0F}
+.case-visual:has(.shot-tabs){margin-bottom:56px}
+@media (max-width:900px){ .case-visual .handset{right:0; bottom:-10%} .case-visual{margin-bottom:24px} .shot-tabs button{padding:7px 12px} }
 .case-visual .handset{position:absolute; right:-3%; bottom:-8%; width:24%}
 .case-visual.solo{display:flex; justify-content:center}
 .case-visual.solo .handset{position:relative; right:auto; bottom:auto; width:min(290px, 62%, 33vh)}
@@ -651,7 +658,12 @@ body.mbar-on .wa-fab{transform:scale(0)}
       <div class="track" id="track">
 
         <article class="case" id="case-vagpro">
-          <div class="case-visual solo" style="--glow:rgba(110,150,230,.30)">
+          <div class="case-visual" style="--glow:rgba(110,150,230,.30)">
+            <div class="win">
+              <div class="screen">
+                <img src="assets/work/vagpro.webp" alt="Homepage van VAGPRO op desktop" loading="lazy" onerror="this.remove()">
+              </div>
+            </div>
             <div class="handset">
               <div class="screen">
                 <span class="notch"></span>
@@ -687,7 +699,14 @@ body.mbar-on .wa-fab{transform:scale(0)}
         </article>
 
         <article class="case" id="case-detak">
-          <div class="case-visual solo" style="--glow:rgba(245,196,0,.24)">
+          <div class="case-visual" style="--glow:rgba(245,196,0,.24)">
+            <div class="win">
+              <div class="screen">
+                <img src="assets/work/detak.webp" alt="Homepage van Sleepdienst De Tak op desktop, Nederlands" loading="lazy" onerror="this.remove()">
+                <img class="alt" src="assets/work/detak-de.webp" alt="Homepage van Sleepdienst De Tak op desktop, Duits" loading="lazy" onerror="this.remove()">
+              </div>
+            </div>
+            <div class="shot-tabs" role="group" aria-label="Taal van de schermafbeelding"><button type="button" aria-pressed="true">NL</button><button type="button" aria-pressed="false">DE</button></div>
             <div class="handset">
               <div class="screen">
                 <span class="notch"></span>
@@ -724,7 +743,14 @@ body.mbar-on .wa-fab{transform:scale(0)}
         </article>
 
         <article class="case" id="case-cartronic">
-          <div class="case-visual solo" style="--glow:rgba(120,110,255,.28)">
+          <div class="case-visual" style="--glow:rgba(120,110,255,.28)">
+            <div class="win">
+              <div class="screen">
+                <img src="assets/work/cartronic.webp" alt="Homepage van CarTronic op desktop" loading="lazy" onerror="this.remove()">
+                <img class="alt" src="assets/work/cartronic-dashboard.webp" alt="Dashboard van het CarTronic-beheerpaneel" loading="lazy" onerror="this.remove()">
+              </div>
+            </div>
+            <div class="shot-tabs" role="group" aria-label="Schermafbeelding kiezen"><button type="button" aria-pressed="true">Website</button><button type="button" aria-pressed="false">Beheer</button></div>
             <div class="handset">
               <div class="screen">
                 <span class="notch"></span>
@@ -1046,6 +1072,20 @@ const CONFIG = {
   }
 };
 const LIVE_NAMES = { vagpro:"VAGPRO", detak:"De Tak", cartronic:"CarTronic" };
+
+/* Wissel tussen twee schermafbeeldingen (De Tak NL/DE, CarTronic website/beheer) */
+document.querySelectorAll(".shot-tabs").forEach(tabs => {
+  const screen = tabs.parentElement.querySelector(".win .screen");
+  const btns = [...tabs.querySelectorAll("button")];
+  let auto;
+  const show = i => {
+    screen.classList.toggle("show-alt", i === 1);
+    btns.forEach((b, j) => b.setAttribute("aria-pressed", String(i === j)));
+  };
+  btns.forEach((b, i) => b.addEventListener("click", () => { clearInterval(auto); show(i); }));
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches)
+    auto = setInterval(() => show(screen.classList.contains("show-alt") ? 0 : 1), 4500);
+});
 
 /* ============================================================ */
 const euro = n => "€" + Math.round(n).toLocaleString("nl-NL");
