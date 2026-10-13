@@ -121,6 +121,9 @@ h1,h2,h3{font-family:var(--f-display); margin:0; text-wrap:balance; line-height:
 .screen > img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:top; z-index:2}
 .handset{background:#05070A; border-radius:clamp(18px, 3vw, 30px); padding:clamp(5px, .8vw, 8px); box-shadow:0 40px 80px -24px rgba(0,0,0,.9), 0 0 0 1px var(--line-2)}
 .handset .screen{aspect-ratio:9/19.5; border-radius:clamp(13px, 2.3vw, 23px)}
+.handset .screen > img{top:auto; bottom:0; height:auto; object-fit:initial}
+.handset .screen:has(> img){background:#000}
+.handset .screen:has(> img) .mock{display:none}
 .handset .notch{position:absolute; top:6px; left:50%; transform:translateX(-50%); width:34%; height:4.5%; border-radius:99px; background:#05070A; z-index:3}
 .float{position:absolute; z-index:4; display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:12px; font-size:.82rem; font-weight:700; white-space:nowrap;
   background:rgba(20,25,34,.88); border:1px solid var(--line-2); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); box-shadow:0 18px 40px -16px rgba(0,0,0,.8)}
@@ -570,7 +573,7 @@ body.mbar-on .wa-fab{transform:scale(0)}
         <div class="stats">
           <div><b data-count="200" data-pre="€">€200</b><span>Startprijs</span></div>
           <div><b data-count="7" data-suf=" dagen">7 dagen</b><span>Tot je online bent</span></div>
-          <div><b data-count="3">3</b><span>Sites live</span></div>
+          <div><b data-count="20" data-suf="+">20+</b><span>Sites live</span></div>
         </div>
       </div>
 
