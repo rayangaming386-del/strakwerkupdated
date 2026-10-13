@@ -21,12 +21,15 @@ Eén-pagina site voor StrakWerk (websites voor ondernemers, vanaf €200). Alle 
 - Altijd testen op desktop én mobiel: geen console-fouten, niets dat horizontaal buiten beeld schuift.
 - Nooit reviews, klantcitaten of cijfers verzinnen; die komen van de eigenaar.
 
+## Eigenaar
+- Rayan, oprichter van StrakWerk. Sectie `#over` ("Over mij") tussen Prijzen en Werkwijze.
+
 ## Portfolio
 - VAGPRO (kentekencheck), De Tak (aanvraag via WhatsApp, meertalig, regiopagina's), CarTronic (webshop + geavanceerd beheerpaneel, `CONFIG.cartronicUrl`).
 - Teller staat op "20+ sites live".
 
 ## Openstaande punten (input van eigenaar nodig)
-- Foto van de eigenaar + naam en kort verhaal voor een "Over mij"-sectie.
+- Portretfoto van Rayan voor de "Over mij"-sectie (nu staat daar de werkplekfoto). De tekst in "Over mij" is geschreven zonder harde feiten (geen leeftijd, jaren ervaring of aantallen); vul die alleen aan met info van Rayan.
 - Echte klantreviews (bijv. Karim van CarTronic) voor een review-sectie.
 - Btw: zijn prijzen incl. of excl. btw? KvK-nummer voor in de footer.
 - Domein: controleren of strakwerkk.nl in Vercel aan dit project gekoppeld is.

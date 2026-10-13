@@ -15,7 +15,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230B0E13'/%3E%3Ctext x='16' y='21' font-family='Arial' font-weight='900' font-size='15' fill='%23E8EDF3' text-anchor='middle'%3ESW%3C/text%3E%3Crect x='7' y='24' width='12' height='2.4' rx='1.2' fill='%23CFAE69'/%3E%3C/svg%3E">
 <meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"ProfessionalService","name":"StrakWerk","url":"https://www.strakwerkk.nl/","image":"https://www.strakwerkk.nl/assets/og.png","description":"Websites op maat vanaf €200. Kies zelf je opties: beheerpaneel, kentekencheck, webshop en meer.","telephone":"+31623462397","email":"strakwerkk@gmail.com","priceRange":"€€","areaServed":"NL"}
+{"@context":"https://schema.org","@type":"ProfessionalService","name":"StrakWerk","url":"https://www.strakwerkk.nl/","image":"https://www.strakwerkk.nl/assets/og.png","description":"Websites op maat vanaf €200. Kies zelf je opties: beheerpaneel, kentekencheck, webshop en meer.","telephone":"+31623462397","email":"strakwerkk@gmail.com","priceRange":"€€","areaServed":"NL","founder":{"@type":"Person","name":"Rayan"}}
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -416,6 +416,28 @@ body::after{content:""; position:fixed; inset:0; z-index:300; pointer-events:non
 .cta-left, .cta-box .form{position:relative; z-index:1}
 @media (max-width:900px){ .cta-photo::after{background:linear-gradient(180deg, rgba(20,25,34,.78), rgba(20,25,34,.93) 45%)} }
 
+
+/* Over mij */
+.about{display:grid; grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr); gap:clamp(36px, 6vw, 88px); align-items:center}
+@media (max-width:900px){ .about{grid-template-columns:1fr} }
+.about-photo{position:relative; margin:0; max-width:460px; width:100%}
+.about-photo img{width:100%; height:auto; aspect-ratio:4/5; object-fit:cover; object-position:50% 72%; border-radius:24px; border:1px solid var(--line-2); box-shadow:0 40px 80px -30px rgba(0,0,0,.9); filter:saturate(.95) contrast(1.03)}
+.about-photo::before{content:""; position:absolute; inset:-12% -14%; z-index:-1; background:radial-gradient(closest-side, rgba(207,174,105,.20), transparent); pointer-events:none}
+.about-photo figcaption{position:absolute; left:-18px; bottom:28px; display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:12px; font-size:.82rem; font-weight:700; background:rgba(20,25,34,.9); border:1px solid var(--line-2); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); box-shadow:0 18px 40px -16px rgba(0,0,0,.8)}
+.about-photo figcaption small{display:block; font-weight:500; color:var(--muted); font-size:.72rem}
+.about-photo .ic{width:28px; height:28px; border-radius:8px; display:grid; place-items:center; background:rgba(207,174,105,.14); color:var(--gold); flex:none}
+.about-photo .ic svg{width:16px; height:16px}
+@media (max-width:900px){ .about-photo{margin-inline:auto} .about-photo figcaption{left:12px} }
+.about-text{display:grid; gap:20px}
+.about-text > p{color:var(--muted); max-width:58ch}
+.about-points{list-style:none; margin:4px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:10px}
+.about-points li{display:inline-flex; align-items:center; gap:9px; padding:9px 14px; border-radius:999px; border:1px solid var(--line-2); background:rgba(255,255,255,.03); font-size:.9rem; font-weight:600}
+.about-points svg{width:17px; height:17px; color:var(--gold); flex:none}
+.about-sign{display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap; margin-top:8px; padding-top:22px}
+.about-sign b{display:block; font:700 1.5rem/1.1 var(--f-display); letter-spacing:-.02em}
+.about-sign span{color:var(--muted); font-size:.9rem}
+#over::before{background:radial-gradient(700px 520px at 10% 50%, rgba(207,174,105,.08), transparent 70%), radial-gradient(600px 460px at 100% 20%, rgba(70,96,230,.08), transparent 70%)}
+
 /* ===== Beweging & kleur ===== */
 .loader{position:fixed; inset:0; z-index:200; background:var(--bg); display:none; place-items:center; --u:0}
 .js .loader{display:grid}
@@ -567,6 +589,7 @@ body.mbar-on .wa-fab{transform:scale(0)}
       <a href="#features">Mogelijkheden</a>
       <a href="#prijzen">Prijzen</a>
       <a href="#werkwijze">Werkwijze</a>
+      <a href="#over">Over mij</a>
       <a href="#waarom">Waarom</a>
       <a href="#vragen">FAQ</a>
     </nav>
@@ -588,6 +611,7 @@ body.mbar-on .wa-fab{transform:scale(0)}
     <a href="#waarom">Waarom StrakWerk</a>
     <a href="#prijzen">Prijzen</a>
     <a href="#werkwijze">Werkwijze</a>
+    <a href="#over">Over mij</a>
     <a href="#contact">Contact</a>
   </nav>
   <div class="mnav-foot">
@@ -973,6 +997,33 @@ Locatie: Rijswijk<small>09:41 ✓✓</small></div>
     </div>
   </section>
 
+  <!-- OVER MIJ -->
+  <section class="sec" id="over">
+    <div class="wrap about">
+      <figure class="about-photo">
+        <img src="assets/setup.webp" alt="De werkplek van Rayan: twee schermen met code, een laptop en een tablet" width="1340" height="2388" loading="lazy">
+        <figcaption><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6l-6 6 6 6M16 6l6 6-6 6"/></svg></span><span>Hier wordt je site gebouwd<small>Mijn eigen werkplek</small></span></figcaption>
+      </figure>
+      <div class="about-text">
+        <div class="sec-head" style="margin-bottom:0">
+          <h2 class="h2">Hoi, ik ben <span class="gold-text">Rayan</span>.</h2>
+          <p class="lead">Achter StrakWerk zit geen groot bureau, maar ik. Ik ontwerp en bouw elke website zelf, van het eerste idee tot de dag dat hij live staat.</p>
+        </div>
+        <p>Ik ben met StrakWerk begonnen omdat ik zag hoe vaak ondernemers vastzitten aan een standaard template, of duizenden euro's kwijt zijn bij een bureau. Dat kan slimmer. Ik combineer een strak ontwerp met techniek die echt iets voor je doet, zoals een kentekencheck via de RDW of een beheerpaneel waarin je zelf alles aanpast.</p>
+        <p>Bij mij heb je één vast aanspreekpunt. Geen accountmanager ertussen en geen wachtrij: je appt mij en je praat direct met degene die je site bouwt.</p>
+        <ul class="about-points">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Eén vast aanspreekpunt</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.8 7L4 20l1.1-4.6A8 8 0 1 1 21 12z"/></svg>Direct contact via WhatsApp</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Vaste prijzen, vooraf bekend</li>
+        </ul>
+        <div class="about-sign">
+          <div><b>Rayan</b><span>Oprichter van StrakWerk</span></div>
+          <a class="btn btn--gold" href="https://wa.me/31623462397?text=Hoi%20Rayan%2C%20ik%20wil%20graag%20een%20website." target="_blank" rel="noopener">App Rayan</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- WERKWIJZE -->
   <section class="sec" id="werkwijze">
     <div class="wrap">
@@ -1054,7 +1105,7 @@ Locatie: Rijswijk<small>09:41 ✓✓</small></div>
 <footer>
   <div class="wrap foot">
     <div class="foot-brand"><span class="brand"><span class="strak">STRAK</span><span>WERK</span></span><p>Websites op maat vanaf €200. Snel online, mobiel-first en vindbaar in Google.</p></div>
-    <nav class="foot-col" aria-label="Footer"><b>Navigatie</b><a href="#werk">Werk</a><a href="#features">Mogelijkheden</a><a href="#prijzen">Prijzen</a><a href="#vragen">FAQ</a></nav>
+    <nav class="foot-col" aria-label="Footer"><b>Navigatie</b><a href="#werk">Werk</a><a href="#features">Mogelijkheden</a><a href="#prijzen">Prijzen</a><a href="#over">Over mij</a><a href="#vragen">FAQ</a></nav>
     <div class="foot-col"><b>Contact</b><a href="https://wa.me/31623462397" target="_blank" rel="noopener">WhatsApp</a><span>06 2346 2397</span><span>strakwerkk@gmail.com</span></div>
   </div>
   <div class="wrap foot-bottom"><span>© <span id="year">2026</span> StrakWerk · Webdesign &amp; development</span><a href="#hero">Terug naar boven ↑</a></div>
@@ -1312,7 +1363,7 @@ if (hasGsap){
   // Actief menu-item
   document.querySelectorAll(".nav a").forEach(a => {
     const sec = document.querySelector(a.getAttribute("href"));
-    if (sec) ScrollTrigger.create({ trigger: sec, start: "top 45%", end: "bottom 45%", onToggle: st => a.classList.toggle("active", st.isActive) });
+    if (sec) ScrollTrigger.create({ trigger: sec, start: "top 45%", end: "bottom 45%", refreshPriority: -1, onToggle: st => a.classList.toggle("active", st.isActive) });
   });
 
   // Woorden splitsen voor de scroll-reveal
@@ -1406,6 +1457,8 @@ if (hasGsap){
 
     /* FAQ, CTA en groot woordmerk */
     gsap.from("details", { y: 30, opacity: 0, duration: .7, stagger: .07, ease: "power3.out", scrollTrigger: { trigger: ".faq-list", start: "top 85%" } });
+    gsap.from(".about-photo", { y: 80, rotate: -4, opacity: 0, duration: 1.2, ease: "power4.out", scrollTrigger: { trigger: "#over", start: "top 80%" } });
+    gsap.from(".about-text > p, .about-points li, .about-sign", { y: 40, opacity: 0, duration: .9, stagger: .08, ease: "power3.out", scrollTrigger: { trigger: ".about-text", start: "top 80%" } });
     gsap.from(".cta-box", { y: 80, scale: .94, opacity: 0, duration: 1.2, ease: "power4.out", scrollTrigger: { trigger: ".cta-box", start: "top 88%" } });
     gsap.fromTo(".giant div", { xPercent: 4 }, { xPercent: -22, ease: "none", scrollTrigger: { trigger: ".giant", start: "top bottom", end: "bottom top", scrub: true } });
   });
