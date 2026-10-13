@@ -4,332 +4,380 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="StrakWerk bouwt strakke, snelle websites vanaf €200. Kies zelf je opties: beheerpaneel, kentekencheck, webshop en meer. Binnen een week online.">
-<meta name="theme-color" content="#0D1014">
+<meta name="theme-color" content="#0B0E13">
 <link rel="canonical" href="https://www.strakwerkk.nl/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://www.strakwerkk.nl/">
 <meta property="og:title" content="StrakWerk · Websites vanaf €200">
 <meta property="og:description" content="Kies zelf je opties en zie direct je prijs. Binnen een week online.">
 <meta property="og:image" content="https://www.strakwerkk.nl/assets/og.png">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230D1014'/%3E%3Crect x='9' y='9' width='14' height='14' rx='2' fill='%23F5C400' transform='skewX(-12) translate(3 0)'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230B0E13'/%3E%3Ctext x='16' y='21' font-family='Arial' font-weight='900' font-size='15' fill='%23E8EDF3' text-anchor='middle'%3ESW%3C/text%3E%3Crect x='7' y='24' width='12' height='2.4' rx='1.2' fill='%23CFAE69'/%3E%3C/svg%3E">
 <script defer src="/_vercel/insights/script.js"></script>
 <title>StrakWerk</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Instrument+Sans:wght@400..700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
 <style>
-/* Layout: links uitgelijnd, brede display-type; één gedurfd element = het kenteken-prijsplaatje in de hero.
-   Kleur: koel aluminium + inkt, met kentekengeel als enige accent (vlakken, nooit als tekstkleur). */
+/* Layout: donker premium, merk-goud als enige accent. Hero = tekst links, device-compositie rechts.
+   Bewust één thema (donker): dat is de huisstijl van StrakWerk. */
 :root{
-  --paper:#ECEEF0;
-  --surface:#F8F9FA;
-  --ink:#0D1014;
-  --muted:#59616B;
-  --line:#D2D6DB;
-  --plate:#F5C400;
-  --plate-ink:#0D1014;
-  --nl:#1E3A8A;
-  --ok:#1F7A4D;
-  --shadow:0 1px 0 rgba(13,16,20,.04), 0 12px 32px -18px rgba(13,16,20,.35);
+  --bg:#0B0E13;
+  --bg-2:#0F1319;
+  --card:#141922;
+  --card-2:#1A202B;
+  --line:rgba(255,255,255,.08);
+  --line-2:rgba(255,255,255,.14);
+  --text:#E8EDF3;
+  --muted:#98A2B0;
+  --gold:#CFAE69;
+  --gold-hi:#EAD39C;
+  --gold-ink:#17130B;
+  --ok:#5BD39A;
 
-  --f-display:"Archivo", "Arial Narrow", system-ui, sans-serif;
-  --f-body:"Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --f-mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --f-display:"Sora", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
 
-  --gutter:clamp(16px, 4vw, 48px);
-  --max:1240px;
-  --r:14px;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --paper:#0E1012; --surface:#16191D; --ink:#E8EBEE; --muted:#949CA6; --line:#2A3036;
-    --plate:#F5C400; --plate-ink:#0D1014; --nl:#2747A8; --ok:#4CC38A;
-    --shadow:0 1px 0 rgba(0,0,0,.3), 0 16px 40px -20px rgba(0,0,0,.8);
-    color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --paper:#0E1012; --surface:#16191D; --ink:#E8EBEE; --muted:#949CA6; --line:#2A3036;
-  --plate:#F5C400; --plate-ink:#0D1014; --nl:#2747A8; --ok:#4CC38A;
-  --shadow:0 1px 0 rgba(0,0,0,.3), 0 16px 40px -20px rgba(0,0,0,.8);
+  --gutter:clamp(16px, 4vw, 40px);
+  --max:1220px;
+  --r:18px;
   color-scheme:dark;
 }
-
 *,*::before,*::after{box-sizing:border-box}
 [hidden]{display:none !important}
 html{scroll-behavior:smooth}
-body{
-  margin:0; background:var(--paper); color:var(--ink);
-  font-family:var(--f-body); font-size:17px; line-height:1.55;
-  -webkit-font-smoothing:antialiased; overflow-x:hidden;
-}
-a{color:inherit}
-:focus-visible{outline:2px solid var(--ink); outline-offset:3px; border-radius:4px}
-.wrap{max-width:var(--max); margin-inline:auto; padding-inline:var(--gutter)}
-h1,h2,h3{font-family:var(--f-display); text-wrap:balance; margin:0; line-height:1}
-h2{font-size:clamp(2.1rem, 5.2vw, 4rem); font-weight:800; font-stretch:112%; letter-spacing:-.02em}
-h3{font-size:1.25rem; font-weight:700; font-stretch:105%; letter-spacing:-.01em}
+body{margin:0; background:var(--bg); color:var(--text); font-family:var(--f-body); font-size:16.5px; line-height:1.6; -webkit-font-smoothing:antialiased; overflow-x:hidden}
+a{color:inherit; text-decoration:none}
+img{max-width:100%; display:block}
 p{margin:0}
-.label{font-family:var(--f-mono); font-size:.75rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
-.lead{font-size:clamp(1.05rem, 1.6vw, 1.25rem); color:var(--muted); max-width:58ch}
-.sec{padding-block:clamp(72px, 11vw, 140px)}
-.sec-head{display:grid; gap:18px; margin-bottom:clamp(36px, 6vw, 64px)}
+h1,h2,h3{font-family:var(--f-display); margin:0; text-wrap:balance; line-height:1.08; letter-spacing:-.025em}
+:focus-visible{outline:2px solid var(--gold); outline-offset:3px; border-radius:6px}
+::selection{background:var(--gold); color:var(--gold-ink)}
+
+.wrap{max-width:var(--max); margin-inline:auto; padding-inline:var(--gutter)}
+.sec{padding-block:clamp(80px, 11vw, 140px); position:relative}
+.eyebrow{display:inline-flex; align-items:center; gap:10px; font:600 .78rem/1 var(--f-body); letter-spacing:.14em; text-transform:uppercase; color:var(--gold)}
+.eyebrow::before{content:""; width:22px; height:1.5px; background:var(--gold)}
+.h2{font-size:clamp(2rem, 4.6vw, 3.4rem); font-weight:700}
+.lead{color:var(--muted); font-size:clamp(1.02rem, 1.4vw, 1.15rem); max-width:56ch}
+.sec-head{display:grid; gap:18px; margin-bottom:clamp(40px, 6vw, 64px)}
+.sec-head.center{justify-items:center; text-align:center}
+.sec-head.center .lead{margin-inline:auto}
+.gold-text{background:linear-gradient(100deg, var(--gold-hi), var(--gold) 55%, #A9873F); -webkit-background-clip:text; background-clip:text; color:transparent}
 
 /* Buttons */
-.btn{
-  display:inline-flex; align-items:center; gap:.55em; justify-content:center;
-  font:600 .98rem/1 var(--f-body); text-decoration:none; cursor:pointer;
-  padding:15px 22px; border-radius:999px; border:1.5px solid var(--ink);
-  background:transparent; color:var(--ink); transition:transform .2s, background .2s, color .2s;
-}
-.btn:hover{transform:translateY(-1px)}
-.btn--plate{background:var(--plate); color:var(--plate-ink); border-color:var(--plate)}
-.btn--ink{background:var(--ink); color:var(--paper)}
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:10px; padding:15px 24px; border-radius:12px; font:700 .96rem/1 var(--f-body); cursor:pointer; border:1px solid var(--line-2); background:rgba(255,255,255,.03); color:var(--text); transition:transform .25s, border-color .25s, background .25s, box-shadow .25s; white-space:nowrap}
+.btn:hover{transform:translateY(-2px); border-color:rgba(255,255,255,.28)}
+.btn--gold{background:linear-gradient(180deg, var(--gold-hi), var(--gold)); color:var(--gold-ink); border-color:transparent; box-shadow:0 10px 30px -10px rgba(207,174,105,.55), inset 0 1px 0 rgba(255,255,255,.5)}
+.btn--gold:hover{box-shadow:0 16px 40px -12px rgba(207,174,105,.7), inset 0 1px 0 rgba(255,255,255,.5); border-color:transparent}
 .btn svg{width:18px; height:18px; flex:none}
+.btn .arr{transition:transform .25s}
+.btn:hover .arr{transform:translateX(3px)}
+
+/* Logo (zoals de oude site) */
+.brand{font-family:var(--f-display); font-weight:800; letter-spacing:.06em; font-size:clamp(20px, 2vw, 25px); line-height:1; display:inline-flex; gap:5px}
+.brand .strak{position:relative; display:inline-block}
+.brand .strak::after{content:""; position:absolute; left:0; right:0; height:3px; border-radius:2px; background:var(--gold); bottom:-7px; transform-origin:left}
 
 /* Header */
-.top{
-  position:sticky; top:env(safe-area-inset-top, 0px); z-index:50;
-  background:color-mix(in srgb, var(--paper) 82%, transparent);
-  backdrop-filter:saturate(1.4) blur(12px); -webkit-backdrop-filter:saturate(1.4) blur(12px);
-  border-bottom:1px solid transparent; transition:border-color .3s;
-}
-.top.scrolled{border-bottom-color:var(--line)}
-.top .wrap{display:flex; align-items:center; justify-content:space-between; gap:16px; height:68px}
-.brand{font-family:var(--f-display); font-weight:900; font-stretch:125%; font-size:1.15rem; letter-spacing:.02em; text-decoration:none; display:flex; align-items:center; gap:8px}
-.brand i{display:inline-block; width:12px; height:12px; background:var(--plate); border-radius:2px; transform:skewX(-12deg)}
-.nav{display:flex; gap:26px; align-items:center}
-.nav a{text-decoration:none; font-weight:500; font-size:.95rem; color:var(--muted)}
-.nav a:hover{color:var(--ink)}
-.top .btn{padding:11px 18px; font-size:.9rem}
-@media (max-width:820px){ .nav{display:none} }
+.top{position:sticky; top:env(safe-area-inset-top, 0px); z-index:50; transition:background .3s, border-color .3s; border-bottom:1px solid transparent}
+.top.scrolled{background:rgba(11,14,19,.78); backdrop-filter:blur(14px) saturate(1.3); -webkit-backdrop-filter:blur(14px) saturate(1.3); border-bottom-color:var(--line)}
+.top .wrap{display:flex; align-items:center; justify-content:space-between; gap:16px; height:76px}
+.nav{display:flex; gap:4px; padding:5px; border:1px solid var(--line); border-radius:999px; background:rgba(255,255,255,.02)}
+.nav a{padding:8px 16px; border-radius:999px; font-weight:600; font-size:.9rem; color:var(--muted); transition:color .2s, background .2s}
+.nav a:hover{color:var(--text); background:rgba(255,255,255,.05)}
+.top .btn{padding:12px 18px; font-size:.9rem}
+@media (max-width:880px){ .nav{display:none} }
+@media (max-width:420px){ .top .btn{padding:11px 14px; font-size:.85rem} }
 
 /* Hero */
-.hero{padding-block:clamp(56px, 9vw, 120px) clamp(48px, 7vw, 96px)}
-.hero h1{
-  font-size:clamp(2.5rem, 8vw, 6.6rem); font-weight:850; font-stretch:112%;
-  letter-spacing:-.035em; line-height:.92;
-}
-.hero h1 .ln{display:block; overflow:hidden; padding-bottom:.06em}
+.hero{position:relative; overflow:clip; padding-block:clamp(40px, 7vw, 96px) clamp(64px, 8vw, 110px)}
+.hero::before{content:""; position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(900px 500px at 78% 30%, rgba(207,174,105,.13), transparent 60%),
+    radial-gradient(700px 500px at 0% 0%, rgba(80,110,160,.10), transparent 60%)}
+.hero::after{content:""; position:absolute; inset:0; pointer-events:none; opacity:.55;
+  background-image:linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size:64px 64px;
+  -webkit-mask-image:radial-gradient(ellipse 70% 60% at 60% 40%, #000 20%, transparent 75%);
+          mask-image:radial-gradient(ellipse 70% 60% at 60% 40%, #000 20%, transparent 75%)}
+.hero .wrap{position:relative; z-index:1; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.05fr); gap:clamp(32px, 4vw, 64px); align-items:center}
+@media (max-width:980px){ .hero .wrap{grid-template-columns:1fr} }
+.pill{display:inline-flex; align-items:center; gap:10px; padding:7px 14px 7px 10px; border-radius:999px; border:1px solid var(--line-2); background:rgba(255,255,255,.03); font-size:.85rem; font-weight:600; color:var(--text)}
+.pill i{width:8px; height:8px; border-radius:50%; background:var(--ok); box-shadow:0 0 0 4px rgba(91,211,154,.15)}
+.hero h1{font-size:clamp(2.5rem, 5.2vw, 4.3rem); font-weight:800; letter-spacing:-.035em; line-height:1.02; margin-top:24px}
+.hero h1 .ln{display:block; overflow:hidden; padding-bottom:.08em; margin-bottom:-.08em}
 .hero h1 .ln > span{display:inline-block}
-.hero-row{display:flex; flex-wrap:wrap; align-items:center; gap:clamp(16px, 3vw, 32px); margin-top:clamp(18px, 2.5vw, 28px)}
-.hero-bottom{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:32px; align-items:end; margin-top:clamp(36px, 5vw, 56px)}
-.hero-bottom .lead{color:var(--muted)}
-.hero-cta{display:flex; gap:12px; flex-wrap:wrap}
-@media (max-width:820px){ .hero-bottom{grid-template-columns:1fr} }
+.hero .lead{margin-top:22px}
+.hero-cta{display:flex; gap:12px; flex-wrap:wrap; margin-top:34px}
+.stats{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:0; margin-top:44px; border-top:1px solid var(--line); max-width:520px}
+.stats div{padding:18px 16px 0 0; display:grid; gap:2px}
+.stats div + div{padding-left:18px; border-left:1px solid var(--line)}
+.stats b{white-space:nowrap; font-family:var(--f-display); font-size:clamp(1.15rem, 2.4vw, 1.8rem); font-weight:700; letter-spacing:-.02em; font-variant-numeric:tabular-nums}
+.stats span{font-size:.84rem; color:var(--muted)}
 
-/* Kenteken-prijsplaat */
-.plate{
-  display:inline-flex; align-items:stretch; border-radius:10px; overflow:hidden;
-  background:var(--plate); color:var(--plate-ink);
-  box-shadow:0 0 0 3px var(--plate-ink) inset, var(--shadow);
-  font-family:var(--f-display); font-weight:800; font-stretch:80%;
-  height:clamp(64px, 9vw, 112px); line-height:1;
-}
-.plate .eu{
-  background:var(--nl); color:#fff; width:clamp(26px, 3.4vw, 40px);
-  display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
-  padding-bottom:8px; font-size:clamp(.7rem, 1vw, .95rem); font-stretch:100%; font-weight:700;
-  margin:3px 0 3px 3px; border-radius:7px 0 0 7px; position:relative;
-}
-.plate .eu::before{
-  content:""; position:absolute; top:22%; left:50%; width:44%; aspect-ratio:1; transform:translateX(-50%);
-  border-radius:50%; border:2px dotted #F5C400;
-}
-.plate .val{display:flex; align-items:center; padding-inline:clamp(14px, 2vw, 26px); font-size:clamp(2.6rem, 6.4vw, 5.6rem); letter-spacing:.02em; font-variant-numeric:tabular-nums}
-.plate .val small{font-size:.42em; font-stretch:100%; margin-right:.35em; align-self:center; letter-spacing:0; font-weight:700}
-.hero-note{max-width:26ch; font-size:1rem; color:var(--muted); line-height:1.4}
-.hero-note b{color:var(--ink); font-weight:600}
+/* Device-compositie */
+.devices{position:relative; aspect-ratio:1.18; max-width:100%}
+.laptop{position:absolute; left:0; top:6%; width:88%}
+.phone{position:absolute; right:0; bottom:0; width:30%}
+.win{background:var(--card); border:1px solid var(--line-2); border-radius:14px; overflow:hidden; box-shadow:0 40px 80px -30px rgba(0,0,0,.8), 0 0 0 1px rgba(0,0,0,.4)}
+.win .bar{display:flex; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid var(--line); background:var(--card-2)}
+.win .dots{display:flex; gap:6px}
+.win .dots i{width:9px; height:9px; border-radius:50%}
+.win .dots i:nth-child(1){background:#FF5F56}.win .dots i:nth-child(2){background:#FFBD2E}.win .dots i:nth-child(3){background:#27C93F}
+.win .url{flex:1; min-width:0; text-align:center; font:500 .72rem/1 var(--f-mono); color:var(--muted); background:rgba(255,255,255,.04); border-radius:6px; padding:6px 10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.win .url::before{content:"🔒 "; filter:grayscale(1); opacity:.6}
+.screen{position:relative; aspect-ratio:16/10; overflow:hidden; background:#0c0f13}
+.screen > img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:top; z-index:2}
+.handset{background:#05070A; border-radius:clamp(18px, 3vw, 30px); padding:clamp(5px, .8vw, 8px); box-shadow:0 40px 80px -24px rgba(0,0,0,.9), 0 0 0 1px var(--line-2)}
+.handset .screen{aspect-ratio:9/19.5; border-radius:clamp(13px, 2.3vw, 23px)}
+.handset .notch{position:absolute; top:6px; left:50%; transform:translateX(-50%); width:34%; height:4.5%; border-radius:99px; background:#05070A; z-index:3}
+.float{position:absolute; z-index:4; display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:12px; font-size:.82rem; font-weight:700; white-space:nowrap;
+  background:rgba(20,25,34,.88); border:1px solid var(--line-2); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); box-shadow:0 18px 40px -16px rgba(0,0,0,.8)}
+.float small{display:block; font-weight:500; color:var(--muted); font-size:.72rem}
+.float .ic{width:28px; height:28px; border-radius:8px; display:grid; place-items:center; background:rgba(207,174,105,.14); color:var(--gold); flex:none}
+.float .ic svg{width:16px; height:16px}
+.float .amt{font-family:var(--f-mono); color:var(--gold); margin-left:4px}
+.f1{left:-2%; bottom:14%}
+.f2{right:22%; top:0}
+@media (max-width:560px){ .float{font-size:.72rem; padding:8px 10px} .float small{display:none} .float .ic{width:22px; height:22px} .f2{right:26%; top:-2%} }
 
-.clients{display:flex; flex-wrap:wrap; gap:10px 28px; align-items:center; padding-top:28px; margin-top:clamp(40px, 6vw, 72px); border-top:1px solid var(--line)}
-.clients a{font-family:var(--f-display); font-weight:700; font-stretch:110%; font-size:1.05rem; text-decoration:none; color:var(--ink); display:inline-flex; gap:6px; align-items:center}
-.clients a span{color:var(--muted); font-family:var(--f-body); font-weight:400; font-stretch:100%; font-size:.85rem}
-.clients a:hover{text-decoration:underline; text-underline-offset:4px}
+/* Mock-ups (worden vervangen door screenshots in assets/work) */
+.mock{position:absolute; inset:0; display:flex; flex-direction:column; font-family:var(--f-body); overflow:hidden}
+.mock .m-nav{display:flex; justify-content:space-between; align-items:center; padding:3.2% 5%; font:800 clamp(.5rem, 1.05vw, .82rem)/1 var(--f-display); letter-spacing:.06em}
+.mock .m-nav em{display:flex; gap:7%; flex:0 0 40%; justify-content:flex-end; align-items:center}
+.mock .m-nav em i{display:block; width:20%; height:4px; border-radius:3px; background:currentColor; opacity:.28}
+.mock .m-nav em b{display:block; padding:5px 9px; border-radius:5px; font-size:.8em}
+.mock .m-hero{padding:5% 5% 0; display:grid; gap:clamp(5px, 1vw, 10px); position:relative; z-index:1}
+.mock .m-k{font:700 clamp(.42rem, .8vw, .62rem)/1 var(--f-body); letter-spacing:.14em; text-transform:uppercase; opacity:.7}
+.mock .m-h{font:800 clamp(.95rem, 2.4vw, 1.9rem)/1.02 var(--f-display); letter-spacing:-.03em; max-width:14ch}
+.mock .m-p{height:5px; border-radius:3px; background:currentColor; opacity:.2}
+.mock .m-row{display:flex; gap:6px; align-items:center; flex-wrap:wrap}
+.mock .m-btn{display:inline-block; padding:clamp(4px, .7vw, 7px) clamp(7px, 1.1vw, 12px); border-radius:6px; font:700 clamp(.42rem, .85vw, .68rem)/1.2 var(--f-body)}
+.mock .m-plate{display:inline-flex; border-radius:5px; overflow:hidden; height:clamp(18px, 2.8vw, 30px); box-shadow:0 0 0 1.5px #111 inset; background:#F5C400; color:#111; font:800 clamp(.55rem, 1.3vw, 1rem)/1 var(--f-display); letter-spacing:.06em}
+.mock .m-plate b{width:clamp(7px, 1vw, 12px); background:#1E3A8A; margin:1.5px 0 1.5px 1.5px; border-radius:3px 0 0 3px}
+.mock .m-plate span{display:flex; align-items:center; padding:0 clamp(6px, 1vw, 12px)}
+.mock .m-cards{display:grid; grid-template-columns:repeat(3,1fr); gap:6px; padding:4% 5% 0}
+.mock .m-cards i{display:block; aspect-ratio:1.3; border-radius:6px; background:currentColor; opacity:.08}
+.mock .m-glow{position:absolute; right:-10%; top:10%; width:60%; aspect-ratio:1; border-radius:50%; filter:blur(30px); opacity:.5}
+.mock-vagpro{background:#F7F8FA; color:#0F1720}
+.mock-vagpro .m-btn, .mock-vagpro .m-nav b{background:#0F1720; color:#fff}
+.mock-vagpro .m-glow{background:#C9D6EA}
+.mock-detak{background:#0F0F0F; color:#F2F2F2}
+.mock-detak .m-btn, .mock-detak .m-nav b{background:#F5C400; color:#111}
+.mock-detak .m-h span{color:#F5C400}
+.mock-detak .m-glow{background:#5A4A00}
+.mock-cartronic{background:#11141A; color:#E7EAF0}
+.mock-cartronic .m-btn, .mock-cartronic .m-nav b{background:#E7EAF0; color:#11141A}
+.mock-cartronic .m-glow{background:#2A3550}
+.mock.is-phone .m-nav em i{display:none}
+.mock.is-phone .m-h{font-size:clamp(.8rem, 1.7vw, 1.15rem)}
+.mock.is-phone .m-nav{padding-top:16%}
+.mock.is-phone .m-hero{padding-top:10%}
+.mock.is-phone .m-cards{grid-template-columns:1fr 1fr}
+
+/* Marquee */
+.marquee{border-block:1px solid var(--line); background:var(--bg-2); overflow:clip; padding-block:22px; position:relative}
+.marquee::before,.marquee::after{content:""; position:absolute; top:0; bottom:0; width:120px; z-index:1; pointer-events:none}
+.marquee::before{left:0; background:linear-gradient(90deg, var(--bg-2), transparent)}
+.marquee::after{right:0; background:linear-gradient(-90deg, var(--bg-2), transparent)}
+.mq-track{display:flex; width:max-content; animation:mq 38s linear infinite}
+.mq-track span{display:inline-flex; align-items:center; gap:28px; padding-right:28px; font:600 1.05rem/1 var(--f-display); color:var(--muted); white-space:nowrap; letter-spacing:-.01em}
+.mq-track span::after{content:""; width:6px; height:6px; transform:rotate(45deg); background:var(--gold)}
+.mq-track span.hl{color:var(--text)}
+@keyframes mq{to{transform:translateX(-50%)}}
 
 /* Werk */
-#werk{overflow:hidden}
+#werk{overflow-x:clip}
 .track{display:grid; gap:clamp(56px, 8vw, 96px)}
-.case{display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr); gap:clamp(24px, 4vw, 56px); align-items:center}
+.case{display:grid; grid-template-columns:minmax(0,1.4fr) minmax(0,1fr); gap:clamp(28px, 4vw, 60px); align-items:center}
 @media (max-width:900px){ .case{grid-template-columns:1fr} }
-.is-horizontal .track{display:flex; gap:clamp(48px, 6vw, 96px); width:max-content; padding-right:var(--gutter)}
-.is-horizontal .case{width:min(calc(100vw - var(--gutter)*2 - 80px), 1120px); flex:none}
-
-.frame{
-  background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
-  box-shadow:var(--shadow); overflow:hidden; max-width:100%;
-}
-.frame .bar{display:flex; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid var(--line)}
-.frame .dots{display:flex; gap:6px}
-.frame .dots i{width:9px; height:9px; border-radius:50%; background:var(--line)}
-.frame .url{flex:1; min-width:0; font-family:var(--f-mono); font-size:.75rem; color:var(--muted); background:var(--paper); border-radius:6px; padding:5px 10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.shot{position:relative; aspect-ratio:16/10; overflow:hidden}
-.shot > img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:top; z-index:2}
-
-/* Mock-ups (worden vervangen door screenshots zodra die in assets/work staan) */
-.mock{position:absolute; inset:0; display:flex; flex-direction:column; font-family:var(--f-body)}
-.mock .m-nav{display:flex; justify-content:space-between; align-items:center; padding:4% 6% 0; font-family:var(--f-display); font-weight:800; font-size:clamp(.7rem, 1.3vw, 1rem); letter-spacing:.04em}
-.mock .m-nav em{display:flex; gap:8px}
-.mock .m-nav em i{display:block; width:28px; height:5px; border-radius:3px; background:currentColor; opacity:.25}
-.mock .m-body{padding:6% 6% 0; display:grid; gap:10px}
-.mock .m-h{font-family:var(--f-display); font-weight:800; font-stretch:110%; font-size:clamp(1rem, 2.6vw, 2.1rem); line-height:1; letter-spacing:-.02em; max-width:15ch}
-.mock .m-l{height:7px; border-radius:4px; background:currentColor; opacity:.18}
-.mock .m-plate{display:inline-flex; margin-top:6px; border-radius:6px; overflow:hidden; height:clamp(26px, 4vw, 40px); width:max-content; box-shadow:0 0 0 2px #0D1014 inset; background:#F5C400; color:#0D1014; font:800 clamp(.8rem, 1.8vw, 1.25rem)/1 var(--f-display); font-stretch:85%}
-.mock .m-plate b{width:16px; background:#1E3A8A; margin:2px 0 2px 2px; border-radius:4px 0 0 4px}
-.mock .m-plate span{display:flex; align-items:center; padding:0 12px; letter-spacing:.06em}
-.mock .m-btn{display:inline-block; padding:7px 12px; border-radius:6px; font-size:clamp(.55rem, 1vw, .75rem); font-weight:700; width:max-content}
-.mock .m-row{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
-.mock .m-grid{display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-top:6px}
-.mock .m-grid i{aspect-ratio:1; border-radius:6px; background:currentColor; opacity:.1}
-.mock-vagpro{background:#FFFFFF; color:#0F1720}
-.mock-vagpro .m-btn{background:#0F1720; color:#fff}
-.mock-detak{background:#111111; color:#F2F2F2}
-.mock-detak .m-btn{background:#F5C400; color:#111}
-.mock-detak .m-h span{color:#F5C400}
-.mock-cartronic{background:#11141A; color:#E7EAF0}
-.mock-cartronic .m-btn{background:#E7EAF0; color:#11141A}
-
+.is-horizontal .track{display:flex; width:max-content; gap:clamp(56px, 6vw, 100px); padding-right:var(--gutter)}
+.is-horizontal .case{width:min(calc(100vw - var(--gutter)*2 - 90px), 1120px); flex:none}
+.case-visual{position:relative}
+.case-visual .handset{position:absolute; right:-3%; bottom:-8%; width:24%}
 .case-info{display:grid; gap:18px; min-width:0}
-.case-info .meta{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
-.case-info h3{font-size:clamp(2rem, 4vw, 3.2rem); font-weight:850; font-stretch:115%; letter-spacing:-.02em}
+.case-num{font:600 .8rem/1 var(--f-mono); color:var(--gold); letter-spacing:.08em}
+.case-info h3{font-size:clamp(1.9rem, 3.4vw, 2.8rem); font-weight:700}
 .case-info p{color:var(--muted); max-width:46ch}
-.chips{display:flex; flex-wrap:wrap; gap:8px; padding:0; margin:0; list-style:none}
-.chip{font-size:.85rem; font-weight:500; padding:6px 12px; border-radius:999px; border:1px solid var(--line); background:var(--surface); display:inline-flex; gap:6px; align-items:center}
-.chip.opt::before{content:""; width:7px; height:7px; border-radius:2px; background:var(--plate); box-shadow:0 0 0 1px var(--plate-ink)}
-.case-links{display:flex; gap:18px; align-items:center; flex-wrap:wrap}
-.link{font-weight:600; text-underline-offset:4px; text-decoration-thickness:1.5px}
-.link-soft{font-size:.92rem; color:var(--muted); text-underline-offset:4px; background:none; border:0; padding:0; cursor:pointer; font-family:inherit; text-decoration:underline}
-.link-soft:hover{color:var(--ink)}
+.case-kind{font-size:.9rem; color:var(--muted); display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.case-kind span + span::before{content:"·"; margin-right:10px; opacity:.6}
+.chips{display:flex; flex-wrap:wrap; gap:8px; list-style:none; margin:0; padding:0}
+.chip{display:inline-flex; align-items:center; gap:8px; padding:7px 12px; border-radius:8px; font-size:.84rem; font-weight:600; background:var(--card); border:1px solid var(--line)}
+.chip svg{width:14px; height:14px; color:var(--gold)}
+.case-links{display:flex; gap:22px; align-items:center; flex-wrap:wrap; margin-top:4px}
+.link{display:inline-flex; align-items:center; gap:8px; font-weight:700; color:var(--text); border-bottom:1.5px solid var(--gold); padding-bottom:3px}
+.link-soft{background:none; border:0; padding:0; font:600 .92rem var(--f-body); color:var(--muted); cursor:pointer}
+.link-soft:hover{color:var(--gold)}
 .progress{display:none}
-.is-horizontal .progress{display:flex; gap:8px; margin-top:40px}
-.progress i{height:3px; flex:1; background:var(--line); border-radius:2px; overflow:hidden; position:relative}
-.progress i b{position:absolute; inset:0; background:var(--ink); transform-origin:left; transform:scaleX(0)}
+.is-horizontal .progress{display:flex; align-items:center; gap:14px; margin-top:56px}
+.progress i{height:2px; flex:1; background:var(--line-2); border-radius:2px; overflow:hidden; position:relative}
+.progress i b{position:absolute; inset:0; background:var(--gold); transform-origin:left; transform:scaleX(0)}
+.progress span{font:500 .78rem/1 var(--f-mono); color:var(--muted)}
+
+/* Bento */
+.bento{display:grid; grid-template-columns:repeat(6, minmax(0,1fr)); gap:16px}
+.tile{position:relative; overflow:hidden; border-radius:var(--r); padding:26px; background:linear-gradient(180deg, var(--card-2), var(--card)); border:1px solid var(--line); display:flex; flex-direction:column; gap:10px; min-height:260px}
+.tile::before{content:""; position:absolute; inset:0 0 auto; height:1px; background:linear-gradient(90deg, transparent, rgba(207,174,105,.5), transparent); opacity:.6}
+.tile h3{font-size:1.2rem; font-weight:700; letter-spacing:-.015em}
+.tile p{color:var(--muted); font-size:.95rem; max-width:40ch}
+.tile .viz{margin-top:auto; padding-top:18px}
+.t-a{grid-column:span 3}.t-b{grid-column:span 3}.t-c{grid-column:span 2}.t-d{grid-column:span 2}.t-e{grid-column:span 2}
+@media (max-width:980px){ .bento{grid-template-columns:repeat(2, minmax(0,1fr))} .t-a,.t-b{grid-column:span 2} .t-c,.t-d,.t-e{grid-column:span 1} .t-e{grid-column:span 2} }
+@media (max-width:620px){ .bento{grid-template-columns:1fr} .t-a,.t-b,.t-c,.t-d,.t-e{grid-column:auto} }
+
+.plate-demo{display:grid; gap:12px}
+.pd-input{display:flex; align-items:stretch; height:58px; border-radius:9px; overflow:hidden; background:#F5C400; box-shadow:0 0 0 2.5px #111 inset; max-width:300px}
+.pd-input b{width:30px; background:#1E3A8A; margin:2.5px 0 2.5px 2.5px; border-radius:7px 0 0 7px; display:flex; align-items:flex-end; justify-content:center; padding-bottom:6px; color:#fff; font:700 .7rem/1 var(--f-body)}
+.pd-input input{flex:1; min-width:0; border:0; background:transparent; color:#111; font:800 1.7rem/1 var(--f-display); letter-spacing:.08em; text-transform:uppercase; padding:0 14px; outline:none}
+.pd-input input::placeholder{color:rgba(0,0,0,.35)}
+.pd-out{display:flex; gap:10px; flex-wrap:wrap; font-size:.88rem}
+.pd-out span{padding:6px 10px; border-radius:8px; background:rgba(255,255,255,.04); border:1px solid var(--line); color:var(--muted)}
+.pd-out span b{color:var(--text); font-weight:700}
+
+.admin{display:grid; grid-template-columns:90px 1fr; border:1px solid var(--line-2); border-radius:12px; overflow:hidden; background:var(--bg); font-size:.78rem}
+.admin aside{background:var(--card-2); padding:12px 10px; display:grid; gap:8px; align-content:start}
+.admin aside i{display:block; height:7px; border-radius:4px; background:var(--line-2)}
+.admin aside i.on{background:var(--gold)}
+.admin main{padding:12px; display:grid; gap:8px}
+.admin .ar{display:flex; justify-content:space-between; align-items:center; gap:8px; padding:8px 10px; border-radius:8px; background:var(--card); border:1px solid var(--line)}
+.admin .ar span:first-child{font-weight:600}
+.admin .tag{font:600 .66rem/1 var(--f-mono); padding:4px 6px; border-radius:5px; background:rgba(91,211,154,.12); color:var(--ok)}
+.admin .tag.w{background:rgba(207,174,105,.14); color:var(--gold)}
+
+.serp{border-radius:12px; background:var(--bg); border:1px solid var(--line-2); padding:14px; display:grid; gap:4px; font-size:.82rem}
+.serp .u{color:var(--muted); font-size:.74rem}
+.serp .t{color:#8AB4F8; font-weight:600; font-size:.98rem}
+.serp .d{color:var(--muted); line-height:1.45}
+.speed{display:flex; align-items:center; gap:16px}
+.ring{--p:0; width:86px; height:86px; border-radius:50%; flex:none; display:grid; place-items:center;
+  background:conic-gradient(var(--ok) calc(var(--p)*1%), rgba(255,255,255,.07) 0)}
+.ring b{width:72px; height:72px; border-radius:50%; background:var(--card); display:grid; place-items:center; font:700 1.5rem/1 var(--f-display); color:var(--ok)}
+.speed span{font-size:.85rem; color:var(--muted)}
+.chat{display:grid; gap:8px; justify-items:end}
+.bubble{max-width:90%; padding:10px 12px; border-radius:12px 12px 4px 12px; background:#1F5C47; color:#EAF7F0; font-size:.82rem; line-height:1.45; white-space:pre-line}
+.bubble small{display:block; text-align:right; opacity:.6; font-size:.68rem; margin-top:4px}
 
 /* Configurator */
-#prijzen{background:var(--surface); border-block:1px solid var(--line)}
-.cfg{display:grid; grid-template-columns:minmax(0,1.45fr) minmax(0,1fr); gap:clamp(24px, 4vw, 56px); align-items:start}
-@media (max-width:960px){ .cfg{grid-template-columns:1fr} }
+#prijzen{background:var(--bg-2); border-block:1px solid var(--line)}
+#prijzen::before{content:""; position:absolute; inset:0; pointer-events:none; background:radial-gradient(800px 400px at 85% 0%, rgba(207,174,105,.08), transparent 60%)}
+.cfg{display:grid; grid-template-columns:minmax(0,1.45fr) minmax(0,1fr); gap:clamp(24px, 4vw, 48px); align-items:start; position:relative}
+@media (max-width:980px){ .cfg{grid-template-columns:1fr} }
+.base{position:relative; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:20px; padding:28px; border-radius:var(--r); background:linear-gradient(180deg, rgba(207,174,105,.10), rgba(207,174,105,.03)); border:1px solid rgba(207,174,105,.35)}
+.base .tagline{font:700 .7rem/1 var(--f-body); letter-spacing:.14em; text-transform:uppercase; color:var(--gold)}
+.base h3{font-size:1.5rem; margin-top:8px}
+.base ul{margin:16px 0 0; padding:0; list-style:none; display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px 22px}
+.base li{display:flex; gap:10px; font-size:.94rem; align-items:flex-start}
+.base li svg{width:18px; height:18px; color:var(--gold); flex:none; margin-top:2px}
+.base .price{text-align:right}
+.base .price b{display:block; font:800 2.4rem/1 var(--f-display); letter-spacing:-.03em}
+.base .price span{font-size:.8rem; color:var(--muted)}
+@media (max-width:560px){ .base{grid-template-columns:1fr} .base .price{text-align:left; order:-1} .base ul{grid-template-columns:1fr} }
 
-.base{
-  display:grid; grid-template-columns:minmax(0,1fr) auto; gap:20px; align-items:start;
-  padding:26px; border-radius:var(--r); background:var(--paper); border:1.5px solid var(--ink);
-}
-.base h3{font-size:1.5rem}
-.base ul{margin:14px 0 0; padding:0; list-style:none; display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px 20px}
-.base li{display:flex; gap:9px; font-size:.95rem; align-items:baseline}
-.base li::before{content:"✓"; font-weight:700; color:var(--ok)}
-.base .price{font-family:var(--f-mono); font-weight:600; font-size:1.4rem; white-space:nowrap}
-@media (max-width:560px){ .base{grid-template-columns:1fr} .base ul{grid-template-columns:1fr} }
+.presets{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:30px 0 6px}
+.presets > span{font-size:.85rem; color:var(--muted); margin-right:4px; font-weight:600}
+.pbtn{font:600 .86rem/1 var(--f-body); padding:10px 14px; border-radius:10px; border:1px solid var(--line-2); background:transparent; color:var(--text); cursor:pointer; transition:border-color .2s, background .2s}
+.pbtn:hover{border-color:var(--gold)}
+.pbtn[aria-pressed="true"]{background:var(--gold); color:var(--gold-ink); border-color:var(--gold)}
 
-.presets{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:28px 0 8px}
-.presets .label{margin-right:6px}
-.pbtn{font:500 .88rem/1 var(--f-body); padding:9px 14px; border-radius:999px; border:1px solid var(--line); background:var(--paper); color:var(--ink); cursor:pointer}
-.pbtn:hover{border-color:var(--ink)}
-.pbtn[aria-pressed="true"]{background:var(--ink); color:var(--paper); border-color:var(--ink)}
+.group{margin-top:30px}
+.group-title{font:700 .72rem/1 var(--f-body); letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:12px; display:block}
+.opts{display:grid; gap:10px}
+.opt-row{display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:16px; align-items:center; padding:16px 18px; border-radius:14px; background:var(--card); border:1px solid var(--line); cursor:pointer; transition:border-color .2s, background .2s}
+.opt-row:hover{border-color:var(--line-2)}
+.opt-row.on{border-color:rgba(207,174,105,.55); background:linear-gradient(180deg, rgba(207,174,105,.07), rgba(207,174,105,.02)), var(--card)}
+.opt-row .name{font-weight:700; display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.opt-row .desc{font-size:.88rem; color:var(--muted); margin-top:2px}
+.opt-row .live{font:600 .66rem/1 var(--f-mono); letter-spacing:.04em; text-transform:uppercase; padding:4px 7px; border-radius:5px; border:1px solid rgba(207,174,105,.45); color:var(--gold)}
+.opt-row .live:hover{background:rgba(207,174,105,.12)}
+.opt-row .amt{font:600 .95rem/1.2 var(--f-mono); text-align:right; white-space:nowrap}
+.opt-row .amt small{display:block; color:var(--muted); font:500 .7rem var(--f-body)}
 
-.group{margin-top:28px}
-.group > .label{display:block; margin-bottom:6px}
-.opt-row{
-  display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:16px; align-items:center;
-  padding:16px 4px; border-bottom:1px solid var(--line); cursor:pointer;
-}
-.opt-row:first-of-type{border-top:1px solid var(--line)}
-.opt-row .name{font-weight:600; display:flex; gap:10px; align-items:center; flex-wrap:wrap}
-.opt-row .desc{font-size:.9rem; color:var(--muted); margin-top:2px}
-.opt-row .live{font-family:var(--f-mono); font-size:.68rem; letter-spacing:.04em; text-transform:uppercase; padding:3px 7px; border-radius:4px; background:var(--plate); color:var(--plate-ink); text-decoration:none; font-weight:600}
-.opt-row .amt{font-family:var(--f-mono); font-size:.95rem; text-align:right; white-space:nowrap}
-.opt-row .amt small{display:block; color:var(--muted); font-size:.72rem}
+.sw{position:relative; width:46px; height:27px; flex:none}
+.sw input{position:absolute; inset:0; opacity:0; margin:0; cursor:pointer; z-index:1}
+.sw span{position:absolute; inset:0; border-radius:999px; background:rgba(255,255,255,.1); border:1px solid var(--line-2); transition:background .2s}
+.sw span::after{content:""; position:absolute; top:3px; left:3px; width:19px; height:19px; border-radius:50%; background:#C9D0DA; transition:transform .28s cubic-bezier(.3,1.4,.5,1), background .2s}
+.sw input:checked + span{background:var(--gold); border-color:var(--gold)}
+.sw input:checked + span::after{transform:translateX(19px); background:var(--gold-ink)}
+.sw input:focus-visible + span{outline:2px solid var(--gold); outline-offset:3px}
 
-/* switch */
-.sw{position:relative; width:44px; height:26px; flex:none}
-.sw input{position:absolute; inset:0; opacity:0; margin:0; cursor:pointer}
-.sw span{position:absolute; inset:0; border-radius:999px; background:var(--line); transition:background .2s}
-.sw span::after{content:""; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:var(--surface); box-shadow:0 1px 3px rgba(0,0,0,.25); transition:transform .25s cubic-bezier(.3,1.4,.5,1)}
-.sw input:checked + span{background:var(--ink)}
-.sw input:checked + span::after{transform:translateX(18px); background:var(--plate)}
-.sw input:focus-visible + span{outline:2px solid var(--ink); outline-offset:3px}
+.step{display:inline-flex; align-items:center; border:1px solid var(--line-2); border-radius:10px; height:32px; flex:none; background:var(--bg)}
+.step button{width:30px; height:30px; border:0; background:none; color:var(--text); font:600 1rem/1 var(--f-mono); cursor:pointer; border-radius:9px}
+.step button:hover{background:rgba(255,255,255,.06)}
+.step output{min-width:22px; text-align:center; font:600 .9rem var(--f-mono)}
 
-/* stepper */
-.step{display:inline-flex; align-items:center; border:1px solid var(--line); border-radius:999px; height:30px; flex:none}
-.step button{width:30px; height:28px; border:0; background:none; color:var(--ink); font:600 1rem/1 var(--f-mono); cursor:pointer; border-radius:999px}
-.step button:hover{background:var(--paper)}
-.step output{min-width:20px; text-align:center; font-family:var(--f-mono); font-size:.9rem}
-
-/* Offerte */
-.quote{
-  position:sticky; top:calc(env(safe-area-inset-top, 0px) + 88px);
-  background:var(--paper); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow);
-  overflow:hidden;
-}
-.quote-head{display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:20px 22px; border-bottom:1px dashed var(--line)}
-.quote-head h3{font-size:1.35rem}
-.quote-head .label{text-align:right}
-.qlines{list-style:none; margin:0; padding:14px 22px; display:grid; gap:9px; font-size:.94rem; min-height:80px}
-.qlines li{display:flex; justify-content:space-between; gap:12px}
-.qlines li span:last-child{font-family:var(--f-mono); white-space:nowrap; font-variant-numeric:tabular-nums}
-.qlines li.base-line{font-weight:600}
-.qtotal{padding:16px 22px 20px; border-top:1px solid var(--ink); display:grid; gap:6px}
+.quote{position:sticky; top:calc(env(safe-area-inset-top, 0px) + 96px); border-radius:var(--r); overflow:hidden; background:var(--card); border:1px solid var(--line-2); box-shadow:0 40px 80px -40px rgba(0,0,0,.9)}
+.quote::before{content:""; display:block; height:3px; background:linear-gradient(90deg, var(--gold-hi), var(--gold), #A9873F)}
+.quote-head{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:22px 24px 18px; border-bottom:1px dashed var(--line-2)}
+.quote-head h3{font-size:1.25rem; font-weight:700}
+.quote-head span{font:500 .74rem/1 var(--f-mono); color:var(--muted)}
+.qlines{list-style:none; margin:0; padding:16px 24px; display:grid; gap:10px; font-size:.93rem; min-height:72px}
+.qlines li{display:flex; justify-content:space-between; gap:12px; color:var(--muted)}
+.qlines li span:last-child{font-family:var(--f-mono); color:var(--text); white-space:nowrap; font-variant-numeric:tabular-nums}
+.qlines li.base-line{color:var(--text); font-weight:700}
+.qtotal{padding:18px 24px 22px; border-top:1px solid var(--line-2); display:grid; gap:8px; background:rgba(255,255,255,.015)}
 .qtotal .row{display:flex; justify-content:space-between; align-items:baseline; gap:12px}
-.qtotal .big{font-family:var(--f-display); font-weight:850; font-stretch:90%; font-size:clamp(2.6rem, 5vw, 3.4rem); letter-spacing:-.01em; font-variant-numeric:tabular-nums; line-height:1}
-.qtotal .mo{font-family:var(--f-mono); font-size:.9rem; color:var(--muted)}
-.qactions{display:grid; gap:10px; padding:0 22px 22px}
+.qtotal .lbl{font-size:.82rem; color:var(--muted); font-weight:600}
+.qtotal .big{font:800 clamp(2.4rem, 4.4vw, 3rem)/1 var(--f-display); letter-spacing:-.03em; font-variant-numeric:tabular-nums}
+.qtotal .mo{font:600 .92rem var(--f-mono); color:var(--gold)}
+.qactions{display:grid; gap:10px; padding:4px 24px 20px}
 .qactions .btn{width:100%}
-.qnote{font-size:.82rem; color:var(--muted); line-height:1.45; padding:0 22px 22px}
-.qnote b{font-weight:600; color:var(--ink); user-select:all}
+.qnote{font-size:.8rem; color:var(--muted); line-height:1.5; padding:0 24px 24px}
+.qnote b{color:var(--text); font-weight:600; user-select:all}
 
-.mbar{
-  position:fixed; left:0; right:0; bottom:0; z-index:60; display:none;
-  padding:12px var(--gutter) calc(12px + env(safe-area-inset-bottom, 0px));
-  background:var(--ink); color:var(--paper);
-  align-items:center; justify-content:space-between; gap:12px;
-  transform:translateY(110%); transition:transform .35s cubic-bezier(.2,.8,.2,1);
-}
+.mbar{position:fixed; left:0; right:0; bottom:0; z-index:60; display:none; align-items:center; justify-content:space-between; gap:12px;
+  padding:12px var(--gutter) calc(12px + env(safe-area-inset-bottom, 0px)); background:rgba(20,25,34,.94); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-top:1px solid var(--line-2);
+  transform:translateY(110%); transition:transform .35s cubic-bezier(.2,.8,.2,1)}
 .mbar.show{transform:none}
-.mbar b{font-family:var(--f-display); font-stretch:95%; font-size:1.5rem; font-variant-numeric:tabular-nums}
-.mbar .label{color:color-mix(in srgb, var(--paper) 60%, transparent)}
-.mbar .btn{padding:11px 16px; font-size:.9rem}
-@media (max-width:960px){ .mbar{display:flex} }
+.mbar small{display:block; font-size:.75rem; color:var(--muted)}
+.mbar b{font:800 1.45rem/1 var(--f-display); font-variant-numeric:tabular-nums}
+.mbar .btn{padding:12px 16px; font-size:.88rem}
+@media (max-width:980px){ .mbar{display:flex} }
 
 /* Werkwijze */
-.steps{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:clamp(20px, 3vw, 36px); position:relative; padding-top:34px}
-.steps .rail{position:absolute; top:0; left:0; right:0; height:3px; background:var(--line); border-radius:2px; overflow:hidden}
-.steps .rail b{position:absolute; inset:0; background:var(--plate); transform-origin:left; box-shadow:0 0 0 1px var(--plate-ink) inset}
-.stp{display:grid; gap:10px; align-content:start}
-.stp .n{font-family:var(--f-mono); font-size:.8rem; color:var(--muted)}
-.stp h3{font-size:1.4rem}
-.stp p{color:var(--muted); font-size:.98rem}
-@media (max-width:820px){ .steps{grid-template-columns:repeat(2, minmax(0,1fr))} }
-@media (max-width:520px){ .steps{grid-template-columns:1fr} }
+.steps{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:16px; position:relative}
+.steps .rail{position:absolute; top:27px; left:28px; right:28px; height:2px; background:var(--line-2); overflow:hidden}
+.steps .rail b{position:absolute; inset:0; background:linear-gradient(90deg, var(--gold), var(--gold-hi)); transform-origin:left}
+.stp{position:relative; display:grid; gap:12px; align-content:start}
+.stp .n{width:56px; height:56px; border-radius:16px; display:grid; place-items:center; background:var(--card-2); border:1px solid var(--line-2); font:700 1.05rem/1 var(--f-display); color:var(--gold); position:relative; z-index:1}
+.stp h3{font-size:1.2rem; font-weight:700; margin-top:8px}
+.stp p{color:var(--muted); font-size:.95rem}
+@media (max-width:860px){ .steps{grid-template-columns:repeat(2, minmax(0,1fr)); row-gap:36px} .steps .rail{display:none} }
+@media (max-width:480px){ .steps{grid-template-columns:1fr} }
 
 /* FAQ */
-.faq{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.6fr); gap:clamp(24px, 5vw, 72px)}
+.faq{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.6fr); gap:clamp(28px, 5vw, 72px)}
 @media (max-width:860px){ .faq{grid-template-columns:1fr} }
-details{border-bottom:1px solid var(--line)}
-details:first-of-type{border-top:1px solid var(--line)}
-summary{list-style:none; cursor:pointer; padding:22px 40px 22px 0; font-weight:600; font-size:1.08rem; position:relative}
+.faq-list{display:grid; gap:10px}
+details{border-radius:14px; background:var(--card); border:1px solid var(--line); transition:border-color .2s}
+details[open]{border-color:var(--line-2)}
+summary{list-style:none; cursor:pointer; padding:20px 56px 20px 22px; font-weight:700; position:relative}
 summary::-webkit-details-marker{display:none}
-summary::after{content:"+"; position:absolute; right:4px; top:50%; transform:translateY(-50%); font:400 1.6rem/1 var(--f-mono); transition:transform .25s}
-details[open] summary::after{transform:translateY(-50%) rotate(45deg)}
-details p{padding:0 0 22px; color:var(--muted); max-width:62ch}
+summary::after{content:""; position:absolute; right:22px; top:50%; width:10px; height:10px; border-right:2px solid var(--gold); border-bottom:2px solid var(--gold); transform:translateY(-70%) rotate(45deg); transition:transform .25s}
+details[open] summary::after{transform:translateY(-30%) rotate(-135deg)}
+details p{padding:0 22px 22px; color:var(--muted); max-width:62ch}
 
-/* Slot */
-.end{background:var(--ink); color:var(--paper)}
-.end .lead{color:color-mix(in srgb, var(--paper) 70%, transparent)}
-.end h2{font-size:clamp(2.6rem, 8vw, 6.4rem); font-stretch:118%; letter-spacing:-.03em}
-.end .btn{border-color:var(--paper); color:var(--paper)}
-.end .btn--plate{color:var(--plate-ink); border-color:var(--plate)}
-.end-grid{display:grid; gap:28px}
-.contact{display:flex; flex-wrap:wrap; gap:12px 40px; margin-top:12px; padding-top:28px; border-top:1px solid color-mix(in srgb, var(--paper) 18%, transparent)}
+/* Slot-CTA */
+.cta-box{position:relative; overflow:hidden; border-radius:28px; padding:clamp(40px, 7vw, 88px) clamp(24px, 6vw, 80px); background:linear-gradient(180deg, var(--card-2), var(--card)); border:1px solid var(--line-2); display:grid; gap:22px; justify-items:start}
+.cta-box::before{content:""; position:absolute; right:-10%; top:-40%; width:60%; aspect-ratio:1; border-radius:50%; background:radial-gradient(closest-side, rgba(207,174,105,.25), transparent); pointer-events:none}
+.cta-box h2{font-size:clamp(2.2rem, 5.4vw, 4rem); font-weight:800; max-width:16ch; position:relative}
+.cta-box .lead{position:relative}
+.cta-box .hero-cta{margin-top:6px; position:relative}
+.contact{display:flex; flex-wrap:wrap; gap:16px 48px; margin-top:16px; padding-top:28px; border-top:1px solid var(--line); width:100%; position:relative}
 .contact div{display:grid; gap:4px}
-.contact .label{color:color-mix(in srgb, var(--paper) 55%, transparent)}
-.contact b{font-weight:600; font-size:1.1rem; user-select:all}
-.contact button{background:none; border:0; color:inherit; font:500 .82rem var(--f-body); text-decoration:underline; text-underline-offset:3px; cursor:pointer; padding:0; justify-self:start; opacity:.7}
-footer{background:var(--ink); color:color-mix(in srgb, var(--paper) 55%, transparent); font-size:.88rem}
-footer .wrap{display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; padding-block:28px 40px; border-top:1px solid color-mix(in srgb, var(--paper) 12%, transparent)}
-@media (max-width:960px){ footer .wrap{padding-bottom:100px} }
+.contact span{font-size:.8rem; color:var(--muted); font-weight:600}
+.contact b{font-size:1.1rem; user-select:all}
+.contact button{justify-self:start; background:none; border:0; padding:0; color:var(--gold); font:600 .8rem var(--f-body); cursor:pointer}
+
+footer{border-top:1px solid var(--line); margin-top:clamp(60px, 8vw, 100px)}
+footer .wrap{display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap; padding-block:36px 44px; color:var(--muted); font-size:.88rem}
+footer .brand{font-size:20px; color:var(--text)}
+@media (max-width:980px){ footer .wrap{padding-bottom:110px} }
 
 @media (prefers-reduced-motion: reduce){
   html{scroll-behavior:auto}
   *{transition:none !important}
+  .mq-track{animation:none}
 }
 </style>
 </head>
@@ -338,184 +386,312 @@ footer .wrap{display:flex; justify-content:space-between; gap:16px; flex-wrap:wr
 
 <header class="top" id="top">
   <div class="wrap">
-    <a class="brand" href="#hero" aria-label="StrakWerk, naar begin"><i></i>STRAKWERK</a>
+    <a class="brand" href="#hero" aria-label="StrakWerk, naar begin"><span class="strak">STRAK</span><span>WERK</span></a>
     <nav class="nav" aria-label="Hoofdmenu">
       <a href="#werk">Werk</a>
+      <a href="#features">Mogelijkheden</a>
       <a href="#prijzen">Prijzen</a>
       <a href="#werkwijze">Werkwijze</a>
-      <a href="#vragen">Vragen</a>
+      <a href="#vragen">FAQ</a>
     </nav>
-    <a class="btn btn--plate" href="#prijzen">Bereken je prijs</a>
+    <a class="btn btn--gold" href="#prijzen">Bereken je prijs</a>
   </div>
 </header>
 
 <main>
-  <section class="hero wrap" id="hero">
-    <p class="label" style="margin-bottom:22px">Webdesign &amp; development · Den Haag e.o.</p>
-    <h1>
-      <span class="ln"><span>Strakke websites</span></span>
-      <span class="ln"><span>voor ondernemers.</span></span>
-    </h1>
-    <div class="hero-row">
-      <div class="plate" aria-label="Vanaf 200 euro">
-        <div class="eu" aria-hidden="true">NL</div>
-        <div class="val"><small>vanaf</small>€200</div>
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="wrap">
+      <div>
+        <span class="pill"><i></i>Beschikbaar voor nieuwe projecten</span>
+        <h1>
+          <span class="ln"><span>Websites die je</span></span>
+          <span class="ln"><span>bedrijf <span class="gold-text">strak</span></span></span>
+          <span class="ln"><span>neerzetten.</span></span>
+        </h1>
+        <p class="lead">Design en development op maat, voor een eerlijke prijs. Je start vanaf €200 en kiest zelf welke functies je erbij wilt: van kentekencheck tot beheerpaneel.</p>
+        <div class="hero-cta">
+          <a class="btn btn--gold" href="#prijzen">Stel je website samen <span class="arr">→</span></a>
+          <a class="btn" href="#werk">Bekijk projecten</a>
+        </div>
+        <div class="stats">
+          <div><b>€200</b><span>Startprijs</span></div>
+          <div><b>7 dagen</b><span>Tot je online bent</span></div>
+          <div><b>3</b><span>Sites live</span></div>
+        </div>
       </div>
-      <p class="hero-note">Kies zelf de opties die je nodig hebt. <b>Binnen een week online.</b></p>
-    </div>
-    <div class="hero-bottom">
-      <p class="lead">Je betaalt voor wat je gebruikt. Een beheerpaneel, een kentekencheck of een webshop voeg je met één klik toe, en je ziet direct wat het kost.</p>
-      <div class="hero-cta">
-        <a class="btn btn--ink" href="#prijzen">Bereken je prijs</a>
-        <a class="btn" href="#werk">Bekijk werk</a>
+
+      <div class="devices" aria-hidden="true">
+        <div class="laptop win">
+          <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url" data-cartronic-url>cartronic.vercel.app</span></div>
+          <div class="screen">
+            <div class="mock mock-cartronic">
+              <div class="m-glow"></div>
+              <div class="m-nav">CARTRONIC <em><i></i><i></i><i></i><b>Webshop</b></em></div>
+              <div class="m-hero">
+                <span class="m-k">Retrofit specialist · Rijswijk</span>
+                <div class="m-h">Fabrieksopties achteraf ingebouwd.</div>
+                <div class="m-p" style="width:46%"></div>
+                <div class="m-row"><span class="m-btn">Voertuigzoeker</span><span class="m-btn" style="background:transparent;color:inherit;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)">Bekijk shop</span></div>
+              </div>
+              <div class="m-cards"><i></i><i></i><i></i></div>
+            </div>
+            <img src="assets/work/cartronic.webp" alt="" loading="eager" onerror="this.remove()">
+          </div>
+        </div>
+        <div class="phone handset">
+          <div class="screen">
+            <span class="notch"></span>
+            <div class="mock mock-detak is-phone">
+              <div class="m-glow"></div>
+              <div class="m-nav">DE TAK <em><b>Bel</b></em></div>
+              <div class="m-hero">
+                <span class="m-k">24/7 bereikbaar</span>
+                <div class="m-h">Pech? <span>Wij</span> komen.</div>
+                <div class="m-plate"><b></b><span>87-TZK-3</span></div>
+                <span class="m-btn">Aanvraag via WhatsApp</span>
+              </div>
+              <div class="m-cards"><i></i><i></i></div>
+            </div>
+            <img src="assets/work/detak-mobiel.webp" alt="" loading="eager" onerror="this.remove()">
+          </div>
+        </div>
+        <div class="float f1">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 14h4"/></svg></span>
+          <span>Beheerpaneel<small>Zelf aanpassen</small></span><span class="amt">+€75</span>
+        </div>
+        <div class="float f2">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 12h.01M10 12h8"/></svg></span>
+          <span>Kentekencheck<small>RDW-koppeling</small></span><span class="amt">+€50</span>
+        </div>
       </div>
-    </div>
-    <div class="clients" aria-label="Gebouwde websites">
-      <span class="label">Online</span>
-      <a href="#case-vagpro">VAGPRO <span>VAG-specialist</span></a>
-      <a href="#case-detak">Sleepdienst De Tak <span>Sleep &amp; berging</span></a>
-      <a href="#case-cartronic">CarTronic <span>Retrofit &amp; webshop</span></a>
     </div>
   </section>
 
+  <!-- MARQUEE -->
+  <div class="marquee" aria-hidden="true">
+    <div class="mq-track">
+      <span class="hl">VAGPRO</span><span>Kentekencheck</span><span class="hl">Sleepdienst De Tak</span><span>Beheerpaneel</span><span class="hl">CarTronic</span><span>Webshop</span><span>Meertalig</span><span>Mobiel-first</span><span>Vindbaar in Google</span><span>WhatsApp-koppeling</span>
+      <span class="hl">VAGPRO</span><span>Kentekencheck</span><span class="hl">Sleepdienst De Tak</span><span>Beheerpaneel</span><span class="hl">CarTronic</span><span>Webshop</span><span>Meertalig</span><span>Mobiel-first</span><span>Vindbaar in Google</span><span>WhatsApp-koppeling</span>
+    </div>
+  </div>
+
+  <!-- WERK -->
   <section class="sec" id="werk">
     <div class="wrap">
       <div class="sec-head">
-        <p class="label">Recent werk</p>
-        <h2>Echte sites, live online.</h2>
+        <span class="eyebrow">Projecten</span>
+        <h2 class="h2">Recent opgeleverd.</h2>
+        <p class="lead">Drie bedrijven, drie verschillende wensen. Elke site is op maat gebouwd en draait live.</p>
       </div>
     </div>
     <div class="wrap hscroll">
       <div class="track" id="track">
 
         <article class="case" id="case-vagpro">
-          <div class="frame">
-            <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">vagpro.nl</span></div>
-            <div class="shot">
-              <div class="mock mock-vagpro" aria-hidden="true">
-                <div class="m-nav">VAGPRO <em><i></i><i></i><i></i></em></div>
-                <div class="m-body">
-                  <div class="m-h">Specialist in VW, Audi, SEAT &amp; Škoda</div>
-                  <div class="m-l" style="width:62%"></div><div class="m-l" style="width:48%"></div>
-                  <div class="m-row"><div class="m-plate"><b></b><span>GH-512-K</span></div><span class="m-btn">Check kenteken</span></div>
+          <div class="case-visual">
+            <div class="win">
+              <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">vagpro.nl</span></div>
+              <div class="screen">
+                <div class="mock mock-vagpro" aria-hidden="true">
+                  <div class="m-glow"></div>
+                  <div class="m-nav">VAGPRO <em><i></i><i></i><i></i><b>WhatsApp</b></em></div>
+                  <div class="m-hero">
+                    <span class="m-k">VAG-specialist · Den Haag</span>
+                    <div class="m-h">Specialist in VW, Audi, SEAT &amp; Škoda.</div>
+                    <div class="m-p" style="width:52%"></div>
+                    <div class="m-row"><div class="m-plate"><b></b><span>GH-512-K</span></div><span class="m-btn">Check kenteken</span></div>
+                  </div>
+                  <div class="m-cards"><i></i><i></i><i></i></div>
                 </div>
+                <img src="assets/work/vagpro.webp" alt="Homepage van VAGPRO" loading="lazy" onerror="this.remove()">
               </div>
-              <img src="assets/work/vagpro.webp" alt="Homepage van VAGPRO" loading="lazy" onerror="this.remove()">
             </div>
           </div>
           <div class="case-info">
-            <div class="meta"><span class="label">01 · Den Haag</span></div>
+            <span class="case-num">01 / 03</span>
             <h3>VAGPRO</h3>
+            <div class="case-kind"><span>Autospecialist</span><span>Den Haag</span></div>
             <p>Onafhankelijk VAG-specialist voor achteruitrijcamera's, CarPlay, codering en storingsdiagnose. Bezoekers checken hun kenteken en sturen direct een WhatsApp.</p>
             <ul class="chips">
-              <li class="chip opt">Kentekencheck (RDW)</li>
-              <li class="chip opt">Extra dienstpagina's</li>
-              <li class="chip">WhatsApp &amp; route</li>
+              <li class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>Kentekencheck (RDW)</li>
+              <li class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>Dienstpagina's</li>
+              <li class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>WhatsApp &amp; route</li>
             </ul>
             <div class="case-links">
-              <a class="link" href="https://vagpro.nl" target="_blank" rel="noopener">Bekijk live ↗</a>
-              <button class="link-soft" type="button" data-preset="vagpro">Bereken zo'n site</button>
+              <a class="link" href="https://vagpro.nl" target="_blank" rel="noopener">Bekijk live <span>↗</span></a>
+              <button class="link-soft" type="button" data-preset="vagpro">Wat kost zo'n site? →</button>
             </div>
           </div>
         </article>
 
         <article class="case" id="case-detak">
-          <div class="frame">
-            <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">sleepdienstdetak.nl</span></div>
-            <div class="shot">
-              <div class="mock mock-detak" aria-hidden="true">
-                <div class="m-nav">DE TAK <em><i></i><i></i><i></i></em></div>
-                <div class="m-body">
-                  <div class="m-h">Pech of ongeval? <span>24/7</span> hulp onderweg.</div>
-                  <div class="m-l" style="width:58%"></div>
-                  <div class="m-row"><div class="m-plate"><b></b><span>87-TZK-3</span></div><span class="m-btn">Vraag aan via WhatsApp</span></div>
-                  <div class="m-row" style="font-size:.7rem;opacity:.6;font-weight:700;letter-spacing:.08em">NL · EN · DE</div>
+          <div class="case-visual">
+            <div class="win">
+              <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">sleepdienstdetak.nl</span></div>
+              <div class="screen">
+                <div class="mock mock-detak" aria-hidden="true">
+                  <div class="m-glow"></div>
+                  <div class="m-nav">DE TAK <em><i></i><i></i><i></i><b>Bel direct</b></em></div>
+                  <div class="m-hero">
+                    <span class="m-k">Sleep &amp; berging · 24/7</span>
+                    <div class="m-h">Pech of ongeval? <span>Wij</span> zijn er snel.</div>
+                    <div class="m-p" style="width:48%"></div>
+                    <div class="m-row"><div class="m-plate"><b></b><span>87-TZK-3</span></div><span class="m-btn">Vraag aan via WhatsApp</span></div>
+                  </div>
+                  <div class="m-cards"><i></i><i></i><i></i></div>
                 </div>
+                <img src="assets/work/detak.webp" alt="Homepage van Sleepdienst De Tak" loading="lazy" onerror="this.remove()">
               </div>
-              <img src="assets/work/detak.webp" alt="Homepage van Sleepdienst De Tak" loading="lazy" onerror="this.remove()">
             </div>
           </div>
           <div class="case-info">
-            <div class="meta"><span class="label">02 · Den Haag</span></div>
+            <span class="case-num">02 / 03</span>
             <h3>Sleepdienst De Tak</h3>
-            <p>Sleep- en bergingsdienst, 24/7. Het aanvraagformulier vult merk en model in via het kenteken en stuurt alles klaar door naar WhatsApp. In drie talen, met pagina's per regio.</p>
+            <div class="case-kind"><span>Sleep- en bergingsdienst</span><span>Den Haag</span></div>
+            <p>Het aanvraagformulier vult merk en model in via het kenteken en stuurt alles kant-en-klaar door naar WhatsApp. In drie talen, met pagina's per regio.</p>
             <ul class="chips">
-              <li class="chip opt">Kentekencheck (RDW)</li>
-              <li class="chip opt">Aanvraag via WhatsApp</li>
-              <li class="chip opt">NL · EN · DE</li>
-              <li class="chip opt">Regiopagina's</li>
+              <li class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>Kentekencheck (RDW)</li>
+              <li class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>Aanvraag via WhatsApp</li>
+              <li class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>NL · EN · DE</li>
+              <li class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>Regiopagina's</li>
             </ul>
             <div class="case-links">
-              <a class="link" href="https://sleepdienstdetak.nl" target="_blank" rel="noopener">Bekijk live ↗</a>
-              <button class="link-soft" type="button" data-preset="detak">Bereken zo'n site</button>
+              <a class="link" href="https://sleepdienstdetak.nl" target="_blank" rel="noopener">Bekijk live <span>↗</span></a>
+              <button class="link-soft" type="button" data-preset="detak">Wat kost zo'n site? →</button>
             </div>
           </div>
         </article>
 
         <article class="case" id="case-cartronic">
-          <div class="frame">
-            <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url" data-cartronic-url>cartronic.vercel.app</span></div>
-            <div class="shot">
-              <div class="mock mock-cartronic" aria-hidden="true">
-                <div class="m-nav">CARTRONIC <em><i></i><i></i><i></i></em></div>
-                <div class="m-body">
-                  <div class="m-h">Fabrieksopties achteraf ingebouwd.</div>
-                  <div class="m-row"><span class="m-btn">Voertuigzoeker</span><div class="m-l" style="width:30%"></div></div>
-                  <div class="m-grid"><i></i><i></i><i></i><i></i></div>
+          <div class="case-visual">
+            <div class="win">
+              <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url" data-cartronic-url>cartronic.vercel.app</span></div>
+              <div class="screen">
+                <div class="mock mock-cartronic" aria-hidden="true">
+                  <div class="m-glow"></div>
+                  <div class="m-nav">CARTRONIC <em><i></i><i></i><i></i><b>Webshop</b></em></div>
+                  <div class="m-hero">
+                    <span class="m-k">Retrofit specialist · Rijswijk</span>
+                    <div class="m-h">Fabrieksopties achteraf ingebouwd.</div>
+                    <div class="m-p" style="width:46%"></div>
+                    <div class="m-row"><span class="m-btn">Voertuigzoeker</span></div>
+                  </div>
+                  <div class="m-cards"><i></i><i></i><i></i></div>
                 </div>
+                <img src="assets/work/cartronic.webp" alt="Homepage van CarTronic" loading="lazy" onerror="this.remove()">
               </div>
-              <img src="assets/work/cartronic.webp" alt="Homepage van CarTronic" loading="lazy" onerror="this.remove()">
             </div>
           </div>
           <div class="case-info">
-            <div class="meta"><span class="label">03 · Rijswijk</span></div>
+            <span class="case-num">03 / 03</span>
             <h3>CarTronic</h3>
-            <p>Retrofit-specialist voor VW, Audi, SEAT en Škoda. Met webshop en voertuigzoeker, en een eigen beheerpaneel waarin de eigenaar zelf producten en teksten aanpast.</p>
+            <div class="case-kind"><span>Retrofit &amp; webshop</span><span>Rijswijk</span></div>
+            <p>Retrofit-specialist voor VW, Audi, SEAT en Škoda. Met webshop, voertuigzoeker en een eigen beheerpaneel waarin de eigenaar zelf producten en teksten aanpast.</p>
             <ul class="chips">
-              <li class="chip opt">Beheerpaneel</li>
-              <li class="chip opt">Webshop</li>
-              <li class="chip">Voertuigzoeker</li>
+              <li class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>Beheerpaneel</li>
+              <li class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>Webshop</li>
+              <li class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>Voertuigzoeker</li>
             </ul>
             <div class="case-links">
-              <a class="link" data-cartronic-link href="https://cartronic.vercel.app" target="_blank" rel="noopener">Bekijk live ↗</a>
-              <button class="link-soft" type="button" data-preset="cartronic">Bereken zo'n site</button>
+              <a class="link" data-cartronic-link href="https://cartronic.vercel.app" target="_blank" rel="noopener">Bekijk live <span>↗</span></a>
+              <button class="link-soft" type="button" data-preset="cartronic">Wat kost zo'n site? →</button>
             </div>
           </div>
         </article>
 
       </div>
-      <div class="progress" aria-hidden="true"><i><b></b></i><i><b></b></i><i><b></b></i></div>
+      <div class="progress" aria-hidden="true"><span>01</span><i><b></b></i><i><b></b></i><i><b></b></i><span>03</span></div>
     </div>
   </section>
 
+  <!-- MOGELIJKHEDEN -->
+  <section class="sec" id="features" style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-head center">
+        <span class="eyebrow">Mogelijkheden</span>
+        <h2 class="h2">Meer dan een visitekaartje.</h2>
+        <p class="lead">Elke site is snel, mobiel en vindbaar. Daarbovenop bouw ik de functies die jouw bedrijf echt verder helpen.</p>
+      </div>
+      <div class="bento">
+        <div class="tile t-a">
+          <h3>Kentekencheck</h3>
+          <p>Klant typt een kenteken en de site herkent de auto via de RDW. Ideaal voor garages, sleepdiensten en specialisten.</p>
+          <div class="viz plate-demo">
+            <label class="pd-input" for="pd"><b>NL</b><input id="pd" value="GH-512-K" maxlength="8" autocomplete="off" spellcheck="false" aria-label="Probeer een kenteken"></label>
+            <div class="pd-out"><span>Merk <b>Volkswagen</b></span><span>Model <b>Golf</b></span><span>Bouwjaar <b>2019</b></span></div>
+          </div>
+        </div>
+        <div class="tile t-b">
+          <h3>Beheerpaneel</h3>
+          <p>Zelf teksten, foto's en producten aanpassen. Geen code, geen wachttijd.</p>
+          <div class="viz admin" aria-hidden="true">
+            <aside><i class="on"></i><i></i><i></i><i></i></aside>
+            <main>
+              <div class="ar"><span>Homepage</span><span class="tag">Live</span></div>
+              <div class="ar"><span>Producten (24)</span><span class="tag">Live</span></div>
+              <div class="ar"><span>Nieuwe actie</span><span class="tag w">Concept</span></div>
+            </main>
+          </div>
+        </div>
+        <div class="tile t-c">
+          <h3>Gebouwd voor snelheid</h3>
+          <p>Lichte code, geoptimaliseerde beelden. Snel op elke telefoon.</p>
+          <div class="viz speed"><div class="ring" id="ring"><b id="ringv">0</b></div><span>Doel voor elke oplevering: een groene score in Google PageSpeed.</span></div>
+        </div>
+        <div class="tile t-d">
+          <h3>Vindbaar in Google</h3>
+          <p>Technische SEO en lokale pagina's, zodat klanten jou vinden.</p>
+          <div class="viz serp" aria-hidden="true">
+            <span class="u">jouwbedrijf.nl › diensten</span>
+            <span class="t">Jouw Bedrijf | Specialist in Den Haag</span>
+            <span class="d">Snel geholpen door een vakman. Bekijk diensten en prijzen, of stuur direct een WhatsApp.</span>
+          </div>
+        </div>
+        <div class="tile t-e">
+          <h3>Aanvragen via WhatsApp</h3>
+          <p>Formulieren die netjes ingevuld in je WhatsApp binnenkomen.</p>
+          <div class="viz chat" aria-hidden="true">
+            <div class="bubble">Nieuwe aanvraag
+Kenteken: 87-TZK-3
+Probleem: start niet
+Locatie: Rijswijk<small>09:41 ✓✓</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRIJZEN -->
   <section class="sec" id="prijzen">
     <div class="wrap">
       <div class="sec-head">
-        <p class="label">Prijzen</p>
-        <h2>Begin bij €200.<br>Voeg toe wat je nodig hebt.</h2>
-        <p class="lead">Zet de opties aan die je wilt. Je offerte rekent mee en stuur je met één tik via WhatsApp.</p>
+        <span class="eyebrow">Prijzen</span>
+        <h2 class="h2">Start vanaf €200. <span class="gold-text">Jij kiest de rest.</span></h2>
+        <p class="lead">Zet de functies aan die je wilt. Je offerte rekent direct mee en verstuur je met één tik via WhatsApp.</p>
       </div>
 
       <div class="cfg">
         <div>
           <div class="base">
             <div>
+              <span class="tagline">Altijd inbegrepen</span>
               <h3>Basis website</h3>
               <ul>
-                <li>Tot 3 pagina's</li>
-                <li>Mobiel-first ontwerp</li>
-                <li>Contactformulier + WhatsApp-knop</li>
-                <li>Basis-SEO en snelle laadtijd</li>
-                <li>Domein koppelen + SSL</li>
-                <li>Binnen 7 dagen online</li>
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>Tot 3 pagina's op maat</li>
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>Mobiel-first ontwerp</li>
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>Contactformulier + WhatsApp-knop</li>
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>Basis-SEO en snelle laadtijd</li>
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>Eigen domein + SSL</li>
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>Binnen 7 dagen online</li>
               </ul>
             </div>
-            <div class="price">€200</div>
+            <div class="price"><b>€200</b><span>eenmalig</span></div>
           </div>
 
           <div class="presets" role="group" aria-label="Voorbeelden">
-            <span class="label">Voorbeeld</span>
-            <button class="pbtn" type="button" data-preset="vagpro" aria-pressed="false">Zoals VAGPRO</button>
+            <span>Begin met:</span>
+            <button class="pbtn" type="button" data-preset="vagpro" aria-pressed="false">Site zoals VAGPRO</button>
             <button class="pbtn" type="button" data-preset="detak" aria-pressed="false">Zoals De Tak</button>
             <button class="pbtn" type="button" data-preset="cartronic" aria-pressed="false">Zoals CarTronic</button>
             <button class="pbtn" type="button" data-preset="reset" aria-pressed="false">Leeg</button>
@@ -525,72 +701,73 @@ footer .wrap{display:flex; justify-content:space-between; gap:16px; flex-wrap:wr
         </div>
 
         <aside class="quote" id="offerte" aria-label="Jouw offerte">
-          <div class="quote-head">
-            <h3>Jouw offerte</h3>
-            <span class="label" id="qnr">SW-2026</span>
-          </div>
+          <div class="quote-head"><h3>Jouw offerte</h3><span id="qnr">SW-2026</span></div>
           <ul class="qlines" id="qlines"></ul>
           <div class="qtotal">
-            <div class="row"><span class="label">Eenmalig</span><span class="big" id="qtotal">€200</span></div>
-            <div class="row" id="qmo-row" hidden><span class="label">Per maand</span><span class="mo" id="qmo">€15</span></div>
+            <div class="row"><span class="lbl">Totaal eenmalig</span><span class="big" id="qtotal">€200</span></div>
+            <div class="row" id="qmo-row" hidden><span class="lbl">Per maand</span><span class="mo" id="qmo">€15</span></div>
           </div>
           <div class="qactions">
-            <a class="btn btn--plate" id="qwa" href="https://wa.me/31623462397" target="_blank" rel="noopener">
+            <a class="btn btn--gold" id="qwa" href="https://wa.me/31623462397" target="_blank" rel="noopener">
               <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.4 14.1c-.2.6-1.3 1.2-1.8 1.3-.5 0-1 .3-3.3-.7a11.4 11.4 0 0 1-4.6-4.1c-.3-.5-1.1-1.6-1.1-3s.8-2.1 1-2.4c.3-.3.6-.4.8-.4h.6c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.3.5-.4.5c-.2.2-.3.4-.1.7.2.4.9 1.5 2 2.4 1.4 1.2 2.5 1.6 2.9 1.7.3.2.5.1.7-.1l.9-1.1c.2-.3.5-.3.8-.2l2 1c.3.1.5.2.6.3.1.2.1.8-.2 1.4z"/></svg>
               Verstuur via WhatsApp
             </a>
             <button class="btn" type="button" id="qcopy">Kopieer offerte</button>
           </div>
-          <p class="qnote">Dit is een indicatie. De definitieve prijs spreken we af in het gratis intakegesprek. Liever mailen? <b>strakwerkk@gmail.com</b></p>
+          <p class="qnote">Indicatieprijs. De definitieve prijs spreken we af in het gratis intakegesprek. Liever mailen? <b>strakwerkk@gmail.com</b></p>
         </aside>
       </div>
     </div>
   </section>
 
+  <!-- WERKWIJZE -->
   <section class="sec" id="werkwijze">
     <div class="wrap">
       <div class="sec-head">
-        <p class="label">Werkwijze</p>
-        <h2>Van appje tot live site.</h2>
+        <span class="eyebrow">Werkwijze</span>
+        <h2 class="h2">Van eerste appje tot live site.</h2>
       </div>
       <div class="steps" id="steps">
         <div class="rail" aria-hidden="true"><b></b></div>
-        <div class="stp"><span class="n">Stap 1</span><h3>Intake</h3><p>Een kort gesprek of WhatsApp. We bespreken je bedrijf, je doel en welke opties je nodig hebt. Gratis.</p></div>
-        <div class="stp"><span class="n">Stap 2</span><h3>Ontwerp</h3><p>Je krijgt een eerste versie om te bekijken op je eigen telefoon. Jij geeft feedback, ik pas het aan.</p></div>
-        <div class="stp"><span class="n">Stap 3</span><h3>Bouwen</h3><p>Snel, mobiel-first en vindbaar in Google. Opties zoals de kentekencheck of het beheerpaneel worden erin gebouwd.</p></div>
-        <div class="stp"><span class="n">Stap 4</span><h3>Live</h3><p>Je site gaat online op je eigen domein. Daarna help ik met updates, of je past het zelf aan.</p></div>
+        <div class="stp"><span class="n">01</span><h3>Gratis intake</h3><p>Een kort gesprek of WhatsApp over je bedrijf, je doel en de functies die je nodig hebt.</p></div>
+        <div class="stp"><span class="n">02</span><h3>Ontwerp</h3><p>Je krijgt een eerste versie die je op je eigen telefoon bekijkt. Jij geeft feedback, ik werk het bij.</p></div>
+        <div class="stp"><span class="n">03</span><h3>Bouwen</h3><p>Snel, mobiel-first en vindbaar. Opties zoals kentekencheck of beheerpaneel worden erin gebouwd.</p></div>
+        <div class="stp"><span class="n">04</span><h3>Live &amp; support</h3><p>Je site gaat online op je eigen domein. Daarna help ik met updates, of pas je het zelf aan.</p></div>
       </div>
     </div>
   </section>
 
+  <!-- FAQ -->
   <section class="sec" id="vragen" style="padding-top:0">
     <div class="wrap faq">
       <div class="sec-head" style="align-content:start">
-        <p class="label">Vragen</p>
-        <h2>Goed om te weten.</h2>
+        <span class="eyebrow">FAQ</span>
+        <h2 class="h2">Veelgestelde vragen.</h2>
+        <p class="lead">Staat je vraag er niet tussen? Stuur gerust een appje.</p>
       </div>
-      <div>
-        <details><summary>Wat krijg ik voor €200?</summary><p>Een complete website tot 3 pagina's: mobiel-first, met contactformulier, WhatsApp-knop, basis-SEO en je eigen domein met SSL. Alles wat daarbovenop komt, kies je zelf bij de opties.</p></details>
-        <details><summary>Hoe snel staat mijn site online?</summary><p>Een basissite staat meestal binnen 7 dagen online. Met grotere opties zoals een webshop of beheerpaneel duurt het iets langer. Dat hoor je vooraf.</p></details>
-        <details><summary>Kan ik later zelf dingen aanpassen?</summary><p>Ja. Met de optie Beheerpaneel pas je zelf teksten, foto's en producten aan, zonder code. Zonder beheerpaneel regel ik kleine aanpassingen voor je.</p></details>
-        <details><summary>Ik heb al een domein of website. Kan dat?</summary><p>Ja. Ik koppel je bestaande domein aan de nieuwe site of verhuis het voor je. Je bestaande e-mail blijft gewoon werken.</p></details>
+      <div class="faq-list">
+        <details><summary>Wat krijg ik voor €200?</summary><p>Een complete website tot 3 pagina's: mobiel-first, met contactformulier, WhatsApp-knop, basis-SEO en je eigen domein met SSL. Alles daarbovenop kies je zelf bij de opties.</p></details>
+        <details><summary>Hoe snel staat mijn site online?</summary><p>Een basissite staat meestal binnen 7 dagen online. Grotere opties zoals een webshop of beheerpaneel kosten iets meer tijd. Dat hoor je vooraf.</p></details>
+        <details><summary>Kan ik later zelf dingen aanpassen?</summary><p>Ja. Met het beheerpaneel pas je zelf teksten, foto's en producten aan, zonder code. Zonder beheerpaneel regel ik kleine aanpassingen voor je.</p></details>
+        <details><summary>Ik heb al een domein of website. Kan dat?</summary><p>Ja. Ik koppel je bestaande domein aan de nieuwe site of verhuis het voor je. Je e-mail blijft gewoon werken.</p></details>
         <details><summary>Kan ik later nog opties toevoegen?</summary><p>Altijd. Je betaalt dan alleen de prijs van de optie die je erbij neemt.</p></details>
       </div>
     </div>
   </section>
 
-  <section class="sec end" id="contact">
-    <div class="wrap end-grid">
-      <p class="label" style="color:inherit;opacity:.6">Contact</p>
-      <h2>Klaar voor een<br>strakke site?</h2>
+  <!-- CTA -->
+  <section class="wrap" id="contact">
+    <div class="cta-box">
+      <span class="eyebrow">Contact</span>
+      <h2>Klaar voor een <span class="gold-text">strakke</span> website?</h2>
       <p class="lead">Stuur een appje met wat je zoekt. Je hoort dezelfde dag van me.</p>
       <div class="hero-cta">
-        <a class="btn btn--plate" href="https://wa.me/31623462397?text=Hoi%20StrakWerk%2C%20ik%20wil%20graag%20een%20website." target="_blank" rel="noopener">WhatsApp mij</a>
-        <a class="btn" href="#prijzen">Stel je site samen</a>
+        <a class="btn btn--gold" href="https://wa.me/31623462397?text=Hoi%20StrakWerk%2C%20ik%20wil%20graag%20een%20website." target="_blank" rel="noopener">WhatsApp mij <span class="arr">→</span></a>
+        <a class="btn" href="#prijzen">Bereken je prijs</a>
       </div>
       <div class="contact">
-        <div><span class="label">Telefoon / WhatsApp</span><b>06 2346 2397</b><button type="button" data-copy="0623462397">Kopieer nummer</button></div>
-        <div><span class="label">E-mail</span><b>strakwerkk@gmail.com</b><button type="button" data-copy="strakwerkk@gmail.com">Kopieer e-mail</button></div>
+        <div><span>Telefoon / WhatsApp</span><b>06 2346 2397</b><button type="button" data-copy="0623462397">Kopieer nummer</button></div>
+        <div><span>E-mail</span><b>strakwerkk@gmail.com</b><button type="button" data-copy="strakwerkk@gmail.com">Kopieer e-mail</button></div>
       </div>
     </div>
   </section>
@@ -598,14 +775,14 @@ footer .wrap{display:flex; justify-content:space-between; gap:16px; flex-wrap:wr
 
 <footer>
   <div class="wrap">
+    <span class="brand"><span class="strak">STRAK</span><span>WERK</span></span>
     <span>© <span id="year">2026</span> StrakWerk · Webdesign &amp; development</span>
-    <span>Gebouwd door StrakWerk</span>
   </div>
 </footer>
 
-<div class="mbar" id="mbar" aria-hidden="true">
-  <div><span class="label">Jouw site</span><br><b id="mtotal">€200</b></div>
-  <a class="btn btn--plate" href="#offerte">Bekijk offerte</a>
+<div class="mbar" id="mbar">
+  <div><small>Jouw website</small><b id="mtotal">€200</b></div>
+  <a class="btn btn--gold" href="#offerte">Bekijk offerte</a>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -622,14 +799,14 @@ const CONFIG = {
     { title: "Functies", items: [
       { id:"beheer",   name:"Beheerpaneel",            price:75,  desc:"Zelf teksten, foto's en producten aanpassen, zonder code.", live:"cartronic" },
       { id:"kenteken", name:"Kentekencheck (RDW)",     price:50,  desc:"Klant typt een kenteken, merk en model verschijnen direct.", live:"vagpro" },
-      { id:"aanvraag", name:"Aanvraag via WhatsApp",   price:35,  desc:"Formulier dat de aanvraag kant-en-klaar naar je WhatsApp stuurt.", live:"detak" },
-      { id:"booking",  name:"Afspraken plannen",       price:75,  desc:"Klanten kiezen zelf een datum en tijd in je agenda." },
+      { id:"aanvraag", name:"Aanvraag via WhatsApp",   price:35,  desc:"Formulier dat aanvragen kant-en-klaar naar je WhatsApp stuurt.", live:"detak" },
+      { id:"booking",  name:"Afspraken plannen",       price:75,  desc:"Klanten kiezen zelf een datum en tijd." },
       { id:"webshop",  name:"Webshop",                 price:150, desc:"Producten, winkelwagen en online betalen met iDEAL.", live:"cartronic" }
     ]},
     { title: "Uitbreiden", items: [
       { id:"pagina",   name:"Extra pagina",            price:25,  desc:"Bijvoorbeeld een pagina per dienst.", qty:true, max:12, unit:"pagina" },
       { id:"taal",     name:"Extra taal",              price:50,  desc:"Je site ook in het Engels, Duits of een andere taal.", qty:true, max:4, unit:"taal", live:"detak" },
-      { id:"regio",    name:"Regiopagina's",           price:50,  desc:"Beter gevonden worden in Google in de plaatsen om je heen.", live:"detak" },
+      { id:"regio",    name:"Regiopagina's",           price:50,  desc:"Beter gevonden in Google in de plaatsen om je heen.", live:"detak" },
       { id:"reviews",  name:"Google reviews & kaart",  price:25,  desc:"Je beste reviews en een routekaart op je site." }
     ]},
     { title: "Extra", items: [
@@ -653,6 +830,7 @@ const euro = n => "€" + Math.round(n).toLocaleString("nl-NL");
 const items = CONFIG.groups.flatMap(g => g.items);
 const state = Object.fromEntries(items.map(i => [i.id, 0]));
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const hasGsap = !!(window.gsap && window.ScrollTrigger);
 
 document.getElementById("year").textContent = new Date().getFullYear();
 document.querySelectorAll("[data-cartronic-link]").forEach(a => a.href = CONFIG.cartronicUrl);
@@ -660,32 +838,27 @@ document.querySelectorAll("[data-cartronic-url]").forEach(s => s.textContent = C
 (() => { const d = new Date(); document.getElementById("qnr").textContent =
   "SW-" + d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + String(d.getDate()).padStart(2,"0"); })();
 
-/* Opties tekenen */
+/* Opties */
 const optRoot = document.getElementById("options");
 CONFIG.groups.forEach(g => {
   const wrap = document.createElement("div");
   wrap.className = "group";
-  wrap.innerHTML = `<span class="label">${g.title}</span>`;
+  wrap.innerHTML = `<span class="group-title">${g.title}</span><div class="opts"></div>`;
+  const list = wrap.querySelector(".opts");
   g.items.forEach(it => {
     const row = document.createElement(it.qty ? "div" : "label");
-    row.className = "opt-row";
+    row.className = "opt-row"; row.dataset.row = it.id;
     const live = it.live ? `<a class="live" href="#case-${it.live}">Live bij ${LIVE_NAMES[it.live]}</a>` : "";
     const ctl = it.qty
-      ? `<div class="step" role="group" aria-label="${it.name} aantal">
-           <button type="button" data-dec="${it.id}" aria-label="Minder">−</button>
-           <output id="q-${it.id}" aria-live="polite">0</output>
-           <button type="button" data-inc="${it.id}" aria-label="Meer">+</button>
-         </div>`
+      ? `<div class="step" role="group" aria-label="${it.name} aantal"><button type="button" data-dec="${it.id}" aria-label="Minder">−</button><output id="q-${it.id}" aria-live="polite">0</output><button type="button" data-inc="${it.id}" aria-label="Meer">+</button></div>`
       : `<span class="sw"><input type="checkbox" id="o-${it.id}" data-opt="${it.id}"><span></span></span>`;
-    const amt = it.monthly ? `${euro(it.price)}<small>per maand</small>`
-              : it.qty ? `${euro(it.price)}<small>per ${it.unit}</small>` : `+${euro(it.price)}`;
+    const amt = it.monthly ? `${euro(it.price)}<small>per maand</small>` : it.qty ? `+${euro(it.price)}<small>per ${it.unit}</small>` : `+${euro(it.price)}`;
     row.innerHTML = `${ctl}<div><div class="name">${it.name} ${live}</div><div class="desc">${it.desc}</div></div><div class="amt">${amt}</div>`;
     if (it.qty) row.addEventListener("click", e => { if (!e.target.closest("button,a")) setQty(it, state[it.id] + 1); });
-    wrap.appendChild(row);
+    list.appendChild(row);
   });
   optRoot.appendChild(wrap);
 });
-
 function setQty(it, n){ state[it.id] = Math.max(0, Math.min(it.max || 10, n)); clearPresets(); render(); }
 optRoot.addEventListener("change", e => { const id = e.target.dataset.opt; if (!id) return; state[id] = e.target.checked ? 1 : 0; clearPresets(); render(); });
 optRoot.addEventListener("click", e => {
@@ -708,7 +881,7 @@ function applyPreset(key, scroll){
 document.querySelectorAll("[data-preset]").forEach(b => b.addEventListener("click", () => applyPreset(b.dataset.preset, !b.classList.contains("pbtn"))));
 
 /* Offerte */
-let shown = { v: CONFIG.base.price };
+const shown = { v: CONFIG.base.price };
 function totals(){
   let once = CONFIG.base.price, mo = 0;
   items.forEach(it => { const n = state[it.id]; if (!n) return; it.monthly ? mo += it.price * n : once += it.price * n; });
@@ -716,8 +889,7 @@ function totals(){
 }
 function lines(){
   const out = [[CONFIG.base.name, CONFIG.base.price, false]];
-  items.forEach(it => { const n = state[it.id]; if (!n || it.monthly) return;
-    out.push([it.qty ? `${it.name} × ${n}` : it.name, it.price * n, false]); });
+  items.forEach(it => { const n = state[it.id]; if (!n || it.monthly) return; out.push([it.qty ? `${it.name} × ${n}` : it.name, it.price * n, false]); });
   items.filter(it => it.monthly && state[it.id]).forEach(it => out.push([it.name, it.price, true]));
   return out;
 }
@@ -730,77 +902,98 @@ function render(){
   items.forEach(it => {
     if (it.qty) document.getElementById("q-" + it.id).textContent = state[it.id];
     else document.getElementById("o-" + it.id).checked = !!state[it.id];
+    document.querySelector(`[data-row="${it.id}"]`).classList.toggle("on", !!state[it.id]);
   });
-  const ul = document.getElementById("qlines");
-  ul.innerHTML = lines().map(([n, p, m], i) =>
+  document.getElementById("qlines").innerHTML = lines().map(([n, p, m], i) =>
     `<li class="${i===0?"base-line":""}"><span>${n}</span><span>${euro(p)}${m?" p/m":""}</span></li>`).join("");
   const { once, mo } = totals();
   document.getElementById("qmo-row").hidden = !mo;
-  document.getElementById("qmo").textContent = euro(mo);
+  document.getElementById("qmo").textContent = euro(mo) + " p/m";
   document.getElementById("qwa").href = `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(quoteText())}`;
   const tEl = document.getElementById("qtotal"), mEl = document.getElementById("mtotal");
   const paint = () => { tEl.textContent = euro(shown.v); mEl.textContent = euro(shown.v); };
-  if (window.gsap && !reduce){
-    gsap.to(shown, { v: once, duration: .6, ease: "power3.out", onUpdate: paint, overwrite: true });
-    gsap.fromTo(tEl, { y: -4 }, { y: 0, duration: .4, ease: "back.out(3)" });
-  } else { shown.v = once; paint(); }
+  if (hasGsap && !reduce){ gsap.to(shown, { v: once, duration: .6, ease: "power3.out", onUpdate: paint, overwrite: true }); }
+  else { shown.v = once; paint(); }
 }
 render();
+
+/* Kenteken-demo: automatisch hoofdletters en streepjes */
+const pd = document.getElementById("pd");
+pd.addEventListener("input", () => {
+  const raw = pd.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+  const groups = raw.match(/[A-Z]+|[0-9]+/g) || [];
+  pd.value = groups.join("-");
+});
 
 /* Kopiëren */
 function copy(text, btn, done){
   const ok = () => { const o = btn.textContent; btn.textContent = done; setTimeout(() => btn.textContent = o, 1600); };
-  try { navigator.clipboard.writeText(text).then(ok, () => fallback()); } catch (e) { fallback(); }
-  function fallback(){ const t = document.createElement("textarea"); t.value = text; document.body.appendChild(t); t.select();
-    try { document.execCommand("copy"); ok(); } catch (e) {} t.remove(); }
+  const fallback = () => { const t = document.createElement("textarea"); t.value = text; document.body.appendChild(t); t.select(); try { document.execCommand("copy"); ok(); } catch (e) {} t.remove(); };
+  try { navigator.clipboard.writeText(text).then(ok, fallback); } catch (e) { fallback(); }
 }
-document.getElementById("qcopy").addEventListener("click", e => copy(quoteText(), e.currentTarget, "Gekopieerd"));
-document.querySelectorAll("[data-copy]").forEach(b => b.addEventListener("click", () => copy(b.dataset.copy, b, "Gekopieerd")));
+document.getElementById("qcopy").addEventListener("click", e => copy(quoteText(), e.currentTarget, "Gekopieerd ✓"));
+document.querySelectorAll("[data-copy]").forEach(b => b.addEventListener("click", () => copy(b.dataset.copy, b, "Gekopieerd ✓")));
 
-/* Header-lijn en mobiele balk */
+/* Header en mobiele balk */
 const header = document.getElementById("top");
-addEventListener("scroll", () => header.classList.toggle("scrolled", scrollY > 8), { passive: true });
+const onScroll = () => header.classList.toggle("scrolled", scrollY > 10);
+addEventListener("scroll", onScroll, { passive: true }); onScroll();
 const mbar = document.getElementById("mbar");
 let inPrices = false, quoteVisible = false;
 const sync = () => mbar.classList.toggle("show", inPrices && !quoteVisible);
 new IntersectionObserver(([e]) => { inPrices = e.isIntersecting; sync(); }).observe(document.getElementById("prijzen"));
-new IntersectionObserver(([e]) => { quoteVisible = e.isIntersecting; sync(); }, { threshold: .25 }).observe(document.getElementById("offerte"));
+new IntersectionObserver(([e]) => { quoteVisible = e.isIntersecting; sync(); }, { threshold: .2 }).observe(document.getElementById("offerte"));
+
+/* Snelheidsring */
+const ring = document.getElementById("ring"), ringv = document.getElementById("ringv");
+const setRing = v => { ring.style.setProperty("--p", v); ringv.textContent = Math.round(v); };
+if (!hasGsap || reduce) setRing(98);
 
 /* GSAP */
-if (window.gsap && window.ScrollTrigger){
+if (hasGsap){
   gsap.registerPlugin(ScrollTrigger);
   const mm = gsap.matchMedia();
 
   mm.add("(prefers-reduced-motion: no-preference)", () => {
-    // Hero: regels schuiven omhoog, het kenteken klapt in
     const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
-    tl.from(".hero h1 .ln > span", { yPercent: 110, duration: 1.1, stagger: .12 })
-      .from(".plate", { rotateX: -90, transformOrigin: "50% 0%", duration: .9, ease: "back.out(1.6)" }, "-=.6")
-      .from(".hero-note, .hero-bottom > *, .clients", { y: 16, opacity: 0, duration: .7, stagger: .08 }, "-=.5");
+    tl.from(".hero .pill", { y: 14, opacity: 0, duration: .6 })
+      .from(".hero h1 .ln > span", { yPercent: 115, duration: 1.1, stagger: .1 }, "-=.3")
+      .from(".hero .lead, .hero .hero-cta, .hero .stats", { y: 18, opacity: 0, duration: .8, stagger: .1 }, "-=.7")
+      .from(".devices .laptop", { y: 60, opacity: 0, rotateX: 8, duration: 1.2, ease: "expo.out" }, .3)
+      .from(".devices .phone", { y: 90, opacity: 0, duration: 1.2, ease: "expo.out" }, .5)
+      .from(".devices .float", { scale: .8, opacity: 0, duration: .7, stagger: .15, ease: "back.out(1.8)" }, 1);
 
-    // Werkwijze: gele lijn loopt mee met scrollen
-    gsap.fromTo("#steps .rail b", { scaleX: 0 }, { scaleX: 1, ease: "none",
-      scrollTrigger: { trigger: "#steps", start: "top 80%", end: "bottom 60%", scrub: true } });
-    gsap.from("#steps .stp", { y: 24, opacity: 0, stagger: .1, duration: .7, ease: "power3.out",
-      scrollTrigger: { trigger: "#steps", start: "top 80%" } });
+    // Zweven van de labels
+    gsap.to(".f1", { y: -10, duration: 2.6, ease: "sine.inOut", yoyo: true, repeat: -1 });
+    gsap.to(".f2", { y: 10, duration: 3.1, ease: "sine.inOut", yoyo: true, repeat: -1 });
+    // Parallax op de devices
+    gsap.to(".devices .phone", { yPercent: -12, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
+    gsap.to(".devices .laptop", { yPercent: 6, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
 
-    // Sectiekoppen
-    gsap.utils.toArray(".sec-head h2").forEach(h => gsap.from(h, { y: 30, opacity: 0, duration: .9, ease: "power3.out",
-      scrollTrigger: { trigger: h, start: "top 88%" } }));
+    // Sectiekoppen en tegels
+    gsap.utils.toArray(".sec-head").forEach(h => gsap.from(h.children, { y: 28, opacity: 0, duration: .9, stagger: .08, ease: "power3.out", scrollTrigger: { trigger: h, start: "top 85%" } }));
+    gsap.from(".tile", { y: 40, opacity: 0, duration: .9, stagger: .08, ease: "power3.out", scrollTrigger: { trigger: ".bento", start: "top 80%" } });
+    const r = { v: 0 };
+    gsap.to(r, { v: 98, duration: 1.6, ease: "power2.out", onUpdate: () => setRing(r.v), scrollTrigger: { trigger: "#ring", start: "top 90%" } });
+
+    // Werkwijze
+    gsap.fromTo("#steps .rail b", { scaleX: 0 }, { scaleX: 1, ease: "none", scrollTrigger: { trigger: "#steps", start: "top 75%", end: "bottom 55%", scrub: true } });
+    gsap.from("#steps .stp", { y: 30, opacity: 0, stagger: .12, duration: .8, ease: "power3.out", scrollTrigger: { trigger: "#steps", start: "top 80%" } });
+    gsap.from(".opt-row", { y: 16, opacity: 0, duration: .5, stagger: .03, ease: "power2.out", scrollTrigger: { trigger: "#options", start: "top 85%" } });
+    gsap.from(".cta-box", { y: 40, opacity: 0, duration: 1, ease: "power3.out", scrollTrigger: { trigger: ".cta-box", start: "top 85%" } });
   });
 
-  // Werk: horizontaal scrollen met vastgepinde sectie (alleen desktop)
+  // Projecten: horizontaal scrollen (desktop)
   mm.add("(min-width: 960px) and (prefers-reduced-motion: no-preference)", () => {
-    const sec = document.getElementById("werk");
-    const track = document.getElementById("track");
+    const sec = document.getElementById("werk"), track = document.getElementById("track");
     sec.classList.add("is-horizontal");
     const dist = () => track.scrollWidth - document.querySelector("#werk .hscroll").clientWidth + 1;
     const bars = gsap.utils.toArray("#werk .progress b");
     const tw = gsap.to(track, { x: () => -dist(), ease: "none",
       scrollTrigger: { trigger: sec, start: "top top", end: () => "+=" + dist(), pin: true, scrub: .8, invalidateOnRefresh: true,
-        onUpdate: self => bars.forEach((b, i) => gsap.set(b, { scaleX: gsap.utils.clamp(0, 1, self.progress * bars.length - i) })) } });
-    gsap.utils.toArray("#werk .frame").forEach(f => gsap.from(f.querySelector(".shot > *"), { scale: 1.08, ease: "none",
-      scrollTrigger: { trigger: f, containerAnimation: tw, start: "left right", end: "right left", scrub: true } }));
+        onUpdate: s => bars.forEach((b, i) => gsap.set(b, { scaleX: gsap.utils.clamp(0, 1, s.progress * bars.length - i) })) } });
+    gsap.utils.toArray("#werk .case-info").slice(1).forEach(el => gsap.from(el.children, { x: 60, opacity: 0, stagger: .05, ease: "power2.out",
+      scrollTrigger: { trigger: el, containerAnimation: tw, start: "left 90%", end: "left 55%", scrub: true } }));
     return () => { sec.classList.remove("is-horizontal"); gsap.set(track, { clearProps: "transform" }); };
   });
 
