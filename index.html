@@ -89,7 +89,7 @@ h1,h2,h3{font-family:var(--f-display); margin:0; text-wrap:balance; line-height:
 @media (max-width:420px){ .top .btn{padding:11px 14px; font-size:.85rem} }
 
 /* Hero */
-.hero{position:relative; overflow:clip; padding-block:clamp(40px, 7vw, 96px) clamp(64px, 8vw, 110px)}
+.hero{position:relative; padding-block:clamp(40px, 7vw, 96px) clamp(64px, 8vw, 110px)}
 .hero::before{content:""; position:absolute; inset:0; pointer-events:none;
   background:
     radial-gradient(800px 480px at 80% 35%, rgba(207,174,105,.07), transparent 65%)}
@@ -342,14 +342,81 @@ footer .wrap{display:flex; justify-content:space-between; align-items:center; ga
 footer .brand{font-size:20px; color:var(--text)}
 @media (max-width:980px){ footer .wrap{padding-bottom:110px} }
 
+
+/* ===== Beweging & kleur ===== */
+.loader{position:fixed; inset:0; z-index:200; background:var(--bg); display:none; place-items:center; --u:0}
+.js .loader{display:grid}
+.loader .brand{font-size:clamp(34px, 6vw, 64px); opacity:0}
+.loader .brand .strak::after{height:5px; bottom:-14px; transform:scaleX(var(--u))}
+
+.hero-bg{position:absolute; inset:0 0 -30% 0; overflow:hidden; pointer-events:none; z-index:0; -webkit-mask-image:linear-gradient(#000 55%, transparent); mask-image:linear-gradient(#000 55%, transparent)}
+main{overflow-x:clip}
+.blob{position:absolute; border-radius:50%; will-change:transform}
+.b1{width:min(62vw, 860px); aspect-ratio:1; right:-14%; top:-26%; background:radial-gradient(closest-side, rgba(207,174,105,.34), transparent)}
+.b2{width:min(48vw, 680px); aspect-ratio:1; left:-16%; top:18%; background:radial-gradient(closest-side, rgba(70,96,230,.26), transparent)}
+.b3{width:min(42vw, 600px); aspect-ratio:1; right:18%; bottom:-34%; background:radial-gradient(closest-side, rgba(222,112,58,.24), transparent)}
+.spot{position:absolute; width:560px; height:560px; left:0; top:0; margin:-280px 0 0 -280px; border-radius:50%; background:radial-gradient(closest-side, rgba(234,211,156,.10), transparent); opacity:0; transition:opacity .5s}
+.hero:hover .spot{opacity:1}
+.hero .wrap > *{position:relative}
+.devices{perspective:1400px}
+.stage{position:absolute; inset:0; transform-style:preserve-3d; will-change:transform}
+.shine{background:linear-gradient(100deg, var(--gold) 0 38%, #FFF4D6 50%, var(--gold) 62% 100%); background-size:260% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation:shine 5s ease-in-out infinite}
+@keyframes shine{0%{background-position:100% 0}55%,100%{background-position:-60% 0}}
+.f3{left:26%; bottom:-6%}
+.f3 .ic{background:rgba(37,211,102,.14); color:#3DDC84}
+@media (max-width:560px){ .f3{left:10%; bottom:-10%} }
+
+.statement{padding-block:clamp(110px, 16vw, 210px)}
+.statement p{font:600 clamp(1.9rem, 4.8vw, 4.2rem)/1.12 var(--f-display); letter-spacing:-.04em; max-width:22ch}
+.statement .w{display:inline-block}
+.statement .g{color:var(--gold)}
+.statement .c1{color:#8EA2FF}
+.statement .c2{color:#F09A6B}
+
+@media (max-width:959px){ #werk{transition:background-color .6s} }
+.case-visual{isolation:isolate}
+.case-visual::before{content:""; position:absolute; inset:-14% -10%; z-index:-1; background:radial-gradient(closest-side, var(--glow), transparent); pointer-events:none}
+
+.tile{transform-style:preserve-3d; will-change:transform}
+.tile::after{content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background:radial-gradient(460px circle at var(--mx, 50%) var(--my, 50%), rgba(207,174,105,.16), transparent 45%); opacity:0; transition:opacity .3s}
+.tile:hover::after{opacity:1}
+.tile:hover{border-color:rgba(207,174,105,.35)}
+
+.stack{display:grid; gap:28px}
+.scard{position:sticky; top:calc(env(safe-area-inset-top, 0px) + 104px); min-height:360px; border-radius:28px; padding:clamp(28px, 5vw, 56px); display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); gap:32px; align-items:center; overflow:hidden; border:1px solid var(--line-2); transform-origin:50% 0; background:var(--card); box-shadow:0 -20px 60px -30px rgba(0,0,0,.9)}
+.scard:nth-child(2){top:calc(env(safe-area-inset-top, 0px) + 122px)}
+.scard:nth-child(3){top:calc(env(safe-area-inset-top, 0px) + 140px)}
+.scard:nth-child(4){top:calc(env(safe-area-inset-top, 0px) + 158px)}
+.scard::before{content:""; position:absolute; inset:0; z-index:0; background:radial-gradient(700px 420px at 100% 0%, var(--tint), transparent 65%); pointer-events:none}
+.scard > *{position:relative; z-index:1}
+.c-gold{--tint:rgba(207,174,105,.30); --acc:#E3C27E}
+.c-indigo{--tint:rgba(88,101,242,.32); --acc:#9AA6FF}
+.c-copper{--tint:rgba(222,112,58,.30); --acc:#F2A274}
+.c-teal{--tint:rgba(43,182,160,.30); --acc:#5FD6C1}
+.scard .tagline{display:inline-flex; padding:6px 12px; border-radius:999px; font-size:.82rem; font-weight:600; color:var(--acc); background:rgba(255,255,255,.05); border:1px solid var(--line-2)}
+.scard h3{font-size:clamp(1.9rem, 4vw, 3rem); font-weight:700; letter-spacing:-.04em; margin-top:18px}
+.scard p{color:var(--muted); font-size:clamp(1rem, 1.4vw, 1.12rem); margin-top:14px; max-width:44ch}
+.scard .big{justify-self:end; width:clamp(120px, 18vw, 220px); aspect-ratio:1; border-radius:36px; display:grid; place-items:center; color:var(--acc); background:rgba(255,255,255,.04); border:1px solid var(--line-2)}
+.scard .big svg{width:46%; height:46%}
+@media (max-width:760px){ .scard{grid-template-columns:1fr; min-height:0} .scard .big{justify-self:start; width:84px; border-radius:22px; order:-1} }
+
+.giant{overflow:clip; padding-top:clamp(40px, 6vw, 80px)}
+.giant div{font:800 clamp(5rem, 22vw, 21rem)/.82 var(--f-display); letter-spacing:-.06em; white-space:nowrap; width:max-content; background:linear-gradient(180deg, rgba(232,237,243,.16), rgba(232,237,243,.02) 85%); -webkit-background-clip:text; background-clip:text; color:transparent}
+.giant div span{background:linear-gradient(180deg, rgba(207,174,105,.75), rgba(207,174,105,.05) 85%); -webkit-background-clip:text; background-clip:text}
+footer{margin-top:0}
+
 @media (prefers-reduced-motion: reduce){
   html{scroll-behavior:auto}
   *{transition:none !important}
+  .shine{animation:none}
 }
 </style>
 </head>
 <body>
 
+
+<script>document.documentElement.classList.add("js");setTimeout(function(){var l=document.getElementById("loader");if(l)l.remove()},3800);</script>
+<div class="loader" id="loader" aria-hidden="true"><span class="brand"><span class="strak">STRAK</span><span>WERK</span></span></div>
 
 <header class="top" id="top">
   <div class="wrap">
@@ -368,11 +435,12 @@ footer .brand{font-size:20px; color:var(--text)}
 <main>
   <!-- HERO -->
   <section class="hero" id="hero">
+    <div class="hero-bg" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span><span class="spot" id="spot"></span></div>
     <div class="wrap">
-      <div>
+      <div class="hero-copy">
         <h1>
           <span class="ln"><span>Websites die je</span></span>
-          <span class="ln"><span>bedrijf <span class="gold-text">strak</span></span></span>
+          <span class="ln"><span>bedrijf <span class="shine">strak</span></span></span>
           <span class="ln"><span>neerzetten.</span></span>
         </h1>
         <p class="lead">Design en development op maat, voor een eerlijke prijs. Je start vanaf €200 en kiest zelf welke functies je erbij wilt: van kentekencheck tot beheerpaneel.</p>
@@ -381,13 +449,13 @@ footer .brand{font-size:20px; color:var(--text)}
           <a class="btn" href="#werk">Bekijk projecten</a>
         </div>
         <div class="stats">
-          <div><b>€200</b><span>Startprijs</span></div>
-          <div><b>7 dagen</b><span>Tot je online bent</span></div>
-          <div><b>3</b><span>Sites live</span></div>
+          <div><b data-count="200" data-pre="€">€200</b><span>Startprijs</span></div>
+          <div><b data-count="7" data-suf=" dagen">7 dagen</b><span>Tot je online bent</span></div>
+          <div><b data-count="3">3</b><span>Sites live</span></div>
         </div>
       </div>
 
-      <div class="devices" aria-hidden="true">
+      <div class="devices" aria-hidden="true"><div class="stage">
         <div class="laptop win">
           <div class="screen">
             <div class="mock mock-cartronic">
@@ -428,7 +496,11 @@ footer .brand{font-size:20px; color:var(--text)}
           <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 12h.01M10 12h8"/></svg></span>
           <span>Kentekencheck<small>RDW-koppeling</small></span><span class="amt">+€50</span>
         </div>
-      </div>
+        <div class="float f3">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2z"/></svg></span>
+          <span>Nieuwe aanvraag<small>via je website</small></span>
+        </div>
+      </div></div>
     </div>
   </section>
 
@@ -439,6 +511,11 @@ footer .brand{font-size:20px; color:var(--text)}
     <a href="#case-detak">Sleepdienst De Tak</a>
     <a href="#case-cartronic">CarTronic</a>
   </div>
+
+  <!-- STATEMENT -->
+  <section class="statement wrap" id="statement" aria-label="Over StrakWerk">
+    <p id="statement-text">Geen standaard templates. Ik bouw websites die <span class="g">snel laden</span>, er <span class="g">strak uitzien</span> en echte <span class="c1">klanten</span> opleveren. Met precies de functies die <span class="c2">jouw bedrijf</span> nodig heeft.</p>
+  </section>
 
   <!-- WERK -->
   <section class="sec" id="werk">
@@ -452,7 +529,7 @@ footer .brand{font-size:20px; color:var(--text)}
       <div class="track" id="track">
 
         <article class="case" id="case-vagpro">
-          <div class="case-visual">
+          <div class="case-visual" style="--glow:rgba(110,150,230,.30)">
             <div class="win">
               <div class="screen">
                 <div class="mock mock-vagpro" aria-hidden="true">
@@ -487,7 +564,7 @@ footer .brand{font-size:20px; color:var(--text)}
         </article>
 
         <article class="case" id="case-detak">
-          <div class="case-visual">
+          <div class="case-visual" style="--glow:rgba(245,196,0,.24)">
             <div class="win">
               <div class="screen">
                 <div class="mock mock-detak" aria-hidden="true">
@@ -523,7 +600,7 @@ footer .brand{font-size:20px; color:var(--text)}
         </article>
 
         <article class="case" id="case-cartronic">
-          <div class="case-visual">
+          <div class="case-visual" style="--glow:rgba(120,110,255,.28)">
             <div class="win">
               <div class="screen">
                 <div class="mock mock-cartronic" aria-hidden="true">
@@ -680,11 +757,23 @@ Locatie: Rijswijk<small>09:41 ✓✓</small></div>
       <div class="sec-head">
         <h2 class="h2">Van eerste appje tot live site.</h2>
       </div>
-      <div class="steps" id="steps">
-        <div class="stp"><span class="n" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.8 7L4 20l1.1-4.6A8 8 0 1 1 21 12z"/></svg></span><h3>Gratis intake</h3><p>Een kort gesprek of WhatsApp over je bedrijf, je doel en de functies die je nodig hebt.</p></div>
-        <div class="stp"><span class="n" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span><h3>Ontwerp</h3><p>Je krijgt een eerste versie die je op je eigen telefoon bekijkt. Jij geeft feedback, ik werk het bij.</p></div>
-        <div class="stp"><span class="n" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6l-6 6 6 6M16 6l6 6-6 6"/></svg></span><h3>Bouwen</h3><p>Snel, mobiel-first en vindbaar. Opties zoals kentekencheck of beheerpaneel worden erin gebouwd.</p></div>
-        <div class="stp"><span class="n" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></span><h3>Live &amp; support</h3><p>Je site gaat online op je eigen domein. Daarna help ik met updates, of pas je het zelf aan.</p></div>
+      <div class="stack" id="stack">
+        <article class="scard c-gold">
+          <div><span class="tagline">Gratis</span><h3>Intake</h3><p>Een kort gesprek of WhatsApp over je bedrijf, je doel en de functies die je nodig hebt. Je weet direct waar je aan toe bent.</p></div>
+          <div class="big" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.8 7L4 20l1.1-4.6A8 8 0 1 1 21 12z"/></svg></div>
+        </article>
+        <article class="scard c-indigo">
+          <div><span class="tagline">Jij geeft feedback</span><h3>Ontwerp</h3><p>Je krijgt een eerste versie die je op je eigen telefoon bekijkt. Niet goed? Dan pas ik het aan tot het klopt.</p></div>
+          <div class="big" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></div>
+        </article>
+        <article class="scard c-copper">
+          <div><span class="tagline">Op maat gebouwd</span><h3>Development</h3><p>Snel, mobiel-first en vindbaar in Google. Functies zoals de kentekencheck of het beheerpaneel bouw ik erin.</p></div>
+          <div class="big" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6l-6 6 6 6M16 6l6 6-6 6"/></svg></div>
+        </article>
+        <article class="scard c-teal">
+          <div><span class="tagline">Binnen 7 dagen</span><h3>Live &amp; support</h3><p>Je site gaat online op je eigen domein. Daarna help ik met updates, of pas je het zelf aan.</p></div>
+          <div class="big" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.3-2 5-2 5s3.7-.5 5-2c.7-.8.7-2.1-.1-2.9a2.2 2.2 0 0 0-2.9-.1z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.9A12.9 12.9 0 0 1 22 2c0 2.7-.8 7.5-6 11a22.4 22.4 0 0 1-4 2z"/><path d="M9 12H4s.6-3 2-4c1.6-1.1 5 0 5 0M12 15v5s3-.6 4-2c1.1-1.6 0-5 0-5"/></svg></div>
+        </article>
       </div>
     </div>
   </section>
@@ -722,6 +811,8 @@ Locatie: Rijswijk<small>09:41 ✓✓</small></div>
     </div>
   </section>
 </main>
+
+<div class="giant" aria-hidden="true"><div><span>STRAK</span>WERK</div></div>
 
 <footer>
   <div class="wrap">
@@ -899,51 +990,166 @@ const ring = document.getElementById("ring"), ringv = document.getElementById("r
 const setRing = v => { ring.style.setProperty("--p", v); ringv.textContent = Math.round(v); };
 if (!hasGsap || reduce) setRing(98);
 
+/* Spotlight op tegels (werkt ook zonder GSAP) */
+document.querySelectorAll(".tile").forEach(t => t.addEventListener("pointermove", e => {
+  const r = t.getBoundingClientRect();
+  t.style.setProperty("--mx", (e.clientX - r.left) + "px"); t.style.setProperty("--my", (e.clientY - r.top) + "px");
+}));
+
 /* GSAP */
+const loader = document.getElementById("loader");
+if (!hasGsap || reduce) loader?.remove();
+
 if (hasGsap){
   gsap.registerPlugin(ScrollTrigger);
   const mm = gsap.matchMedia();
 
+  // Woorden splitsen voor de scroll-reveal
+  (function split(el){
+    [...el.childNodes].forEach(n => {
+      if (n.nodeType === 3){
+        const f = document.createDocumentFragment();
+        n.textContent.split(/(\s+)/).forEach(t => {
+          if (!t) return;
+          if (/^\s+$/.test(t)) f.appendChild(document.createTextNode(t));
+          else { const w = document.createElement("span"); w.className = "w"; w.textContent = t; f.appendChild(w); }
+        });
+        n.replaceWith(f);
+      } else if (n.nodeType === 1) split(n);
+    });
+  })(document.getElementById("statement-text"));
+
   mm.add("(prefers-reduced-motion: no-preference)", () => {
+    /* Intro: logo, dan de hero */
     const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
-    tl.from(".hero .pill", { y: 14, opacity: 0, duration: .6 })
-      .from(".hero h1 .ln > span", { yPercent: 115, duration: 1.1, stagger: .1 }, "-=.3")
-      .from(".hero .lead, .hero .hero-cta, .hero .stats", { y: 18, opacity: 0, duration: .8, stagger: .1 }, "-=.7")
-      .from(".devices .laptop", { y: 60, opacity: 0, rotateX: 8, duration: 1.2, ease: "expo.out" }, .3)
-      .from(".devices .phone", { y: 90, opacity: 0, duration: 1.2, ease: "expo.out" }, .5)
-      .from(".devices .float", { scale: .8, opacity: 0, duration: .7, stagger: .15, ease: "back.out(1.8)" }, 1);
+    if (loader){
+      tl.fromTo("#loader .brand", { yPercent: 60, opacity: 0 }, { yPercent: 0, opacity: 1, duration: .7 })
+        .to(loader, { "--u": 1, duration: .55, ease: "power2.inOut" }, "-=.15")
+        .to(loader, { yPercent: -100, duration: 1, ease: "expo.inOut" }, "+=.15")
+        .set(loader, { display: "none" });
+    }
+    tl.from(".hero h1 .ln > span", { yPercent: 120, rotate: 5, duration: 1.3, stagger: .11 }, loader ? "-=.55" : 0)
+      .from(".hero .lead, .hero .hero-cta", { y: 26, opacity: 0, duration: .9, stagger: .1 }, "-=.9")
+      .addLabel("stats", "-=.6")
+      .from(".hero .stats > div", { y: 20, opacity: 0, duration: .8, stagger: .08 }, "stats")
+      .from(".devices .laptop", { y: 90, rotateX: 22, opacity: 0, duration: 1.5, ease: "expo.out" }, "-=1.4")
+      .from(".devices .phone", { y: 140, rotate: 8, opacity: 0, duration: 1.4, ease: "expo.out" }, "-=1.3")
+      .from(".devices .float", { scale: .5, opacity: 0, duration: .9, stagger: .14, ease: "back.out(2.2)" }, "-=.9")
+      .from(".clients > *", { y: 22, opacity: 0, stagger: .07, duration: .7 }, "-=.7");
+    document.querySelectorAll("[data-count]").forEach(el => {
+      const o = { v: 0 }, pre = el.dataset.pre || "", suf = el.dataset.suf || "";
+      tl.to(o, { v: +el.dataset.count, duration: 1.6, ease: "power2.out", onUpdate: () => el.textContent = pre + Math.round(o.v) + suf }, "stats");
+    });
 
-    // Zweven van de labels
-    gsap.to(".f1", { y: -10, duration: 2.6, ease: "sine.inOut", yoyo: true, repeat: -1 });
-    gsap.to(".f2", { y: 10, duration: 3.1, ease: "sine.inOut", yoyo: true, repeat: -1 });
-    // Parallax op de devices
-    gsap.to(".devices .phone", { yPercent: -12, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
-    gsap.to(".devices .laptop", { yPercent: 6, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
+    /* Kleurvlekken bewegen langzaam */
+    gsap.to(".b1", { x: "-10vw", y: "8vh", scale: 1.1, duration: 11, ease: "sine.inOut", yoyo: true, repeat: -1 });
+    gsap.to(".b2", { x: "12vw", y: "-6vh", scale: 1.15, duration: 13, ease: "sine.inOut", yoyo: true, repeat: -1 });
+    gsap.to(".b3", { x: "-8vw", y: "-10vh", duration: 9, ease: "sine.inOut", yoyo: true, repeat: -1 });
+    gsap.to(".f1", { y: -12, duration: 2.6, ease: "sine.inOut", yoyo: true, repeat: -1 });
+    gsap.to(".f2", { y: 12, duration: 3.1, ease: "sine.inOut", yoyo: true, repeat: -1 });
+    gsap.to(".f3", { y: -9, duration: 2.2, ease: "sine.inOut", yoyo: true, repeat: -1, delay: .5 });
 
-    // Sectiekoppen en tegels
-    gsap.utils.toArray(".sec-head").forEach(h => gsap.from(h.children, { y: 28, opacity: 0, duration: .9, stagger: .08, ease: "power3.out", scrollTrigger: { trigger: h, start: "top 85%" } }));
-    gsap.from(".tile", { y: 40, opacity: 0, duration: .9, stagger: .08, ease: "power3.out", scrollTrigger: { trigger: ".bento", start: "top 80%" } });
+    /* Hero scrollt weg met diepte */
+    const heroST = { trigger: ".hero", start: "top top", end: "bottom top", scrub: true };
+    gsap.to(".hero-copy", { yPercent: -22, opacity: 0, ease: "none", scrollTrigger: heroST });
+    gsap.to(".devices", { yPercent: 14, scale: 1.08, rotateX: -10, ease: "none", scrollTrigger: heroST });
+    gsap.to(".hero-bg", { yPercent: 30, ease: "none", scrollTrigger: heroST });
+
+    /* Statement: woorden lichten op tijdens scrollen */
+    gsap.fromTo("#statement-text .w", { opacity: .1, y: 8 }, { opacity: 1, y: 0, stagger: .1, ease: "none",
+      scrollTrigger: { trigger: "#statement", start: "top 78%", end: "bottom 55%", scrub: .6 } });
+
+    /* Koppen */
+    gsap.utils.toArray(".sec-head").forEach(h => gsap.from(h.children, { y: 50, opacity: 0, duration: 1, stagger: .1, ease: "power4.out", scrollTrigger: { trigger: h, start: "top 85%" } }));
+
+    /* Mogelijkheden */
+    gsap.from(".tile", { y: 100, opacity: 0, rotateX: -18, transformPerspective: 900, transformOrigin: "50% 100%", duration: 1.1, stagger: .09, ease: "power4.out", scrollTrigger: { trigger: ".bento", start: "top 82%" } });
     const r = { v: 0 };
-    gsap.to(r, { v: 98, duration: 1.6, ease: "power2.out", onUpdate: () => setRing(r.v), scrollTrigger: { trigger: "#ring", start: "top 90%" } });
+    gsap.to(r, { v: 98, duration: 1.8, ease: "power2.out", onUpdate: () => setRing(r.v), scrollTrigger: { trigger: "#ring", start: "top 90%" } });
+    gsap.from(".bubble", { scale: .6, opacity: 0, transformOrigin: "100% 100%", duration: .8, ease: "back.out(2)", scrollTrigger: { trigger: ".bubble", start: "top 92%" } });
 
-    // Werkwijze
-    gsap.from("#steps .stp", { y: 30, opacity: 0, stagger: .12, duration: .8, ease: "power3.out", scrollTrigger: { trigger: "#steps", start: "top 80%" } });
-    gsap.from(".opt-row", { y: 16, opacity: 0, duration: .5, stagger: .03, ease: "power2.out", scrollTrigger: { trigger: "#options", start: "top 85%" } });
-    gsap.from(".cta-box", { y: 40, opacity: 0, duration: 1, ease: "power3.out", scrollTrigger: { trigger: ".cta-box", start: "top 85%" } });
+    /* Prijzen */
+    gsap.from(".base", { y: 40, opacity: 0, duration: .9, ease: "power3.out", scrollTrigger: { trigger: ".base", start: "top 85%" } });
+    gsap.from(".quote", { x: 60, opacity: 0, duration: 1.1, ease: "power3.out", scrollTrigger: { trigger: ".quote", start: "top 85%" } });
+    gsap.utils.toArray(".group").forEach(g => gsap.from(g.querySelectorAll(".opt-row"), { x: -40, opacity: 0, duration: .7, stagger: .06, ease: "power3.out", scrollTrigger: { trigger: g, start: "top 85%" } }));
+
+    /* Werkwijze: kaarten stapelen */
+    const cards = gsap.utils.toArray(".scard");
+    cards.forEach((c, i) => {
+      gsap.from(c.querySelector(".big"), { scale: .4, rotate: -25, opacity: 0, duration: 1, ease: "back.out(1.8)", scrollTrigger: { trigger: c, start: "top 80%" } });
+      if (i < cards.length - 1) gsap.to(c, { scale: .92, filter: "brightness(.45)", ease: "none",
+        scrollTrigger: { trigger: cards[i + 1], start: "top 85%", end: "top 25%", scrub: true } });
+    });
+
+    /* FAQ, CTA en groot woordmerk */
+    gsap.from("details", { y: 30, opacity: 0, duration: .7, stagger: .07, ease: "power3.out", scrollTrigger: { trigger: ".faq-list", start: "top 85%" } });
+    gsap.from(".cta-box", { y: 80, scale: .94, opacity: 0, duration: 1.2, ease: "power4.out", scrollTrigger: { trigger: ".cta-box", start: "top 88%" } });
+    gsap.fromTo(".giant div", { xPercent: 4 }, { xPercent: -22, ease: "none", scrollTrigger: { trigger: ".giant", start: "top bottom", end: "bottom top", scrub: true } });
   });
 
-  // Projecten: horizontaal scrollen (desktop)
+  /* Desktop: horizontaal werk met kleurwissel, 3D-tilt en magnetische knoppen */
   mm.add("(min-width: 960px) and (prefers-reduced-motion: no-preference)", () => {
     const sec = document.getElementById("werk"), track = document.getElementById("track");
     sec.classList.add("is-horizontal");
+    const bgs = ["#0D1424", "#1A160A", "#121530"];
     const dist = () => track.scrollWidth - document.querySelector("#werk .hscroll").clientWidth + 1;
     const tw = gsap.to(track, { x: () => -dist(), ease: "none",
-      scrollTrigger: { trigger: sec, start: "top top", end: () => "+=" + dist(), pin: true, scrub: .8, invalidateOnRefresh: true } });
-    gsap.utils.toArray("#werk .case-info").slice(1).forEach(el => gsap.from(el.children, { x: 60, opacity: 0, stagger: .05, ease: "power2.out",
-      scrollTrigger: { trigger: el, containerAnimation: tw, start: "left 90%", end: "left 55%", scrub: true } }));
-    return () => { sec.classList.remove("is-horizontal"); gsap.set(track, { clearProps: "transform" }); };
+      scrollTrigger: { trigger: sec, start: "top top", end: () => "+=" + dist(), pin: true, scrub: .8, invalidateOnRefresh: true,
+        onUpdate: st => sec.style.backgroundColor = gsap.utils.interpolate(bgs, st.progress),
+        onLeaveBack: () => sec.style.backgroundColor = "", onLeave: () => sec.style.backgroundColor = bgs[2] } });
+    gsap.utils.toArray("#werk .case").slice(1).forEach(c => {
+      gsap.from(c.querySelector(".case-visual"), { rotateY: -25, scale: .82, opacity: .3, transformPerspective: 1200, ease: "power2.out",
+        scrollTrigger: { trigger: c, containerAnimation: tw, start: "left 100%", end: "left 35%", scrub: true } });
+      gsap.from(c.querySelector(".case-info").children, { x: 80, opacity: 0, stagger: .06, ease: "power2.out",
+        scrollTrigger: { trigger: c, containerAnimation: tw, start: "left 80%", end: "left 30%", scrub: true } });
+    });
+
+    // 3D-tilt van de devices met de muis
+    const hero = document.querySelector(".hero"), stage = document.querySelector(".stage"), spot = document.getElementById("spot");
+    const rx = gsap.quickTo(stage, "rotationX", { duration: .8, ease: "power3" }), ry = gsap.quickTo(stage, "rotationY", { duration: .8, ease: "power3" });
+    const sx = gsap.quickTo(spot, "x", { duration: .6, ease: "power3" }), sy = gsap.quickTo(spot, "y", { duration: .6, ease: "power3" });
+    const move = e => { const b = hero.getBoundingClientRect(); const px = (e.clientX - b.left) / b.width - .5, py = (e.clientY - b.top) / b.height - .5;
+      ry(px * 14); rx(-py * 10); sx(e.clientX - b.left); sy(e.clientY - b.top); };
+    hero.addEventListener("pointermove", move);
+
+    // Tegels kantelen licht
+    const tiles = gsap.utils.toArray(".tile").map(t => {
+      const qx = gsap.quickTo(t, "rotationX", { duration: .5 }), qy = gsap.quickTo(t, "rotationY", { duration: .5 });
+      const on = e => { const b = t.getBoundingClientRect(); qy(((e.clientX - b.left) / b.width - .5) * 8); qx(-((e.clientY - b.top) / b.height - .5) * 8); };
+      const off = () => { qx(0); qy(0); };
+      gsap.set(t, { transformPerspective: 900 });
+      t.addEventListener("pointermove", on); t.addEventListener("pointerleave", off);
+      return [t, on, off];
+    });
+
+    // Magnetische knoppen
+    const mags = gsap.utils.toArray(".btn--gold, .hero .btn").map(b => {
+      const qx = gsap.quickTo(b, "x", { duration: .4, ease: "power3" }), qy = gsap.quickTo(b, "y", { duration: .4, ease: "power3" });
+      const on = e => { const r = b.getBoundingClientRect(); qx((e.clientX - r.left - r.width / 2) * .3); qy((e.clientY - r.top - r.height / 2) * .4); };
+      const off = () => { qx(0); qy(0); };
+      b.addEventListener("pointermove", on); b.addEventListener("pointerleave", off);
+      return [b, on, off];
+    });
+
+    return () => {
+      sec.classList.remove("is-horizontal"); sec.style.backgroundColor = ""; gsap.set(track, { clearProps: "transform" });
+      hero.removeEventListener("pointermove", move);
+      tiles.forEach(([t, on, off]) => { t.removeEventListener("pointermove", on); t.removeEventListener("pointerleave", off); });
+      mags.forEach(([b, on, off]) => { b.removeEventListener("pointermove", on); b.removeEventListener("pointerleave", off); });
+    };
   });
 
+  /* Mobiel: achtergrond kleurt mee per project */
+  mm.add("(max-width: 959px) and (prefers-reduced-motion: no-preference)", () => {
+    const sec = document.getElementById("werk"), bgs = ["#0D1424", "#1A160A", "#121530"];
+    gsap.utils.toArray("#werk .case").forEach((c, i) => {
+      ScrollTrigger.create({ trigger: c, start: "top 60%", end: "bottom 40%", onToggle: st => { if (st.isActive) sec.style.backgroundColor = bgs[i]; } });
+      gsap.from(c.querySelector(".case-visual"), { y: 60, scale: .92, opacity: 0, duration: 1, ease: "power3.out", scrollTrigger: { trigger: c, start: "top 85%" } });
+    });
+    return () => { sec.style.backgroundColor = ""; };
+  });
+
+  addEventListener("load", () => ScrollTrigger.refresh());
   document.fonts?.ready.then(() => ScrollTrigger.refresh());
 }
 </script>
