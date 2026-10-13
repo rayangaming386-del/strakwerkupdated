@@ -1,19 +1,812 @@
-<!DOCTYPE html> <html lang="nl"> <head> <meta charset="utf-8" /> <meta name="viewport" content="width=device-width, initial-scale=1" /> <title>StrakWerk — Webdesign & Development</title> <meta name="description" content="StrakWerk bouwt snelle, mobiele en SEO‑klare websites. Van webshop (Shopify) tot booking en portfolio. Eerlijke prijs en snelle oplevering." /> <meta property="og:title" content="StrakWerk — Webdesign & Development" /> <meta property="og:description" content="Websites op maat — snel online, mobiel‑first & SEO‑ready. Vraag je project aan via WhatsApp of e‑mail." /> <meta property="og:type" content="website" /> <meta property="og:url" content="https://example.com/strakwerk" /> <meta property="og:image" content="assets/img/img01.png" /> <link rel="preconnect" href="https://fonts.googleapis.com"> <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"> <link rel="stylesheet" href="styles.css" /> 
-  <!-- Vercel Analytics -->
-  <script defer src="/_vercel/insights/script.js"></script>
-  <script>
-    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-  </script>
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="StrakWerk bouwt strakke, snelle websites vanaf €200. Kies zelf je opties: beheerpaneel, kentekencheck, webshop en meer. Binnen een week online.">
+<meta name="theme-color" content="#0D1014">
+<link rel="canonical" href="https://www.strakwerkk.nl/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.strakwerkk.nl/">
+<meta property="og:title" content="StrakWerk · Websites vanaf €200">
+<meta property="og:description" content="Kies zelf je opties en zie direct je prijs. Binnen een week online.">
+<meta property="og:image" content="https://www.strakwerkk.nl/assets/og.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230D1014'/%3E%3Crect x='9' y='9' width='14' height='14' rx='2' fill='%23F5C400' transform='skewX(-12) translate(3 0)'/%3E%3C/svg%3E">
+<script defer src="/_vercel/insights/script.js"></script>
+<title>StrakWerk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Instrument+Sans:wght@400..700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: links uitgelijnd, brede display-type; één gedurfd element = het kenteken-prijsplaatje in de hero.
+   Kleur: koel aluminium + inkt, met kentekengeel als enige accent (vlakken, nooit als tekstkleur). */
+:root{
+  --paper:#ECEEF0;
+  --surface:#F8F9FA;
+  --ink:#0D1014;
+  --muted:#59616B;
+  --line:#D2D6DB;
+  --plate:#F5C400;
+  --plate-ink:#0D1014;
+  --nl:#1E3A8A;
+  --ok:#1F7A4D;
+  --shadow:0 1px 0 rgba(13,16,20,.04), 0 12px 32px -18px rgba(13,16,20,.35);
 
-</head> <body> <a href="#top" class="to-top" aria-label="Naar boven">↑</a> <a class="wa-float" href="https://wa.me/31623462397?text=Hi%20StrakWerk%2C%20ik%20wil%20een%20website." aria-label="WhatsApp StrakWerk">WhatsApp</a> <header> <div class="container nav"> <a href="#top" class="brand" aria-label="StrakWerk home"><span class="strak">STRAK</span><span>WERK</span></a> <nav> <a class="btn" href="#waarom">Voordelen</a> <a class="btn" href="#aanpak">Werkwijze</a> <a class="btn" href="#diensten">Diensten</a> </nav> </div> </header> <main id="top" class="container"> <!-- Hero --> <section class="hero reveal"> <h1>Websites op maat</h1> <p class="sub">Design & development — snel online, mobiel‑first en SEO‑ready. Eerlijke prijs en persoonlijke service.</p> <div class="badges"> <span class="badge">Shopify & Booking</span> <span class="badge">Meertalig</span> <span class="badge">SEO‑ready</span> <span class="badge">Snelle oplevering</span> </div> <div class="cta"> <a class="btn btn--gold" href="https://wa.me/31623462397?text=Hi%20StrakWerk%2C%20ik%20wil%20een%20website." target="_blank" rel="noopener">Stuur een WhatsApp</a> <a class="btn" href="tel:+31623462397">Bel: 06 2346 2397</a> </div> </section> <!-- Waarom (nu vóór Werk) --> <section id="waarom" class="section why reveal"> <h2>Waarom StrakWerk</h2> <div class="why-grid"> <div class="why-card reveal"><h3>Snel & schaalbaar</h3><p>Snelle laadtijden, mobiel‑first en klaar voor groei.</p></div> <div class="why-card reveal"><h3>Meedenkend</h3><p>Samen vertalen we je idee naar een heldere online ervaring.</p></div> <div class="why-card reveal"><h3>Veilig & betrouwbaar</h3><p>Best‑practices voor performance, security en SEO.</p></div> <div class="why-card reveal"><h3>Heldere prijzen</h3><p>Eerlijke tarieven, duidelijke afspraken en support mogelijk.</p></div> </div> </section> <!-- Recent werk (nu ná Waarom) --> <section id="werk" class="section reveal"> <h2>Recent werk</h2> <div class="grid"> <figure class="frame reveal"> <div class="toolbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div> <div class="viewport"><img alt="Projectbeeld 1" src="assets/img/img01.png" loading="lazy" /></div> </figure> <figure class="frame reveal"> <div class="toolbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div> <div class="viewport"><img alt="Projectbeeld 2" src="assets/img/img02.png" loading="lazy" /></div> </figure> <figure class="frame reveal"> <div class="toolbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div> <div class="viewport"><img alt="Projectbeeld 3" src="assets/img/img03.png" loading="lazy" /></div> </figure> <figure class="frame reveal"> <div class="toolbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div> <div class="viewport"><img alt="Projectbeeld 4" src="assets/img/img04.png" loading="lazy" /></div> </figure> </div> </section> <!-- Aanpak --> <section id="aanpak" class="section steps reveal"> <h2>Aanpak</h2> <ol class="timeline"> <li class="reveal"><span class="n">1</span><div><strong>Gratis intake</strong><p>Korte call/WhatsApp om jouw doelen te begrijpen.</p></div></li> <li class="reveal"><span class="n">2</span><div><strong>Ontwerp</strong><p>Wireframe + stijl; jij geeft feedback, wij polijsten.</p></div></li> <li class="reveal"><span class="n">3</span><div><strong>Development</strong><p>Snel, mobiel‑first en SEO‑ready gebouwd.</p></div></li> <li class="reveal"><span class="n">4</span><div><strong>Live & support</strong><p>Oplevering + hulp bij updates/onderhoud.</p></div></li> </ol> </section> <!-- Diensten (nu onder Aanpak) --> <section id="diensten" class="section reveal"> <h2>Diensten</h2> <div class="services"> <div class="scard"> <h3>Starter — One‑pager</h3> <p>Snelle, strakke one‑pager voor je business of portfolio.</p> <div class="price-tag">€250</div> <div class="actions"> <a class="btn--cta" href="service-starter.html">Meer info <span class="arrow">→</span></a> <a class="btn--cta-soft" href="https://wa.me/31623462397?text=Starter%20—%20StrakWerk">WhatsApp</a> </div> </div> <div class="scard"> <h3>Pro — Meerdere pagina’s</h3> <p>Voor groeiende bedrijven: blog of booking en uitgebreide SEO.</p> <div class="price-tag">€500</div> <div class="actions"> <a class="btn--cta" href="service-pro.html">Meer info <span class="arrow">→</span></a> <a class="btn--cta-soft" href="https://wa.me/31623462397?text=Pro%20—%20StrakWerk">WhatsApp</a> </div> </div> <div class="scard"> <h3>E‑commerce — Shopify</h3> <p>Complete webshop: betalingen, checkout, e‑mailflows en training.</p> <div class="price-tag">€750</div> <div class="actions"> <a class="btn--cta" href="service-ecom.html">Meer info <span class="arrow">→</span></a> <a class="btn--cta-soft" href="https://wa.me/31623462397?text=E-commerce%20—%20StrakWerk">WhatsApp</a> </div> </div> <div class="scard"> <h3>Onderhoud & Support</h3> <p>Updates, beveiliging, kleine aanpassingen en support wanneer je het nodig hebt.</p> <div class="price-tag">Op aanvraag</div> <div class="actions"> <a class="btn--cta" href="service-onderhoud.html">Meer info <span class="arrow">→</span></a> <a class="btn--cta-soft" href="https://wa.me/31623462397?text=Onderhoud%20—%20StrakWerk">WhatsApp</a> </div> </div> <div class="scard"> <h3>Performance & SEO Boost</h3> <p>Snelheidsoptimalisatie (Core Web Vitals), technische SEO-audit en verbeterplan.</p> <div class="price-tag">Op aanvraag</div> <div class="actions"> <a class="btn--cta" href="service-boost.html">Meer info <span class="arrow">→</span></a> <a class="btn--cta-soft" href="https://wa.me/31623462397?text=Performance%20%26%20SEO%20Boost%20—%20StrakWerk">WhatsApp</a> </div> </div> </div> </section> <!-- Pakketten --> <section id="pakketten" class="section pricing reveal"> <h2>Pakketten</h2> <div class="price-grid"> <div class="price-card reveal"> <h3>Starter</h3> <ul><li>One‑pager</li><li>Mobiel‑first</li><li>Basis SEO</li></ul> <a class="btn btn--gold" href="https://wa.me/31623462397?text=Starter%20pakket%20—%20StrakWerk">Vraag offerte</a> </div> <div class="price-card recommended reveal"> <div class="tag">Meest gekozen</div> <h3>Pro</h3> <ul><li>Meerdere pagina’s</li><li>Blog of booking</li><li>Uitgebreide SEO</li></ul> <a class="btn btn--gold" href="https://wa.me/31623462397?text=Pro%20pakket%20—%20StrakWerk">Vraag offerte</a> </div> <div class="price-card reveal"> <h3>E‑commerce</h3> <ul><li>Shopify setup</li><li>Betaalmethodes</li><li>E‑mailflows</li></ul> <a class="btn btn--gold" href="https://wa.me/31623462397?text=E-commerce%20pakket%20—%20StrakWerk">Vraag offerte</a> </div> </div> </section> <!-- FAQ (hernoemd + aangepaste tekst) --> <section id="faq" class="section faq reveal"> <h2>Veelgestelde vragen</h2> <details class="reveal"><summary>Hoe snel kan mijn website online?</summary><p>Binnen 1 week afhankelijk van de aanvraag.</p></details> <details class="reveal"><summary>Werken jullie ook met mijn huidige domein/hosting?</summary><p>Ja. We kunnen overzetten of koppelen en adviseren over de beste setup.</p></details> <details class="reveal"><summary>Kan ik later zelf teksten/afbeeldingen aanpassen?</summary><p>Ja. We leveren desgewenst een eenvoudige handleiding of CMS‑toegang.</p></details> </section> <section class="section reveal"> <div class="contact-strip sticky-cta"> <strong>Klaar om te starten?</strong> <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"> <a class="phone" href="https://wa.me/31623462397?text=Hi%20StrakWerk%2C%20ik%20wil%20een%20website.">WhatsApp 06 2346 2397</a> <a class="btn" href="mailto:strakwerkk@gmail.com?subject=Nieuw%20project%20—%20StrakWerk">Mail: strakwerkk@gmail.com</a> </div> </div> </section> </main> <footer class="container"> <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between"> <div class="brand"><span class="strak">STRAK</span><span>WERK</span></div> <div>© <span id="year"></span> StrakWerk — Webdesign & Development</div> </div> </footer> <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
-    // Fade-in on scroll
-    const io = new IntersectionObserver((entries)=>{
-      entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in'); });
-    }, { threshold: 0.12 });
-    document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
-    // Back-to-top button
-    const toTop = document.querySelector('.to-top');
-    const onScroll = function() { toTop.style.opacity = window.scrollY > 600 ? 1 : 0; };
-    window.addEventListener('scroll', onScroll); onScroll();
-  </script> </body> </html>
+  --f-display:"Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body:"Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --gutter:clamp(16px, 4vw, 48px);
+  --max:1240px;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1012; --surface:#16191D; --ink:#E8EBEE; --muted:#949CA6; --line:#2A3036;
+    --plate:#F5C400; --plate-ink:#0D1014; --nl:#2747A8; --ok:#4CC38A;
+    --shadow:0 1px 0 rgba(0,0,0,.3), 0 16px 40px -20px rgba(0,0,0,.8);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1012; --surface:#16191D; --ink:#E8EBEE; --muted:#949CA6; --line:#2A3036;
+  --plate:#F5C400; --plate-ink:#0D1014; --nl:#2747A8; --ok:#4CC38A;
+  --shadow:0 1px 0 rgba(0,0,0,.3), 0 16px 40px -20px rgba(0,0,0,.8);
+  color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--f-body); font-size:17px; line-height:1.55;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--ink); outline-offset:3px; border-radius:4px}
+.wrap{max-width:var(--max); margin-inline:auto; padding-inline:var(--gutter)}
+h1,h2,h3{font-family:var(--f-display); text-wrap:balance; margin:0; line-height:1}
+h2{font-size:clamp(2.1rem, 5.2vw, 4rem); font-weight:800; font-stretch:112%; letter-spacing:-.02em}
+h3{font-size:1.25rem; font-weight:700; font-stretch:105%; letter-spacing:-.01em}
+p{margin:0}
+.label{font-family:var(--f-mono); font-size:.75rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.lead{font-size:clamp(1.05rem, 1.6vw, 1.25rem); color:var(--muted); max-width:58ch}
+.sec{padding-block:clamp(72px, 11vw, 140px)}
+.sec-head{display:grid; gap:18px; margin-bottom:clamp(36px, 6vw, 64px)}
+
+/* Buttons */
+.btn{
+  display:inline-flex; align-items:center; gap:.55em; justify-content:center;
+  font:600 .98rem/1 var(--f-body); text-decoration:none; cursor:pointer;
+  padding:15px 22px; border-radius:999px; border:1.5px solid var(--ink);
+  background:transparent; color:var(--ink); transition:transform .2s, background .2s, color .2s;
+}
+.btn:hover{transform:translateY(-1px)}
+.btn--plate{background:var(--plate); color:var(--plate-ink); border-color:var(--plate)}
+.btn--ink{background:var(--ink); color:var(--paper)}
+.btn svg{width:18px; height:18px; flex:none}
+
+/* Header */
+.top{
+  position:sticky; top:env(safe-area-inset-top, 0px); z-index:50;
+  background:color-mix(in srgb, var(--paper) 82%, transparent);
+  backdrop-filter:saturate(1.4) blur(12px); -webkit-backdrop-filter:saturate(1.4) blur(12px);
+  border-bottom:1px solid transparent; transition:border-color .3s;
+}
+.top.scrolled{border-bottom-color:var(--line)}
+.top .wrap{display:flex; align-items:center; justify-content:space-between; gap:16px; height:68px}
+.brand{font-family:var(--f-display); font-weight:900; font-stretch:125%; font-size:1.15rem; letter-spacing:.02em; text-decoration:none; display:flex; align-items:center; gap:8px}
+.brand i{display:inline-block; width:12px; height:12px; background:var(--plate); border-radius:2px; transform:skewX(-12deg)}
+.nav{display:flex; gap:26px; align-items:center}
+.nav a{text-decoration:none; font-weight:500; font-size:.95rem; color:var(--muted)}
+.nav a:hover{color:var(--ink)}
+.top .btn{padding:11px 18px; font-size:.9rem}
+@media (max-width:820px){ .nav{display:none} }
+
+/* Hero */
+.hero{padding-block:clamp(56px, 9vw, 120px) clamp(48px, 7vw, 96px)}
+.hero h1{
+  font-size:clamp(2.5rem, 8vw, 6.6rem); font-weight:850; font-stretch:112%;
+  letter-spacing:-.035em; line-height:.92;
+}
+.hero h1 .ln{display:block; overflow:hidden; padding-bottom:.06em}
+.hero h1 .ln > span{display:inline-block}
+.hero-row{display:flex; flex-wrap:wrap; align-items:center; gap:clamp(16px, 3vw, 32px); margin-top:clamp(18px, 2.5vw, 28px)}
+.hero-bottom{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:32px; align-items:end; margin-top:clamp(36px, 5vw, 56px)}
+.hero-bottom .lead{color:var(--muted)}
+.hero-cta{display:flex; gap:12px; flex-wrap:wrap}
+@media (max-width:820px){ .hero-bottom{grid-template-columns:1fr} }
+
+/* Kenteken-prijsplaat */
+.plate{
+  display:inline-flex; align-items:stretch; border-radius:10px; overflow:hidden;
+  background:var(--plate); color:var(--plate-ink);
+  box-shadow:0 0 0 3px var(--plate-ink) inset, var(--shadow);
+  font-family:var(--f-display); font-weight:800; font-stretch:80%;
+  height:clamp(64px, 9vw, 112px); line-height:1;
+}
+.plate .eu{
+  background:var(--nl); color:#fff; width:clamp(26px, 3.4vw, 40px);
+  display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+  padding-bottom:8px; font-size:clamp(.7rem, 1vw, .95rem); font-stretch:100%; font-weight:700;
+  margin:3px 0 3px 3px; border-radius:7px 0 0 7px; position:relative;
+}
+.plate .eu::before{
+  content:""; position:absolute; top:22%; left:50%; width:44%; aspect-ratio:1; transform:translateX(-50%);
+  border-radius:50%; border:2px dotted #F5C400;
+}
+.plate .val{display:flex; align-items:center; padding-inline:clamp(14px, 2vw, 26px); font-size:clamp(2.6rem, 6.4vw, 5.6rem); letter-spacing:.02em; font-variant-numeric:tabular-nums}
+.plate .val small{font-size:.42em; font-stretch:100%; margin-right:.35em; align-self:center; letter-spacing:0; font-weight:700}
+.hero-note{max-width:26ch; font-size:1rem; color:var(--muted); line-height:1.4}
+.hero-note b{color:var(--ink); font-weight:600}
+
+.clients{display:flex; flex-wrap:wrap; gap:10px 28px; align-items:center; padding-top:28px; margin-top:clamp(40px, 6vw, 72px); border-top:1px solid var(--line)}
+.clients a{font-family:var(--f-display); font-weight:700; font-stretch:110%; font-size:1.05rem; text-decoration:none; color:var(--ink); display:inline-flex; gap:6px; align-items:center}
+.clients a span{color:var(--muted); font-family:var(--f-body); font-weight:400; font-stretch:100%; font-size:.85rem}
+.clients a:hover{text-decoration:underline; text-underline-offset:4px}
+
+/* Werk */
+#werk{overflow:hidden}
+.track{display:grid; gap:clamp(56px, 8vw, 96px)}
+.case{display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr); gap:clamp(24px, 4vw, 56px); align-items:center}
+@media (max-width:900px){ .case{grid-template-columns:1fr} }
+.is-horizontal .track{display:flex; gap:clamp(48px, 6vw, 96px); width:max-content; padding-right:var(--gutter)}
+.is-horizontal .case{width:min(calc(100vw - var(--gutter)*2 - 80px), 1120px); flex:none}
+
+.frame{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+  box-shadow:var(--shadow); overflow:hidden; max-width:100%;
+}
+.frame .bar{display:flex; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid var(--line)}
+.frame .dots{display:flex; gap:6px}
+.frame .dots i{width:9px; height:9px; border-radius:50%; background:var(--line)}
+.frame .url{flex:1; min-width:0; font-family:var(--f-mono); font-size:.75rem; color:var(--muted); background:var(--paper); border-radius:6px; padding:5px 10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.shot{position:relative; aspect-ratio:16/10; overflow:hidden}
+.shot > img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:top; z-index:2}
+
+/* Mock-ups (worden vervangen door screenshots zodra die in assets/work staan) */
+.mock{position:absolute; inset:0; display:flex; flex-direction:column; font-family:var(--f-body)}
+.mock .m-nav{display:flex; justify-content:space-between; align-items:center; padding:4% 6% 0; font-family:var(--f-display); font-weight:800; font-size:clamp(.7rem, 1.3vw, 1rem); letter-spacing:.04em}
+.mock .m-nav em{display:flex; gap:8px}
+.mock .m-nav em i{display:block; width:28px; height:5px; border-radius:3px; background:currentColor; opacity:.25}
+.mock .m-body{padding:6% 6% 0; display:grid; gap:10px}
+.mock .m-h{font-family:var(--f-display); font-weight:800; font-stretch:110%; font-size:clamp(1rem, 2.6vw, 2.1rem); line-height:1; letter-spacing:-.02em; max-width:15ch}
+.mock .m-l{height:7px; border-radius:4px; background:currentColor; opacity:.18}
+.mock .m-plate{display:inline-flex; margin-top:6px; border-radius:6px; overflow:hidden; height:clamp(26px, 4vw, 40px); width:max-content; box-shadow:0 0 0 2px #0D1014 inset; background:#F5C400; color:#0D1014; font:800 clamp(.8rem, 1.8vw, 1.25rem)/1 var(--f-display); font-stretch:85%}
+.mock .m-plate b{width:16px; background:#1E3A8A; margin:2px 0 2px 2px; border-radius:4px 0 0 4px}
+.mock .m-plate span{display:flex; align-items:center; padding:0 12px; letter-spacing:.06em}
+.mock .m-btn{display:inline-block; padding:7px 12px; border-radius:6px; font-size:clamp(.55rem, 1vw, .75rem); font-weight:700; width:max-content}
+.mock .m-row{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+.mock .m-grid{display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-top:6px}
+.mock .m-grid i{aspect-ratio:1; border-radius:6px; background:currentColor; opacity:.1}
+.mock-vagpro{background:#FFFFFF; color:#0F1720}
+.mock-vagpro .m-btn{background:#0F1720; color:#fff}
+.mock-detak{background:#111111; color:#F2F2F2}
+.mock-detak .m-btn{background:#F5C400; color:#111}
+.mock-detak .m-h span{color:#F5C400}
+.mock-cartronic{background:#11141A; color:#E7EAF0}
+.mock-cartronic .m-btn{background:#E7EAF0; color:#11141A}
+
+.case-info{display:grid; gap:18px; min-width:0}
+.case-info .meta{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.case-info h3{font-size:clamp(2rem, 4vw, 3.2rem); font-weight:850; font-stretch:115%; letter-spacing:-.02em}
+.case-info p{color:var(--muted); max-width:46ch}
+.chips{display:flex; flex-wrap:wrap; gap:8px; padding:0; margin:0; list-style:none}
+.chip{font-size:.85rem; font-weight:500; padding:6px 12px; border-radius:999px; border:1px solid var(--line); background:var(--surface); display:inline-flex; gap:6px; align-items:center}
+.chip.opt::before{content:""; width:7px; height:7px; border-radius:2px; background:var(--plate); box-shadow:0 0 0 1px var(--plate-ink)}
+.case-links{display:flex; gap:18px; align-items:center; flex-wrap:wrap}
+.link{font-weight:600; text-underline-offset:4px; text-decoration-thickness:1.5px}
+.link-soft{font-size:.92rem; color:var(--muted); text-underline-offset:4px; background:none; border:0; padding:0; cursor:pointer; font-family:inherit; text-decoration:underline}
+.link-soft:hover{color:var(--ink)}
+.progress{display:none}
+.is-horizontal .progress{display:flex; gap:8px; margin-top:40px}
+.progress i{height:3px; flex:1; background:var(--line); border-radius:2px; overflow:hidden; position:relative}
+.progress i b{position:absolute; inset:0; background:var(--ink); transform-origin:left; transform:scaleX(0)}
+
+/* Configurator */
+#prijzen{background:var(--surface); border-block:1px solid var(--line)}
+.cfg{display:grid; grid-template-columns:minmax(0,1.45fr) minmax(0,1fr); gap:clamp(24px, 4vw, 56px); align-items:start}
+@media (max-width:960px){ .cfg{grid-template-columns:1fr} }
+
+.base{
+  display:grid; grid-template-columns:minmax(0,1fr) auto; gap:20px; align-items:start;
+  padding:26px; border-radius:var(--r); background:var(--paper); border:1.5px solid var(--ink);
+}
+.base h3{font-size:1.5rem}
+.base ul{margin:14px 0 0; padding:0; list-style:none; display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px 20px}
+.base li{display:flex; gap:9px; font-size:.95rem; align-items:baseline}
+.base li::before{content:"✓"; font-weight:700; color:var(--ok)}
+.base .price{font-family:var(--f-mono); font-weight:600; font-size:1.4rem; white-space:nowrap}
+@media (max-width:560px){ .base{grid-template-columns:1fr} .base ul{grid-template-columns:1fr} }
+
+.presets{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:28px 0 8px}
+.presets .label{margin-right:6px}
+.pbtn{font:500 .88rem/1 var(--f-body); padding:9px 14px; border-radius:999px; border:1px solid var(--line); background:var(--paper); color:var(--ink); cursor:pointer}
+.pbtn:hover{border-color:var(--ink)}
+.pbtn[aria-pressed="true"]{background:var(--ink); color:var(--paper); border-color:var(--ink)}
+
+.group{margin-top:28px}
+.group > .label{display:block; margin-bottom:6px}
+.opt-row{
+  display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:16px; align-items:center;
+  padding:16px 4px; border-bottom:1px solid var(--line); cursor:pointer;
+}
+.opt-row:first-of-type{border-top:1px solid var(--line)}
+.opt-row .name{font-weight:600; display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.opt-row .desc{font-size:.9rem; color:var(--muted); margin-top:2px}
+.opt-row .live{font-family:var(--f-mono); font-size:.68rem; letter-spacing:.04em; text-transform:uppercase; padding:3px 7px; border-radius:4px; background:var(--plate); color:var(--plate-ink); text-decoration:none; font-weight:600}
+.opt-row .amt{font-family:var(--f-mono); font-size:.95rem; text-align:right; white-space:nowrap}
+.opt-row .amt small{display:block; color:var(--muted); font-size:.72rem}
+
+/* switch */
+.sw{position:relative; width:44px; height:26px; flex:none}
+.sw input{position:absolute; inset:0; opacity:0; margin:0; cursor:pointer}
+.sw span{position:absolute; inset:0; border-radius:999px; background:var(--line); transition:background .2s}
+.sw span::after{content:""; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:var(--surface); box-shadow:0 1px 3px rgba(0,0,0,.25); transition:transform .25s cubic-bezier(.3,1.4,.5,1)}
+.sw input:checked + span{background:var(--ink)}
+.sw input:checked + span::after{transform:translateX(18px); background:var(--plate)}
+.sw input:focus-visible + span{outline:2px solid var(--ink); outline-offset:3px}
+
+/* stepper */
+.step{display:inline-flex; align-items:center; border:1px solid var(--line); border-radius:999px; height:30px; flex:none}
+.step button{width:30px; height:28px; border:0; background:none; color:var(--ink); font:600 1rem/1 var(--f-mono); cursor:pointer; border-radius:999px}
+.step button:hover{background:var(--paper)}
+.step output{min-width:20px; text-align:center; font-family:var(--f-mono); font-size:.9rem}
+
+/* Offerte */
+.quote{
+  position:sticky; top:calc(env(safe-area-inset-top, 0px) + 88px);
+  background:var(--paper); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.quote-head{display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:20px 22px; border-bottom:1px dashed var(--line)}
+.quote-head h3{font-size:1.35rem}
+.quote-head .label{text-align:right}
+.qlines{list-style:none; margin:0; padding:14px 22px; display:grid; gap:9px; font-size:.94rem; min-height:80px}
+.qlines li{display:flex; justify-content:space-between; gap:12px}
+.qlines li span:last-child{font-family:var(--f-mono); white-space:nowrap; font-variant-numeric:tabular-nums}
+.qlines li.base-line{font-weight:600}
+.qtotal{padding:16px 22px 20px; border-top:1px solid var(--ink); display:grid; gap:6px}
+.qtotal .row{display:flex; justify-content:space-between; align-items:baseline; gap:12px}
+.qtotal .big{font-family:var(--f-display); font-weight:850; font-stretch:90%; font-size:clamp(2.6rem, 5vw, 3.4rem); letter-spacing:-.01em; font-variant-numeric:tabular-nums; line-height:1}
+.qtotal .mo{font-family:var(--f-mono); font-size:.9rem; color:var(--muted)}
+.qactions{display:grid; gap:10px; padding:0 22px 22px}
+.qactions .btn{width:100%}
+.qnote{font-size:.82rem; color:var(--muted); line-height:1.45; padding:0 22px 22px}
+.qnote b{font-weight:600; color:var(--ink); user-select:all}
+
+.mbar{
+  position:fixed; left:0; right:0; bottom:0; z-index:60; display:none;
+  padding:12px var(--gutter) calc(12px + env(safe-area-inset-bottom, 0px));
+  background:var(--ink); color:var(--paper);
+  align-items:center; justify-content:space-between; gap:12px;
+  transform:translateY(110%); transition:transform .35s cubic-bezier(.2,.8,.2,1);
+}
+.mbar.show{transform:none}
+.mbar b{font-family:var(--f-display); font-stretch:95%; font-size:1.5rem; font-variant-numeric:tabular-nums}
+.mbar .label{color:color-mix(in srgb, var(--paper) 60%, transparent)}
+.mbar .btn{padding:11px 16px; font-size:.9rem}
+@media (max-width:960px){ .mbar{display:flex} }
+
+/* Werkwijze */
+.steps{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:clamp(20px, 3vw, 36px); position:relative; padding-top:34px}
+.steps .rail{position:absolute; top:0; left:0; right:0; height:3px; background:var(--line); border-radius:2px; overflow:hidden}
+.steps .rail b{position:absolute; inset:0; background:var(--plate); transform-origin:left; box-shadow:0 0 0 1px var(--plate-ink) inset}
+.stp{display:grid; gap:10px; align-content:start}
+.stp .n{font-family:var(--f-mono); font-size:.8rem; color:var(--muted)}
+.stp h3{font-size:1.4rem}
+.stp p{color:var(--muted); font-size:.98rem}
+@media (max-width:820px){ .steps{grid-template-columns:repeat(2, minmax(0,1fr))} }
+@media (max-width:520px){ .steps{grid-template-columns:1fr} }
+
+/* FAQ */
+.faq{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.6fr); gap:clamp(24px, 5vw, 72px)}
+@media (max-width:860px){ .faq{grid-template-columns:1fr} }
+details{border-bottom:1px solid var(--line)}
+details:first-of-type{border-top:1px solid var(--line)}
+summary{list-style:none; cursor:pointer; padding:22px 40px 22px 0; font-weight:600; font-size:1.08rem; position:relative}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+"; position:absolute; right:4px; top:50%; transform:translateY(-50%); font:400 1.6rem/1 var(--f-mono); transition:transform .25s}
+details[open] summary::after{transform:translateY(-50%) rotate(45deg)}
+details p{padding:0 0 22px; color:var(--muted); max-width:62ch}
+
+/* Slot */
+.end{background:var(--ink); color:var(--paper)}
+.end .lead{color:color-mix(in srgb, var(--paper) 70%, transparent)}
+.end h2{font-size:clamp(2.6rem, 8vw, 6.4rem); font-stretch:118%; letter-spacing:-.03em}
+.end .btn{border-color:var(--paper); color:var(--paper)}
+.end .btn--plate{color:var(--plate-ink); border-color:var(--plate)}
+.end-grid{display:grid; gap:28px}
+.contact{display:flex; flex-wrap:wrap; gap:12px 40px; margin-top:12px; padding-top:28px; border-top:1px solid color-mix(in srgb, var(--paper) 18%, transparent)}
+.contact div{display:grid; gap:4px}
+.contact .label{color:color-mix(in srgb, var(--paper) 55%, transparent)}
+.contact b{font-weight:600; font-size:1.1rem; user-select:all}
+.contact button{background:none; border:0; color:inherit; font:500 .82rem var(--f-body); text-decoration:underline; text-underline-offset:3px; cursor:pointer; padding:0; justify-self:start; opacity:.7}
+footer{background:var(--ink); color:color-mix(in srgb, var(--paper) 55%, transparent); font-size:.88rem}
+footer .wrap{display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; padding-block:28px 40px; border-top:1px solid color-mix(in srgb, var(--paper) 12%, transparent)}
+@media (max-width:960px){ footer .wrap{padding-bottom:100px} }
+
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *{transition:none !important}
+}
+</style>
+</head>
+<body>
+
+
+<header class="top" id="top">
+  <div class="wrap">
+    <a class="brand" href="#hero" aria-label="StrakWerk, naar begin"><i></i>STRAKWERK</a>
+    <nav class="nav" aria-label="Hoofdmenu">
+      <a href="#werk">Werk</a>
+      <a href="#prijzen">Prijzen</a>
+      <a href="#werkwijze">Werkwijze</a>
+      <a href="#vragen">Vragen</a>
+    </nav>
+    <a class="btn btn--plate" href="#prijzen">Bereken je prijs</a>
+  </div>
+</header>
+
+<main>
+  <section class="hero wrap" id="hero">
+    <p class="label" style="margin-bottom:22px">Webdesign &amp; development · Den Haag e.o.</p>
+    <h1>
+      <span class="ln"><span>Strakke websites</span></span>
+      <span class="ln"><span>voor ondernemers.</span></span>
+    </h1>
+    <div class="hero-row">
+      <div class="plate" aria-label="Vanaf 200 euro">
+        <div class="eu" aria-hidden="true">NL</div>
+        <div class="val"><small>vanaf</small>€200</div>
+      </div>
+      <p class="hero-note">Kies zelf de opties die je nodig hebt. <b>Binnen een week online.</b></p>
+    </div>
+    <div class="hero-bottom">
+      <p class="lead">Je betaalt voor wat je gebruikt. Een beheerpaneel, een kentekencheck of een webshop voeg je met één klik toe, en je ziet direct wat het kost.</p>
+      <div class="hero-cta">
+        <a class="btn btn--ink" href="#prijzen">Bereken je prijs</a>
+        <a class="btn" href="#werk">Bekijk werk</a>
+      </div>
+    </div>
+    <div class="clients" aria-label="Gebouwde websites">
+      <span class="label">Online</span>
+      <a href="#case-vagpro">VAGPRO <span>VAG-specialist</span></a>
+      <a href="#case-detak">Sleepdienst De Tak <span>Sleep &amp; berging</span></a>
+      <a href="#case-cartronic">CarTronic <span>Retrofit &amp; webshop</span></a>
+    </div>
+  </section>
+
+  <section class="sec" id="werk">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="label">Recent werk</p>
+        <h2>Echte sites, live online.</h2>
+      </div>
+    </div>
+    <div class="wrap hscroll">
+      <div class="track" id="track">
+
+        <article class="case" id="case-vagpro">
+          <div class="frame">
+            <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">vagpro.nl</span></div>
+            <div class="shot">
+              <div class="mock mock-vagpro" aria-hidden="true">
+                <div class="m-nav">VAGPRO <em><i></i><i></i><i></i></em></div>
+                <div class="m-body">
+                  <div class="m-h">Specialist in VW, Audi, SEAT &amp; Škoda</div>
+                  <div class="m-l" style="width:62%"></div><div class="m-l" style="width:48%"></div>
+                  <div class="m-row"><div class="m-plate"><b></b><span>GH-512-K</span></div><span class="m-btn">Check kenteken</span></div>
+                </div>
+              </div>
+              <img src="assets/work/vagpro.webp" alt="Homepage van VAGPRO" loading="lazy" onerror="this.remove()">
+            </div>
+          </div>
+          <div class="case-info">
+            <div class="meta"><span class="label">01 · Den Haag</span></div>
+            <h3>VAGPRO</h3>
+            <p>Onafhankelijk VAG-specialist voor achteruitrijcamera's, CarPlay, codering en storingsdiagnose. Bezoekers checken hun kenteken en sturen direct een WhatsApp.</p>
+            <ul class="chips">
+              <li class="chip opt">Kentekencheck (RDW)</li>
+              <li class="chip opt">Extra dienstpagina's</li>
+              <li class="chip">WhatsApp &amp; route</li>
+            </ul>
+            <div class="case-links">
+              <a class="link" href="https://vagpro.nl" target="_blank" rel="noopener">Bekijk live ↗</a>
+              <button class="link-soft" type="button" data-preset="vagpro">Bereken zo'n site</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="case" id="case-detak">
+          <div class="frame">
+            <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">sleepdienstdetak.nl</span></div>
+            <div class="shot">
+              <div class="mock mock-detak" aria-hidden="true">
+                <div class="m-nav">DE TAK <em><i></i><i></i><i></i></em></div>
+                <div class="m-body">
+                  <div class="m-h">Pech of ongeval? <span>24/7</span> hulp onderweg.</div>
+                  <div class="m-l" style="width:58%"></div>
+                  <div class="m-row"><div class="m-plate"><b></b><span>87-TZK-3</span></div><span class="m-btn">Vraag aan via WhatsApp</span></div>
+                  <div class="m-row" style="font-size:.7rem;opacity:.6;font-weight:700;letter-spacing:.08em">NL · EN · DE</div>
+                </div>
+              </div>
+              <img src="assets/work/detak.webp" alt="Homepage van Sleepdienst De Tak" loading="lazy" onerror="this.remove()">
+            </div>
+          </div>
+          <div class="case-info">
+            <div class="meta"><span class="label">02 · Den Haag</span></div>
+            <h3>Sleepdienst De Tak</h3>
+            <p>Sleep- en bergingsdienst, 24/7. Het aanvraagformulier vult merk en model in via het kenteken en stuurt alles klaar door naar WhatsApp. In drie talen, met pagina's per regio.</p>
+            <ul class="chips">
+              <li class="chip opt">Kentekencheck (RDW)</li>
+              <li class="chip opt">Aanvraag via WhatsApp</li>
+              <li class="chip opt">NL · EN · DE</li>
+              <li class="chip opt">Regiopagina's</li>
+            </ul>
+            <div class="case-links">
+              <a class="link" href="https://sleepdienstdetak.nl" target="_blank" rel="noopener">Bekijk live ↗</a>
+              <button class="link-soft" type="button" data-preset="detak">Bereken zo'n site</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="case" id="case-cartronic">
+          <div class="frame">
+            <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url" data-cartronic-url>cartronic.vercel.app</span></div>
+            <div class="shot">
+              <div class="mock mock-cartronic" aria-hidden="true">
+                <div class="m-nav">CARTRONIC <em><i></i><i></i><i></i></em></div>
+                <div class="m-body">
+                  <div class="m-h">Fabrieksopties achteraf ingebouwd.</div>
+                  <div class="m-row"><span class="m-btn">Voertuigzoeker</span><div class="m-l" style="width:30%"></div></div>
+                  <div class="m-grid"><i></i><i></i><i></i><i></i></div>
+                </div>
+              </div>
+              <img src="assets/work/cartronic.webp" alt="Homepage van CarTronic" loading="lazy" onerror="this.remove()">
+            </div>
+          </div>
+          <div class="case-info">
+            <div class="meta"><span class="label">03 · Rijswijk</span></div>
+            <h3>CarTronic</h3>
+            <p>Retrofit-specialist voor VW, Audi, SEAT en Škoda. Met webshop en voertuigzoeker, en een eigen beheerpaneel waarin de eigenaar zelf producten en teksten aanpast.</p>
+            <ul class="chips">
+              <li class="chip opt">Beheerpaneel</li>
+              <li class="chip opt">Webshop</li>
+              <li class="chip">Voertuigzoeker</li>
+            </ul>
+            <div class="case-links">
+              <a class="link" data-cartronic-link href="https://cartronic.vercel.app" target="_blank" rel="noopener">Bekijk live ↗</a>
+              <button class="link-soft" type="button" data-preset="cartronic">Bereken zo'n site</button>
+            </div>
+          </div>
+        </article>
+
+      </div>
+      <div class="progress" aria-hidden="true"><i><b></b></i><i><b></b></i><i><b></b></i></div>
+    </div>
+  </section>
+
+  <section class="sec" id="prijzen">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="label">Prijzen</p>
+        <h2>Begin bij €200.<br>Voeg toe wat je nodig hebt.</h2>
+        <p class="lead">Zet de opties aan die je wilt. Je offerte rekent mee en stuur je met één tik via WhatsApp.</p>
+      </div>
+
+      <div class="cfg">
+        <div>
+          <div class="base">
+            <div>
+              <h3>Basis website</h3>
+              <ul>
+                <li>Tot 3 pagina's</li>
+                <li>Mobiel-first ontwerp</li>
+                <li>Contactformulier + WhatsApp-knop</li>
+                <li>Basis-SEO en snelle laadtijd</li>
+                <li>Domein koppelen + SSL</li>
+                <li>Binnen 7 dagen online</li>
+              </ul>
+            </div>
+            <div class="price">€200</div>
+          </div>
+
+          <div class="presets" role="group" aria-label="Voorbeelden">
+            <span class="label">Voorbeeld</span>
+            <button class="pbtn" type="button" data-preset="vagpro" aria-pressed="false">Zoals VAGPRO</button>
+            <button class="pbtn" type="button" data-preset="detak" aria-pressed="false">Zoals De Tak</button>
+            <button class="pbtn" type="button" data-preset="cartronic" aria-pressed="false">Zoals CarTronic</button>
+            <button class="pbtn" type="button" data-preset="reset" aria-pressed="false">Leeg</button>
+          </div>
+
+          <div id="options"></div>
+        </div>
+
+        <aside class="quote" id="offerte" aria-label="Jouw offerte">
+          <div class="quote-head">
+            <h3>Jouw offerte</h3>
+            <span class="label" id="qnr">SW-2026</span>
+          </div>
+          <ul class="qlines" id="qlines"></ul>
+          <div class="qtotal">
+            <div class="row"><span class="label">Eenmalig</span><span class="big" id="qtotal">€200</span></div>
+            <div class="row" id="qmo-row" hidden><span class="label">Per maand</span><span class="mo" id="qmo">€15</span></div>
+          </div>
+          <div class="qactions">
+            <a class="btn btn--plate" id="qwa" href="https://wa.me/31623462397" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.4 14.1c-.2.6-1.3 1.2-1.8 1.3-.5 0-1 .3-3.3-.7a11.4 11.4 0 0 1-4.6-4.1c-.3-.5-1.1-1.6-1.1-3s.8-2.1 1-2.4c.3-.3.6-.4.8-.4h.6c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.3.5-.4.5c-.2.2-.3.4-.1.7.2.4.9 1.5 2 2.4 1.4 1.2 2.5 1.6 2.9 1.7.3.2.5.1.7-.1l.9-1.1c.2-.3.5-.3.8-.2l2 1c.3.1.5.2.6.3.1.2.1.8-.2 1.4z"/></svg>
+              Verstuur via WhatsApp
+            </a>
+            <button class="btn" type="button" id="qcopy">Kopieer offerte</button>
+          </div>
+          <p class="qnote">Dit is een indicatie. De definitieve prijs spreken we af in het gratis intakegesprek. Liever mailen? <b>strakwerkk@gmail.com</b></p>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="werkwijze">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="label">Werkwijze</p>
+        <h2>Van appje tot live site.</h2>
+      </div>
+      <div class="steps" id="steps">
+        <div class="rail" aria-hidden="true"><b></b></div>
+        <div class="stp"><span class="n">Stap 1</span><h3>Intake</h3><p>Een kort gesprek of WhatsApp. We bespreken je bedrijf, je doel en welke opties je nodig hebt. Gratis.</p></div>
+        <div class="stp"><span class="n">Stap 2</span><h3>Ontwerp</h3><p>Je krijgt een eerste versie om te bekijken op je eigen telefoon. Jij geeft feedback, ik pas het aan.</p></div>
+        <div class="stp"><span class="n">Stap 3</span><h3>Bouwen</h3><p>Snel, mobiel-first en vindbaar in Google. Opties zoals de kentekencheck of het beheerpaneel worden erin gebouwd.</p></div>
+        <div class="stp"><span class="n">Stap 4</span><h3>Live</h3><p>Je site gaat online op je eigen domein. Daarna help ik met updates, of je past het zelf aan.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="vragen" style="padding-top:0">
+    <div class="wrap faq">
+      <div class="sec-head" style="align-content:start">
+        <p class="label">Vragen</p>
+        <h2>Goed om te weten.</h2>
+      </div>
+      <div>
+        <details><summary>Wat krijg ik voor €200?</summary><p>Een complete website tot 3 pagina's: mobiel-first, met contactformulier, WhatsApp-knop, basis-SEO en je eigen domein met SSL. Alles wat daarbovenop komt, kies je zelf bij de opties.</p></details>
+        <details><summary>Hoe snel staat mijn site online?</summary><p>Een basissite staat meestal binnen 7 dagen online. Met grotere opties zoals een webshop of beheerpaneel duurt het iets langer. Dat hoor je vooraf.</p></details>
+        <details><summary>Kan ik later zelf dingen aanpassen?</summary><p>Ja. Met de optie Beheerpaneel pas je zelf teksten, foto's en producten aan, zonder code. Zonder beheerpaneel regel ik kleine aanpassingen voor je.</p></details>
+        <details><summary>Ik heb al een domein of website. Kan dat?</summary><p>Ja. Ik koppel je bestaande domein aan de nieuwe site of verhuis het voor je. Je bestaande e-mail blijft gewoon werken.</p></details>
+        <details><summary>Kan ik later nog opties toevoegen?</summary><p>Altijd. Je betaalt dan alleen de prijs van de optie die je erbij neemt.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec end" id="contact">
+    <div class="wrap end-grid">
+      <p class="label" style="color:inherit;opacity:.6">Contact</p>
+      <h2>Klaar voor een<br>strakke site?</h2>
+      <p class="lead">Stuur een appje met wat je zoekt. Je hoort dezelfde dag van me.</p>
+      <div class="hero-cta">
+        <a class="btn btn--plate" href="https://wa.me/31623462397?text=Hoi%20StrakWerk%2C%20ik%20wil%20graag%20een%20website." target="_blank" rel="noopener">WhatsApp mij</a>
+        <a class="btn" href="#prijzen">Stel je site samen</a>
+      </div>
+      <div class="contact">
+        <div><span class="label">Telefoon / WhatsApp</span><b>06 2346 2397</b><button type="button" data-copy="0623462397">Kopieer nummer</button></div>
+        <div><span class="label">E-mail</span><b>strakwerkk@gmail.com</b><button type="button" data-copy="strakwerkk@gmail.com">Kopieer e-mail</button></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© <span id="year">2026</span> StrakWerk · Webdesign &amp; development</span>
+    <span>Gebouwd door StrakWerk</span>
+  </div>
+</footer>
+
+<div class="mbar" id="mbar" aria-hidden="true">
+  <div><span class="label">Jouw site</span><br><b id="mtotal">€200</b></div>
+  <a class="btn btn--plate" href="#offerte">Bekijk offerte</a>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+/* ============================================================
+   INSTELLINGEN — prijzen en opties pas je hier aan.
+   ============================================================ */
+const CONFIG = {
+  whatsapp: "31623462397",
+  base: { name: "Basis website", price: 200 },
+  cartronicUrl: "https://cartronic.vercel.app",   // later: https://cartronic.nl
+  groups: [
+    { title: "Functies", items: [
+      { id:"beheer",   name:"Beheerpaneel",            price:75,  desc:"Zelf teksten, foto's en producten aanpassen, zonder code.", live:"cartronic" },
+      { id:"kenteken", name:"Kentekencheck (RDW)",     price:50,  desc:"Klant typt een kenteken, merk en model verschijnen direct.", live:"vagpro" },
+      { id:"aanvraag", name:"Aanvraag via WhatsApp",   price:35,  desc:"Formulier dat de aanvraag kant-en-klaar naar je WhatsApp stuurt.", live:"detak" },
+      { id:"booking",  name:"Afspraken plannen",       price:75,  desc:"Klanten kiezen zelf een datum en tijd in je agenda." },
+      { id:"webshop",  name:"Webshop",                 price:150, desc:"Producten, winkelwagen en online betalen met iDEAL.", live:"cartronic" }
+    ]},
+    { title: "Uitbreiden", items: [
+      { id:"pagina",   name:"Extra pagina",            price:25,  desc:"Bijvoorbeeld een pagina per dienst.", qty:true, max:12, unit:"pagina" },
+      { id:"taal",     name:"Extra taal",              price:50,  desc:"Je site ook in het Engels, Duits of een andere taal.", qty:true, max:4, unit:"taal", live:"detak" },
+      { id:"regio",    name:"Regiopagina's",           price:50,  desc:"Beter gevonden worden in Google in de plaatsen om je heen.", live:"detak" },
+      { id:"reviews",  name:"Google reviews & kaart",  price:25,  desc:"Je beste reviews en een routekaart op je site." }
+    ]},
+    { title: "Extra", items: [
+      { id:"anim",     name:"Premium animaties",       price:50,  desc:"Vloeiende scroll-animaties, zoals op deze site." },
+      { id:"logo",     name:"Logo-ontwerp",            price:50,  desc:"Een strak logo in een paar varianten." },
+      { id:"teksten",  name:"Teksten laten schrijven", price:40,  desc:"Ik schrijf de teksten voor je, gericht op Google." },
+      { id:"onderhoud",name:"Hosting & onderhoud",     price:15,  desc:"Updates, back-ups en kleine aanpassingen.", monthly:true }
+    ]}
+  ],
+  presets: {
+    vagpro:    { kenteken:1, pagina:3 },
+    detak:     { kenteken:1, aanvraag:1, taal:2, regio:1, pagina:3 },
+    cartronic: { beheer:1, webshop:1, pagina:2 },
+    reset:     {}
+  }
+};
+const LIVE_NAMES = { vagpro:"VAGPRO", detak:"De Tak", cartronic:"CarTronic" };
+
+/* ============================================================ */
+const euro = n => "€" + Math.round(n).toLocaleString("nl-NL");
+const items = CONFIG.groups.flatMap(g => g.items);
+const state = Object.fromEntries(items.map(i => [i.id, 0]));
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+document.getElementById("year").textContent = new Date().getFullYear();
+document.querySelectorAll("[data-cartronic-link]").forEach(a => a.href = CONFIG.cartronicUrl);
+document.querySelectorAll("[data-cartronic-url]").forEach(s => s.textContent = CONFIG.cartronicUrl.replace(/^https?:\/\//, ""));
+(() => { const d = new Date(); document.getElementById("qnr").textContent =
+  "SW-" + d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + String(d.getDate()).padStart(2,"0"); })();
+
+/* Opties tekenen */
+const optRoot = document.getElementById("options");
+CONFIG.groups.forEach(g => {
+  const wrap = document.createElement("div");
+  wrap.className = "group";
+  wrap.innerHTML = `<span class="label">${g.title}</span>`;
+  g.items.forEach(it => {
+    const row = document.createElement(it.qty ? "div" : "label");
+    row.className = "opt-row";
+    const live = it.live ? `<a class="live" href="#case-${it.live}">Live bij ${LIVE_NAMES[it.live]}</a>` : "";
+    const ctl = it.qty
+      ? `<div class="step" role="group" aria-label="${it.name} aantal">
+           <button type="button" data-dec="${it.id}" aria-label="Minder">−</button>
+           <output id="q-${it.id}" aria-live="polite">0</output>
+           <button type="button" data-inc="${it.id}" aria-label="Meer">+</button>
+         </div>`
+      : `<span class="sw"><input type="checkbox" id="o-${it.id}" data-opt="${it.id}"><span></span></span>`;
+    const amt = it.monthly ? `${euro(it.price)}<small>per maand</small>`
+              : it.qty ? `${euro(it.price)}<small>per ${it.unit}</small>` : `+${euro(it.price)}`;
+    row.innerHTML = `${ctl}<div><div class="name">${it.name} ${live}</div><div class="desc">${it.desc}</div></div><div class="amt">${amt}</div>`;
+    if (it.qty) row.addEventListener("click", e => { if (!e.target.closest("button,a")) setQty(it, state[it.id] + 1); });
+    wrap.appendChild(row);
+  });
+  optRoot.appendChild(wrap);
+});
+
+function setQty(it, n){ state[it.id] = Math.max(0, Math.min(it.max || 10, n)); clearPresets(); render(); }
+optRoot.addEventListener("change", e => { const id = e.target.dataset.opt; if (!id) return; state[id] = e.target.checked ? 1 : 0; clearPresets(); render(); });
+optRoot.addEventListener("click", e => {
+  const inc = e.target.closest("[data-inc]"), dec = e.target.closest("[data-dec]");
+  if (inc) { const it = items.find(i => i.id === inc.dataset.inc); setQty(it, state[it.id] + 1); }
+  if (dec) { const it = items.find(i => i.id === dec.dataset.dec); setQty(it, state[it.id] - 1); }
+});
+
+/* Voorbeelden */
+const pbtns = document.querySelectorAll(".pbtn");
+function clearPresets(){ pbtns.forEach(b => b.setAttribute("aria-pressed","false")); }
+function applyPreset(key, scroll){
+  const p = CONFIG.presets[key] || {};
+  items.forEach(it => state[it.id] = p[it.id] || 0);
+  clearPresets();
+  if (key !== "reset") document.querySelector(`.pbtn[data-preset="${key}"]`)?.setAttribute("aria-pressed","true");
+  render();
+  if (scroll) document.getElementById("prijzen").scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
+}
+document.querySelectorAll("[data-preset]").forEach(b => b.addEventListener("click", () => applyPreset(b.dataset.preset, !b.classList.contains("pbtn"))));
+
+/* Offerte */
+let shown = { v: CONFIG.base.price };
+function totals(){
+  let once = CONFIG.base.price, mo = 0;
+  items.forEach(it => { const n = state[it.id]; if (!n) return; it.monthly ? mo += it.price * n : once += it.price * n; });
+  return { once, mo };
+}
+function lines(){
+  const out = [[CONFIG.base.name, CONFIG.base.price, false]];
+  items.forEach(it => { const n = state[it.id]; if (!n || it.monthly) return;
+    out.push([it.qty ? `${it.name} × ${n}` : it.name, it.price * n, false]); });
+  items.filter(it => it.monthly && state[it.id]).forEach(it => out.push([it.name, it.price, true]));
+  return out;
+}
+function quoteText(){
+  const { once, mo } = totals();
+  const l = lines().map(([n, p, m]) => `• ${n}: ${euro(p)}${m ? " p/m" : ""}`).join("\n");
+  return `Hoi StrakWerk, ik wil graag een website.\n\nMijn keuze:\n${l}\n\nTotaal: ${euro(once)} eenmalig${mo ? ` + ${euro(mo)} per maand` : ""}\n\nMijn bedrijf: `;
+}
+function render(){
+  items.forEach(it => {
+    if (it.qty) document.getElementById("q-" + it.id).textContent = state[it.id];
+    else document.getElementById("o-" + it.id).checked = !!state[it.id];
+  });
+  const ul = document.getElementById("qlines");
+  ul.innerHTML = lines().map(([n, p, m], i) =>
+    `<li class="${i===0?"base-line":""}"><span>${n}</span><span>${euro(p)}${m?" p/m":""}</span></li>`).join("");
+  const { once, mo } = totals();
+  document.getElementById("qmo-row").hidden = !mo;
+  document.getElementById("qmo").textContent = euro(mo);
+  document.getElementById("qwa").href = `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(quoteText())}`;
+  const tEl = document.getElementById("qtotal"), mEl = document.getElementById("mtotal");
+  const paint = () => { tEl.textContent = euro(shown.v); mEl.textContent = euro(shown.v); };
+  if (window.gsap && !reduce){
+    gsap.to(shown, { v: once, duration: .6, ease: "power3.out", onUpdate: paint, overwrite: true });
+    gsap.fromTo(tEl, { y: -4 }, { y: 0, duration: .4, ease: "back.out(3)" });
+  } else { shown.v = once; paint(); }
+}
+render();
+
+/* Kopiëren */
+function copy(text, btn, done){
+  const ok = () => { const o = btn.textContent; btn.textContent = done; setTimeout(() => btn.textContent = o, 1600); };
+  try { navigator.clipboard.writeText(text).then(ok, () => fallback()); } catch (e) { fallback(); }
+  function fallback(){ const t = document.createElement("textarea"); t.value = text; document.body.appendChild(t); t.select();
+    try { document.execCommand("copy"); ok(); } catch (e) {} t.remove(); }
+}
+document.getElementById("qcopy").addEventListener("click", e => copy(quoteText(), e.currentTarget, "Gekopieerd"));
+document.querySelectorAll("[data-copy]").forEach(b => b.addEventListener("click", () => copy(b.dataset.copy, b, "Gekopieerd")));
+
+/* Header-lijn en mobiele balk */
+const header = document.getElementById("top");
+addEventListener("scroll", () => header.classList.toggle("scrolled", scrollY > 8), { passive: true });
+const mbar = document.getElementById("mbar");
+let inPrices = false, quoteVisible = false;
+const sync = () => mbar.classList.toggle("show", inPrices && !quoteVisible);
+new IntersectionObserver(([e]) => { inPrices = e.isIntersecting; sync(); }).observe(document.getElementById("prijzen"));
+new IntersectionObserver(([e]) => { quoteVisible = e.isIntersecting; sync(); }, { threshold: .25 }).observe(document.getElementById("offerte"));
+
+/* GSAP */
+if (window.gsap && window.ScrollTrigger){
+  gsap.registerPlugin(ScrollTrigger);
+  const mm = gsap.matchMedia();
+
+  mm.add("(prefers-reduced-motion: no-preference)", () => {
+    // Hero: regels schuiven omhoog, het kenteken klapt in
+    const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
+    tl.from(".hero h1 .ln > span", { yPercent: 110, duration: 1.1, stagger: .12 })
+      .from(".plate", { rotateX: -90, transformOrigin: "50% 0%", duration: .9, ease: "back.out(1.6)" }, "-=.6")
+      .from(".hero-note, .hero-bottom > *, .clients", { y: 16, opacity: 0, duration: .7, stagger: .08 }, "-=.5");
+
+    // Werkwijze: gele lijn loopt mee met scrollen
+    gsap.fromTo("#steps .rail b", { scaleX: 0 }, { scaleX: 1, ease: "none",
+      scrollTrigger: { trigger: "#steps", start: "top 80%", end: "bottom 60%", scrub: true } });
+    gsap.from("#steps .stp", { y: 24, opacity: 0, stagger: .1, duration: .7, ease: "power3.out",
+      scrollTrigger: { trigger: "#steps", start: "top 80%" } });
+
+    // Sectiekoppen
+    gsap.utils.toArray(".sec-head h2").forEach(h => gsap.from(h, { y: 30, opacity: 0, duration: .9, ease: "power3.out",
+      scrollTrigger: { trigger: h, start: "top 88%" } }));
+  });
+
+  // Werk: horizontaal scrollen met vastgepinde sectie (alleen desktop)
+  mm.add("(min-width: 960px) and (prefers-reduced-motion: no-preference)", () => {
+    const sec = document.getElementById("werk");
+    const track = document.getElementById("track");
+    sec.classList.add("is-horizontal");
+    const dist = () => track.scrollWidth - document.querySelector("#werk .hscroll").clientWidth + 1;
+    const bars = gsap.utils.toArray("#werk .progress b");
+    const tw = gsap.to(track, { x: () => -dist(), ease: "none",
+      scrollTrigger: { trigger: sec, start: "top top", end: () => "+=" + dist(), pin: true, scrub: .8, invalidateOnRefresh: true,
+        onUpdate: self => bars.forEach((b, i) => gsap.set(b, { scaleX: gsap.utils.clamp(0, 1, self.progress * bars.length - i) })) } });
+    gsap.utils.toArray("#werk .frame").forEach(f => gsap.from(f.querySelector(".shot > *"), { scale: 1.08, ease: "none",
+      scrollTrigger: { trigger: f, containerAnimation: tw, start: "left right", end: "right left", scrub: true } }));
+    return () => { sec.classList.remove("is-horizontal"); gsap.set(track, { clearProps: "transform" }); };
+  });
+
+  document.fonts?.ready.then(() => ScrollTrigger.refresh());
+}
+</script>
+
+</body>
+</html>

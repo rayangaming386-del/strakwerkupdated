@@ -1,0 +1,6 @@
+Zet hier screenshots van je projecten (homepage, 1600x1000 px, liggend):
+  vagpro.webp
+  detak.webp
+  cartronic.webp
+Zolang een bestand ontbreekt, toont de site automatisch een nette mock-up.
+(.png of .jpg mag ook: pas dan in index.html de bestandsnaam aan.)
