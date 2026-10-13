@@ -16,7 +16,7 @@
 <title>StrakWerk</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@500;600&display=swap">
 <style>
 /* Layout: donker premium, merk-goud als enige accent. Hero = tekst links, device-compositie rechts.
    Bewust één thema (donker): dat is de huisstijl van StrakWerk. */
@@ -34,9 +34,9 @@
   --gold-ink:#17130B;
   --ok:#5BD39A;
 
-  --f-display:"Sora", "Segoe UI", system-ui, sans-serif;
-  --f-body:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --f-mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+  --f-display:"Geist", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"Geist Mono", ui-monospace, Menlo, monospace;
 
   --gutter:clamp(16px, 4vw, 40px);
   --max:1220px;
@@ -56,20 +56,18 @@ h1,h2,h3{font-family:var(--f-display); margin:0; text-wrap:balance; line-height:
 
 .wrap{max-width:var(--max); margin-inline:auto; padding-inline:var(--gutter)}
 .sec{padding-block:clamp(80px, 11vw, 140px); position:relative}
-.eyebrow{display:inline-flex; align-items:center; gap:10px; font:600 .78rem/1 var(--f-body); letter-spacing:.14em; text-transform:uppercase; color:var(--gold)}
-.eyebrow::before{content:""; width:22px; height:1.5px; background:var(--gold)}
-.h2{font-size:clamp(2rem, 4.6vw, 3.4rem); font-weight:700}
+.h2{font-size:clamp(2rem, 4.4vw, 3.2rem); font-weight:700; letter-spacing:-.035em}
 .lead{color:var(--muted); font-size:clamp(1.02rem, 1.4vw, 1.15rem); max-width:56ch}
 .sec-head{display:grid; gap:18px; margin-bottom:clamp(40px, 6vw, 64px)}
 .sec-head.center{justify-items:center; text-align:center}
 .sec-head.center .lead{margin-inline:auto}
-.gold-text{background:linear-gradient(100deg, var(--gold-hi), var(--gold) 55%, #A9873F); -webkit-background-clip:text; background-clip:text; color:transparent}
+.gold-text{color:var(--gold)}
 
 /* Buttons */
 .btn{display:inline-flex; align-items:center; justify-content:center; gap:10px; padding:15px 24px; border-radius:12px; font:700 .96rem/1 var(--f-body); cursor:pointer; border:1px solid var(--line-2); background:rgba(255,255,255,.03); color:var(--text); transition:transform .25s, border-color .25s, background .25s, box-shadow .25s; white-space:nowrap}
-.btn:hover{transform:translateY(-2px); border-color:rgba(255,255,255,.28)}
-.btn--gold{background:linear-gradient(180deg, var(--gold-hi), var(--gold)); color:var(--gold-ink); border-color:transparent; box-shadow:0 10px 30px -10px rgba(207,174,105,.55), inset 0 1px 0 rgba(255,255,255,.5)}
-.btn--gold:hover{box-shadow:0 16px 40px -12px rgba(207,174,105,.7), inset 0 1px 0 rgba(255,255,255,.5); border-color:transparent}
+.btn:hover{border-color:rgba(255,255,255,.3)}
+.btn--gold{background:var(--gold); color:var(--gold-ink); border-color:var(--gold)}
+.btn--gold:hover{background:var(--gold-hi); border-color:var(--gold-hi)}
 .btn svg{width:18px; height:18px; flex:none}
 .btn .arr{transition:transform .25s}
 .btn:hover .arr{transform:translateX(3px)}
@@ -94,25 +92,19 @@ h1,h2,h3{font-family:var(--f-display); margin:0; text-wrap:balance; line-height:
 .hero{position:relative; overflow:clip; padding-block:clamp(40px, 7vw, 96px) clamp(64px, 8vw, 110px)}
 .hero::before{content:""; position:absolute; inset:0; pointer-events:none;
   background:
-    radial-gradient(900px 500px at 78% 30%, rgba(207,174,105,.13), transparent 60%),
-    radial-gradient(700px 500px at 0% 0%, rgba(80,110,160,.10), transparent 60%)}
-.hero::after{content:""; position:absolute; inset:0; pointer-events:none; opacity:.55;
-  background-image:linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
-  background-size:64px 64px;
-  -webkit-mask-image:radial-gradient(ellipse 70% 60% at 60% 40%, #000 20%, transparent 75%);
-          mask-image:radial-gradient(ellipse 70% 60% at 60% 40%, #000 20%, transparent 75%)}
+    radial-gradient(800px 480px at 80% 35%, rgba(207,174,105,.07), transparent 65%)}
 .hero .wrap{position:relative; z-index:1; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.05fr); gap:clamp(32px, 4vw, 64px); align-items:center}
 @media (max-width:980px){ .hero .wrap{grid-template-columns:1fr} }
 .pill{display:inline-flex; align-items:center; gap:10px; padding:7px 14px 7px 10px; border-radius:999px; border:1px solid var(--line-2); background:rgba(255,255,255,.03); font-size:.85rem; font-weight:600; color:var(--text)}
 .pill i{width:8px; height:8px; border-radius:50%; background:var(--ok); box-shadow:0 0 0 4px rgba(91,211,154,.15)}
-.hero h1{font-size:clamp(2.5rem, 5.2vw, 4.3rem); font-weight:800; letter-spacing:-.035em; line-height:1.02; margin-top:24px}
+.hero h1{font-size:clamp(2.5rem, 5.2vw, 4.3rem); font-weight:700; letter-spacing:-.04em; line-height:1.02}
 .hero h1 .ln{display:block; overflow:hidden; padding-bottom:.08em; margin-bottom:-.08em}
 .hero h1 .ln > span{display:inline-block}
 .hero .lead{margin-top:22px}
 .hero-cta{display:flex; gap:12px; flex-wrap:wrap; margin-top:34px}
-.stats{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:0; margin-top:44px; border-top:1px solid var(--line); max-width:520px}
-.stats div{padding:18px 16px 0 0; display:grid; gap:2px}
-.stats div + div{padding-left:18px; border-left:1px solid var(--line)}
+.stats{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:0; margin-top:48px; max-width:520px}
+.stats div{padding:0 16px 0 0; display:grid; gap:2px}
+.stats div + div{padding-left:18px}
 .stats b{white-space:nowrap; font-family:var(--f-display); font-size:clamp(1.15rem, 2.4vw, 1.8rem); font-weight:700; letter-spacing:-.02em; font-variant-numeric:tabular-nums}
 .stats span{font-size:.84rem; color:var(--muted)}
 
@@ -120,14 +112,8 @@ h1,h2,h3{font-family:var(--f-display); margin:0; text-wrap:balance; line-height:
 .devices{position:relative; aspect-ratio:1.18; max-width:100%}
 .laptop{position:absolute; left:0; top:6%; width:88%}
 .phone{position:absolute; right:0; bottom:0; width:30%}
-.win{background:var(--card); border:1px solid var(--line-2); border-radius:14px; overflow:hidden; box-shadow:0 40px 80px -30px rgba(0,0,0,.8), 0 0 0 1px rgba(0,0,0,.4)}
-.win .bar{display:flex; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid var(--line); background:var(--card-2)}
-.win .dots{display:flex; gap:6px}
-.win .dots i{width:9px; height:9px; border-radius:50%}
-.win .dots i:nth-child(1){background:#FF5F56}.win .dots i:nth-child(2){background:#FFBD2E}.win .dots i:nth-child(3){background:#27C93F}
-.win .url{flex:1; min-width:0; text-align:center; font:500 .72rem/1 var(--f-mono); color:var(--muted); background:rgba(255,255,255,.04); border-radius:6px; padding:6px 10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.win .url::before{content:"🔒 "; filter:grayscale(1); opacity:.6}
-.screen{position:relative; aspect-ratio:16/10; overflow:hidden; background:#0c0f13}
+.win{background:var(--card); border:1px solid var(--line-2); border-radius:16px; overflow:hidden; padding:6px; box-shadow:0 40px 80px -30px rgba(0,0,0,.8), 0 0 0 1px rgba(0,0,0,.4)}
+.screen{position:relative; aspect-ratio:16/10; overflow:hidden; background:#0c0f13; border-radius:11px}
 .screen > img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:top; z-index:2}
 .handset{background:#05070A; border-radius:clamp(18px, 3vw, 30px); padding:clamp(5px, .8vw, 8px); box-shadow:0 40px 80px -24px rgba(0,0,0,.9), 0 0 0 1px var(--line-2)}
 .handset .screen{aspect-ratio:9/19.5; border-radius:clamp(13px, 2.3vw, 23px)}
@@ -146,12 +132,10 @@ h1,h2,h3{font-family:var(--f-display); margin:0; text-wrap:balance; line-height:
 .mock{position:absolute; inset:0; display:flex; flex-direction:column; font-family:var(--f-body); overflow:hidden}
 .mock .m-nav{display:flex; justify-content:space-between; align-items:center; padding:3.2% 5%; font:800 clamp(.5rem, 1.05vw, .82rem)/1 var(--f-display); letter-spacing:.06em}
 .mock .m-nav em{display:flex; gap:7%; flex:0 0 40%; justify-content:flex-end; align-items:center}
-.mock .m-nav em i{display:block; width:20%; height:4px; border-radius:3px; background:currentColor; opacity:.28}
 .mock .m-nav em b{display:block; padding:5px 9px; border-radius:5px; font-size:.8em}
 .mock .m-hero{padding:5% 5% 0; display:grid; gap:clamp(5px, 1vw, 10px); position:relative; z-index:1}
 .mock .m-k{font:700 clamp(.42rem, .8vw, .62rem)/1 var(--f-body); letter-spacing:.14em; text-transform:uppercase; opacity:.7}
 .mock .m-h{font:800 clamp(.95rem, 2.4vw, 1.9rem)/1.02 var(--f-display); letter-spacing:-.03em; max-width:14ch}
-.mock .m-p{height:5px; border-radius:3px; background:currentColor; opacity:.2}
 .mock .m-row{display:flex; gap:6px; align-items:center; flex-wrap:wrap}
 .mock .m-btn{display:inline-block; padding:clamp(4px, .7vw, 7px) clamp(7px, 1.1vw, 12px); border-radius:6px; font:700 clamp(.42rem, .85vw, .68rem)/1.2 var(--f-body)}
 .mock .m-plate{display:inline-flex; border-radius:5px; overflow:hidden; height:clamp(18px, 2.8vw, 30px); box-shadow:0 0 0 1.5px #111 inset; background:#F5C400; color:#111; font:800 clamp(.55rem, 1.3vw, 1rem)/1 var(--f-display); letter-spacing:.06em}
@@ -170,22 +154,16 @@ h1,h2,h3{font-family:var(--f-display); margin:0; text-wrap:balance; line-height:
 .mock-cartronic{background:#11141A; color:#E7EAF0}
 .mock-cartronic .m-btn, .mock-cartronic .m-nav b{background:#E7EAF0; color:#11141A}
 .mock-cartronic .m-glow{background:#2A3550}
-.mock.is-phone .m-nav em i{display:none}
 .mock.is-phone .m-h{font-size:clamp(.8rem, 1.7vw, 1.15rem)}
 .mock.is-phone .m-nav{padding-top:16%}
 .mock.is-phone .m-hero{padding-top:10%}
 .mock.is-phone .m-cards{grid-template-columns:1fr 1fr}
 
-/* Marquee */
-.marquee{border-block:1px solid var(--line); background:var(--bg-2); overflow:clip; padding-block:22px; position:relative}
-.marquee::before,.marquee::after{content:""; position:absolute; top:0; bottom:0; width:120px; z-index:1; pointer-events:none}
-.marquee::before{left:0; background:linear-gradient(90deg, var(--bg-2), transparent)}
-.marquee::after{right:0; background:linear-gradient(-90deg, var(--bg-2), transparent)}
-.mq-track{display:flex; width:max-content; animation:mq 38s linear infinite}
-.mq-track span{display:inline-flex; align-items:center; gap:28px; padding-right:28px; font:600 1.05rem/1 var(--f-display); color:var(--muted); white-space:nowrap; letter-spacing:-.01em}
-.mq-track span::after{content:""; width:6px; height:6px; transform:rotate(45deg); background:var(--gold)}
-.mq-track span.hl{color:var(--text)}
-@keyframes mq{to{transform:translateX(-50%)}}
+/* Klanten */
+.clients{display:flex; flex-wrap:wrap; align-items:baseline; gap:12px 40px; padding-block:8px 0}
+.clients span{font-size:.88rem; color:var(--muted)}
+.clients a{font:700 1.2rem/1 var(--f-display); letter-spacing:-.02em; color:#C3CAD4; transition:color .2s}
+.clients a:hover{color:var(--gold)}
 
 /* Werk */
 #werk{overflow-x:clip}
@@ -197,7 +175,6 @@ h1,h2,h3{font-family:var(--f-display); margin:0; text-wrap:balance; line-height:
 .case-visual{position:relative}
 .case-visual .handset{position:absolute; right:-3%; bottom:-8%; width:24%}
 .case-info{display:grid; gap:18px; min-width:0}
-.case-num{font:600 .8rem/1 var(--f-mono); color:var(--gold); letter-spacing:.08em}
 .case-info h3{font-size:clamp(1.9rem, 3.4vw, 2.8rem); font-weight:700}
 .case-info p{color:var(--muted); max-width:46ch}
 .case-kind{font-size:.9rem; color:var(--muted); display:flex; gap:10px; flex-wrap:wrap; align-items:center}
@@ -206,19 +183,14 @@ h1,h2,h3{font-family:var(--f-display); margin:0; text-wrap:balance; line-height:
 .chip{display:inline-flex; align-items:center; gap:8px; padding:7px 12px; border-radius:8px; font-size:.84rem; font-weight:600; background:var(--card); border:1px solid var(--line)}
 .chip svg{width:14px; height:14px; color:var(--gold)}
 .case-links{display:flex; gap:22px; align-items:center; flex-wrap:wrap; margin-top:4px}
-.link{display:inline-flex; align-items:center; gap:8px; font-weight:700; color:var(--text); border-bottom:1.5px solid var(--gold); padding-bottom:3px}
+.link{display:inline-flex; align-items:center; gap:8px; font-weight:600; color:var(--text); padding:11px 16px; border-radius:10px; border:1px solid var(--line-2); transition:border-color .2s}
+.link:hover{border-color:var(--gold)}
 .link-soft{background:none; border:0; padding:0; font:600 .92rem var(--f-body); color:var(--muted); cursor:pointer}
 .link-soft:hover{color:var(--gold)}
-.progress{display:none}
-.is-horizontal .progress{display:flex; align-items:center; gap:14px; margin-top:56px}
-.progress i{height:2px; flex:1; background:var(--line-2); border-radius:2px; overflow:hidden; position:relative}
-.progress i b{position:absolute; inset:0; background:var(--gold); transform-origin:left; transform:scaleX(0)}
-.progress span{font:500 .78rem/1 var(--f-mono); color:var(--muted)}
 
 /* Bento */
 .bento{display:grid; grid-template-columns:repeat(6, minmax(0,1fr)); gap:16px}
-.tile{position:relative; overflow:hidden; border-radius:var(--r); padding:26px; background:linear-gradient(180deg, var(--card-2), var(--card)); border:1px solid var(--line); display:flex; flex-direction:column; gap:10px; min-height:260px}
-.tile::before{content:""; position:absolute; inset:0 0 auto; height:1px; background:linear-gradient(90deg, transparent, rgba(207,174,105,.5), transparent); opacity:.6}
+.tile{position:relative; overflow:hidden; border-radius:var(--r); padding:26px; background:var(--card); border:1px solid var(--line); display:flex; flex-direction:column; gap:10px; min-height:260px}
 .tile h3{font-size:1.2rem; font-weight:700; letter-spacing:-.015em}
 .tile p{color:var(--muted); font-size:.95rem; max-width:40ch}
 .tile .viz{margin-top:auto; padding-top:18px}
@@ -260,10 +232,9 @@ h1,h2,h3{font-family:var(--f-display); margin:0; text-wrap:balance; line-height:
 
 /* Configurator */
 #prijzen{background:var(--bg-2); border-block:1px solid var(--line)}
-#prijzen::before{content:""; position:absolute; inset:0; pointer-events:none; background:radial-gradient(800px 400px at 85% 0%, rgba(207,174,105,.08), transparent 60%)}
 .cfg{display:grid; grid-template-columns:minmax(0,1.45fr) minmax(0,1fr); gap:clamp(24px, 4vw, 48px); align-items:start; position:relative}
 @media (max-width:980px){ .cfg{grid-template-columns:1fr} }
-.base{position:relative; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:20px; padding:28px; border-radius:var(--r); background:linear-gradient(180deg, rgba(207,174,105,.10), rgba(207,174,105,.03)); border:1px solid rgba(207,174,105,.35)}
+.base{position:relative; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:20px; padding:28px; border-radius:var(--r); background:var(--card); border:1px solid rgba(207,174,105,.4)}
 .base .tagline{font:700 .7rem/1 var(--f-body); letter-spacing:.14em; text-transform:uppercase; color:var(--gold)}
 .base h3{font-size:1.5rem; margin-top:8px}
 .base ul{margin:16px 0 0; padding:0; list-style:none; display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px 22px}
@@ -281,15 +252,15 @@ h1,h2,h3{font-family:var(--f-display); margin:0; text-wrap:balance; line-height:
 .pbtn[aria-pressed="true"]{background:var(--gold); color:var(--gold-ink); border-color:var(--gold)}
 
 .group{margin-top:30px}
-.group-title{font:700 .72rem/1 var(--f-body); letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:12px; display:block}
+.group-title{font:600 1rem/1 var(--f-body); color:var(--text); margin-bottom:14px; display:block}
 .opts{display:grid; gap:10px}
 .opt-row{display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:16px; align-items:center; padding:16px 18px; border-radius:14px; background:var(--card); border:1px solid var(--line); cursor:pointer; transition:border-color .2s, background .2s}
 .opt-row:hover{border-color:var(--line-2)}
 .opt-row.on{border-color:rgba(207,174,105,.55); background:linear-gradient(180deg, rgba(207,174,105,.07), rgba(207,174,105,.02)), var(--card)}
 .opt-row .name{font-weight:700; display:flex; gap:10px; align-items:center; flex-wrap:wrap}
 .opt-row .desc{font-size:.88rem; color:var(--muted); margin-top:2px}
-.opt-row .live{font:600 .66rem/1 var(--f-mono); letter-spacing:.04em; text-transform:uppercase; padding:4px 7px; border-radius:5px; border:1px solid rgba(207,174,105,.45); color:var(--gold)}
-.opt-row .live:hover{background:rgba(207,174,105,.12)}
+.opt-row .live{font:500 .8rem/1 var(--f-body); color:var(--gold)}
+.opt-row .live:hover{text-decoration:underline; text-underline-offset:3px}
 .opt-row .amt{font:600 .95rem/1.2 var(--f-mono); text-align:right; white-space:nowrap}
 .opt-row .amt small{display:block; color:var(--muted); font:500 .7rem var(--f-body)}
 
@@ -307,7 +278,6 @@ h1,h2,h3{font-family:var(--f-display); margin:0; text-wrap:balance; line-height:
 .step output{min-width:22px; text-align:center; font:600 .9rem var(--f-mono)}
 
 .quote{position:sticky; top:calc(env(safe-area-inset-top, 0px) + 96px); border-radius:var(--r); overflow:hidden; background:var(--card); border:1px solid var(--line-2); box-shadow:0 40px 80px -40px rgba(0,0,0,.9)}
-.quote::before{content:""; display:block; height:3px; background:linear-gradient(90deg, var(--gold-hi), var(--gold), #A9873F)}
 .quote-head{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:22px 24px 18px; border-bottom:1px dashed var(--line-2)}
 .quote-head h3{font-size:1.25rem; font-weight:700}
 .quote-head span{font:500 .74rem/1 var(--f-mono); color:var(--muted)}
@@ -336,13 +306,12 @@ h1,h2,h3{font-family:var(--f-display); margin:0; text-wrap:balance; line-height:
 
 /* Werkwijze */
 .steps{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:16px; position:relative}
-.steps .rail{position:absolute; top:27px; left:28px; right:28px; height:2px; background:var(--line-2); overflow:hidden}
-.steps .rail b{position:absolute; inset:0; background:linear-gradient(90deg, var(--gold), var(--gold-hi)); transform-origin:left}
-.stp{position:relative; display:grid; gap:12px; align-content:start}
-.stp .n{width:56px; height:56px; border-radius:16px; display:grid; place-items:center; background:var(--card-2); border:1px solid var(--line-2); font:700 1.05rem/1 var(--f-display); color:var(--gold); position:relative; z-index:1}
-.stp h3{font-size:1.2rem; font-weight:700; margin-top:8px}
+.stp{position:relative; display:grid; gap:12px; align-content:start; padding:24px; border-radius:var(--r); background:var(--card); border:1px solid var(--line)}
+.stp .n{width:48px; height:48px; border-radius:12px; display:grid; place-items:center; background:var(--card-2); border:1px solid var(--line-2); color:var(--gold)}
+.stp .n svg{width:22px; height:22px}
+.stp h3{font-size:1.15rem; font-weight:600; margin-top:6px}
 .stp p{color:var(--muted); font-size:.95rem}
-@media (max-width:860px){ .steps{grid-template-columns:repeat(2, minmax(0,1fr)); row-gap:36px} .steps .rail{display:none} }
+@media (max-width:860px){ .steps{grid-template-columns:repeat(2, minmax(0,1fr)); row-gap:36px} }
 @media (max-width:480px){ .steps{grid-template-columns:1fr} }
 
 /* FAQ */
@@ -358,12 +327,11 @@ details[open] summary::after{transform:translateY(-30%) rotate(-135deg)}
 details p{padding:0 22px 22px; color:var(--muted); max-width:62ch}
 
 /* Slot-CTA */
-.cta-box{position:relative; overflow:hidden; border-radius:28px; padding:clamp(40px, 7vw, 88px) clamp(24px, 6vw, 80px); background:linear-gradient(180deg, var(--card-2), var(--card)); border:1px solid var(--line-2); display:grid; gap:22px; justify-items:start}
-.cta-box::before{content:""; position:absolute; right:-10%; top:-40%; width:60%; aspect-ratio:1; border-radius:50%; background:radial-gradient(closest-side, rgba(207,174,105,.25), transparent); pointer-events:none}
+.cta-box{position:relative; overflow:hidden; border-radius:24px; padding:clamp(40px, 7vw, 88px) clamp(24px, 6vw, 80px); background:var(--card); border:1px solid var(--line-2); display:grid; gap:22px; justify-items:start}
 .cta-box h2{font-size:clamp(2.2rem, 5.4vw, 4rem); font-weight:800; max-width:16ch; position:relative}
 .cta-box .lead{position:relative}
 .cta-box .hero-cta{margin-top:6px; position:relative}
-.contact{display:flex; flex-wrap:wrap; gap:16px 48px; margin-top:16px; padding-top:28px; border-top:1px solid var(--line); width:100%; position:relative}
+.contact{display:flex; flex-wrap:wrap; gap:16px 48px; margin-top:20px; width:100%; position:relative}
 .contact div{display:grid; gap:4px}
 .contact span{font-size:.8rem; color:var(--muted); font-weight:600}
 .contact b{font-size:1.1rem; user-select:all}
@@ -377,7 +345,6 @@ footer .brand{font-size:20px; color:var(--text)}
 @media (prefers-reduced-motion: reduce){
   html{scroll-behavior:auto}
   *{transition:none !important}
-  .mq-track{animation:none}
 }
 </style>
 </head>
@@ -403,7 +370,6 @@ footer .brand{font-size:20px; color:var(--text)}
   <section class="hero" id="hero">
     <div class="wrap">
       <div>
-        <span class="pill"><i></i>Beschikbaar voor nieuwe projecten</span>
         <h1>
           <span class="ln"><span>Websites die je</span></span>
           <span class="ln"><span>bedrijf <span class="gold-text">strak</span></span></span>
@@ -411,7 +377,7 @@ footer .brand{font-size:20px; color:var(--text)}
         </h1>
         <p class="lead">Design en development op maat, voor een eerlijke prijs. Je start vanaf €200 en kiest zelf welke functies je erbij wilt: van kentekencheck tot beheerpaneel.</p>
         <div class="hero-cta">
-          <a class="btn btn--gold" href="#prijzen">Stel je website samen <span class="arr">→</span></a>
+          <a class="btn btn--gold" href="#prijzen">Stel je website samen</a>
           <a class="btn" href="#werk">Bekijk projecten</a>
         </div>
         <div class="stats">
@@ -423,15 +389,13 @@ footer .brand{font-size:20px; color:var(--text)}
 
       <div class="devices" aria-hidden="true">
         <div class="laptop win">
-          <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url" data-cartronic-url>cartronic.vercel.app</span></div>
           <div class="screen">
             <div class="mock mock-cartronic">
               <div class="m-glow"></div>
-              <div class="m-nav">CARTRONIC <em><i></i><i></i><i></i><b>Webshop</b></em></div>
+              <div class="m-nav">CARTRONIC</div>
               <div class="m-hero">
                 <span class="m-k">Retrofit specialist · Rijswijk</span>
                 <div class="m-h">Fabrieksopties achteraf ingebouwd.</div>
-                <div class="m-p" style="width:46%"></div>
                 <div class="m-row"><span class="m-btn">Voertuigzoeker</span><span class="m-btn" style="background:transparent;color:inherit;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)">Bekijk shop</span></div>
               </div>
               <div class="m-cards"><i></i><i></i><i></i></div>
@@ -468,19 +432,18 @@ footer .brand{font-size:20px; color:var(--text)}
     </div>
   </section>
 
-  <!-- MARQUEE -->
-  <div class="marquee" aria-hidden="true">
-    <div class="mq-track">
-      <span class="hl">VAGPRO</span><span>Kentekencheck</span><span class="hl">Sleepdienst De Tak</span><span>Beheerpaneel</span><span class="hl">CarTronic</span><span>Webshop</span><span>Meertalig</span><span>Mobiel-first</span><span>Vindbaar in Google</span><span>WhatsApp-koppeling</span>
-      <span class="hl">VAGPRO</span><span>Kentekencheck</span><span class="hl">Sleepdienst De Tak</span><span>Beheerpaneel</span><span class="hl">CarTronic</span><span>Webshop</span><span>Meertalig</span><span>Mobiel-first</span><span>Vindbaar in Google</span><span>WhatsApp-koppeling</span>
-    </div>
+  <!-- KLANTEN -->
+  <div class="clients wrap">
+    <span>Websites voor</span>
+    <a href="#case-vagpro">VAGPRO</a>
+    <a href="#case-detak">Sleepdienst De Tak</a>
+    <a href="#case-cartronic">CarTronic</a>
   </div>
 
   <!-- WERK -->
   <section class="sec" id="werk">
     <div class="wrap">
       <div class="sec-head">
-        <span class="eyebrow">Projecten</span>
         <h2 class="h2">Recent opgeleverd.</h2>
         <p class="lead">Drie bedrijven, drie verschillende wensen. Elke site is op maat gebouwd en draait live.</p>
       </div>
@@ -491,15 +454,14 @@ footer .brand{font-size:20px; color:var(--text)}
         <article class="case" id="case-vagpro">
           <div class="case-visual">
             <div class="win">
-              <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">vagpro.nl</span></div>
               <div class="screen">
                 <div class="mock mock-vagpro" aria-hidden="true">
                   <div class="m-glow"></div>
-                  <div class="m-nav">VAGPRO <em><i></i><i></i><i></i><b>WhatsApp</b></em></div>
+                  <div class="m-nav">VAGPRO <em><b>WhatsApp</b></em></div>
                   <div class="m-hero">
                     <span class="m-k">VAG-specialist · Den Haag</span>
                     <div class="m-h">Specialist in VW, Audi, SEAT &amp; Škoda.</div>
-                    <div class="m-p" style="width:52%"></div>
+                    
                     <div class="m-row"><div class="m-plate"><b></b><span>GH-512-K</span></div><span class="m-btn">Check kenteken</span></div>
                   </div>
                   <div class="m-cards"><i></i><i></i><i></i></div>
@@ -509,7 +471,6 @@ footer .brand{font-size:20px; color:var(--text)}
             </div>
           </div>
           <div class="case-info">
-            <span class="case-num">01 / 03</span>
             <h3>VAGPRO</h3>
             <div class="case-kind"><span>Autospecialist</span><span>Den Haag</span></div>
             <p>Onafhankelijk VAG-specialist voor achteruitrijcamera's, CarPlay, codering en storingsdiagnose. Bezoekers checken hun kenteken en sturen direct een WhatsApp.</p>
@@ -520,7 +481,7 @@ footer .brand{font-size:20px; color:var(--text)}
             </ul>
             <div class="case-links">
               <a class="link" href="https://vagpro.nl" target="_blank" rel="noopener">Bekijk live <span>↗</span></a>
-              <button class="link-soft" type="button" data-preset="vagpro">Wat kost zo'n site? →</button>
+              <button class="link-soft" type="button" data-preset="vagpro">Wat kost zo'n site?</button>
             </div>
           </div>
         </article>
@@ -528,15 +489,14 @@ footer .brand{font-size:20px; color:var(--text)}
         <article class="case" id="case-detak">
           <div class="case-visual">
             <div class="win">
-              <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">sleepdienstdetak.nl</span></div>
               <div class="screen">
                 <div class="mock mock-detak" aria-hidden="true">
                   <div class="m-glow"></div>
-                  <div class="m-nav">DE TAK <em><i></i><i></i><i></i><b>Bel direct</b></em></div>
+                  <div class="m-nav">DE TAK <em><b>Bel direct</b></em></div>
                   <div class="m-hero">
                     <span class="m-k">Sleep &amp; berging · 24/7</span>
                     <div class="m-h">Pech of ongeval? <span>Wij</span> zijn er snel.</div>
-                    <div class="m-p" style="width:48%"></div>
+                    
                     <div class="m-row"><div class="m-plate"><b></b><span>87-TZK-3</span></div><span class="m-btn">Vraag aan via WhatsApp</span></div>
                   </div>
                   <div class="m-cards"><i></i><i></i><i></i></div>
@@ -546,7 +506,6 @@ footer .brand{font-size:20px; color:var(--text)}
             </div>
           </div>
           <div class="case-info">
-            <span class="case-num">02 / 03</span>
             <h3>Sleepdienst De Tak</h3>
             <div class="case-kind"><span>Sleep- en bergingsdienst</span><span>Den Haag</span></div>
             <p>Het aanvraagformulier vult merk en model in via het kenteken en stuurt alles kant-en-klaar door naar WhatsApp. In drie talen, met pagina's per regio.</p>
@@ -558,7 +517,7 @@ footer .brand{font-size:20px; color:var(--text)}
             </ul>
             <div class="case-links">
               <a class="link" href="https://sleepdienstdetak.nl" target="_blank" rel="noopener">Bekijk live <span>↗</span></a>
-              <button class="link-soft" type="button" data-preset="detak">Wat kost zo'n site? →</button>
+              <button class="link-soft" type="button" data-preset="detak">Wat kost zo'n site?</button>
             </div>
           </div>
         </article>
@@ -566,15 +525,14 @@ footer .brand{font-size:20px; color:var(--text)}
         <article class="case" id="case-cartronic">
           <div class="case-visual">
             <div class="win">
-              <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url" data-cartronic-url>cartronic.vercel.app</span></div>
               <div class="screen">
                 <div class="mock mock-cartronic" aria-hidden="true">
                   <div class="m-glow"></div>
-                  <div class="m-nav">CARTRONIC <em><i></i><i></i><i></i><b>Webshop</b></em></div>
+                  <div class="m-nav">CARTRONIC <em><b>Webshop</b></em></div>
                   <div class="m-hero">
                     <span class="m-k">Retrofit specialist · Rijswijk</span>
                     <div class="m-h">Fabrieksopties achteraf ingebouwd.</div>
-                    <div class="m-p" style="width:46%"></div>
+                    
                     <div class="m-row"><span class="m-btn">Voertuigzoeker</span></div>
                   </div>
                   <div class="m-cards"><i></i><i></i><i></i></div>
@@ -584,7 +542,6 @@ footer .brand{font-size:20px; color:var(--text)}
             </div>
           </div>
           <div class="case-info">
-            <span class="case-num">03 / 03</span>
             <h3>CarTronic</h3>
             <div class="case-kind"><span>Retrofit &amp; webshop</span><span>Rijswijk</span></div>
             <p>Retrofit-specialist voor VW, Audi, SEAT en Škoda. Met webshop, voertuigzoeker en een eigen beheerpaneel waarin de eigenaar zelf producten en teksten aanpast.</p>
@@ -595,13 +552,12 @@ footer .brand{font-size:20px; color:var(--text)}
             </ul>
             <div class="case-links">
               <a class="link" data-cartronic-link href="https://cartronic.vercel.app" target="_blank" rel="noopener">Bekijk live <span>↗</span></a>
-              <button class="link-soft" type="button" data-preset="cartronic">Wat kost zo'n site? →</button>
+              <button class="link-soft" type="button" data-preset="cartronic">Wat kost zo'n site?</button>
             </div>
           </div>
         </article>
 
       </div>
-      <div class="progress" aria-hidden="true"><span>01</span><i><b></b></i><i><b></b></i><i><b></b></i><span>03</span></div>
     </div>
   </section>
 
@@ -609,7 +565,6 @@ footer .brand{font-size:20px; color:var(--text)}
   <section class="sec" id="features" style="padding-top:0">
     <div class="wrap">
       <div class="sec-head center">
-        <span class="eyebrow">Mogelijkheden</span>
         <h2 class="h2">Meer dan een visitekaartje.</h2>
         <p class="lead">Elke site is snel, mobiel en vindbaar. Daarbovenop bouw ik de functies die jouw bedrijf echt verder helpen.</p>
       </div>
@@ -666,7 +621,6 @@ Locatie: Rijswijk<small>09:41 ✓✓</small></div>
   <section class="sec" id="prijzen">
     <div class="wrap">
       <div class="sec-head">
-        <span class="eyebrow">Prijzen</span>
         <h2 class="h2">Start vanaf €200. <span class="gold-text">Jij kiest de rest.</span></h2>
         <p class="lead">Zet de functies aan die je wilt. Je offerte rekent direct mee en verstuur je met één tik via WhatsApp.</p>
       </div>
@@ -724,15 +678,13 @@ Locatie: Rijswijk<small>09:41 ✓✓</small></div>
   <section class="sec" id="werkwijze">
     <div class="wrap">
       <div class="sec-head">
-        <span class="eyebrow">Werkwijze</span>
         <h2 class="h2">Van eerste appje tot live site.</h2>
       </div>
       <div class="steps" id="steps">
-        <div class="rail" aria-hidden="true"><b></b></div>
-        <div class="stp"><span class="n">01</span><h3>Gratis intake</h3><p>Een kort gesprek of WhatsApp over je bedrijf, je doel en de functies die je nodig hebt.</p></div>
-        <div class="stp"><span class="n">02</span><h3>Ontwerp</h3><p>Je krijgt een eerste versie die je op je eigen telefoon bekijkt. Jij geeft feedback, ik werk het bij.</p></div>
-        <div class="stp"><span class="n">03</span><h3>Bouwen</h3><p>Snel, mobiel-first en vindbaar. Opties zoals kentekencheck of beheerpaneel worden erin gebouwd.</p></div>
-        <div class="stp"><span class="n">04</span><h3>Live &amp; support</h3><p>Je site gaat online op je eigen domein. Daarna help ik met updates, of pas je het zelf aan.</p></div>
+        <div class="stp"><span class="n" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.8 7L4 20l1.1-4.6A8 8 0 1 1 21 12z"/></svg></span><h3>Gratis intake</h3><p>Een kort gesprek of WhatsApp over je bedrijf, je doel en de functies die je nodig hebt.</p></div>
+        <div class="stp"><span class="n" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span><h3>Ontwerp</h3><p>Je krijgt een eerste versie die je op je eigen telefoon bekijkt. Jij geeft feedback, ik werk het bij.</p></div>
+        <div class="stp"><span class="n" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6l-6 6 6 6M16 6l6 6-6 6"/></svg></span><h3>Bouwen</h3><p>Snel, mobiel-first en vindbaar. Opties zoals kentekencheck of beheerpaneel worden erin gebouwd.</p></div>
+        <div class="stp"><span class="n" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></span><h3>Live &amp; support</h3><p>Je site gaat online op je eigen domein. Daarna help ik met updates, of pas je het zelf aan.</p></div>
       </div>
     </div>
   </section>
@@ -741,7 +693,6 @@ Locatie: Rijswijk<small>09:41 ✓✓</small></div>
   <section class="sec" id="vragen" style="padding-top:0">
     <div class="wrap faq">
       <div class="sec-head" style="align-content:start">
-        <span class="eyebrow">FAQ</span>
         <h2 class="h2">Veelgestelde vragen.</h2>
         <p class="lead">Staat je vraag er niet tussen? Stuur gerust een appje.</p>
       </div>
@@ -758,11 +709,10 @@ Locatie: Rijswijk<small>09:41 ✓✓</small></div>
   <!-- CTA -->
   <section class="wrap" id="contact">
     <div class="cta-box">
-      <span class="eyebrow">Contact</span>
       <h2>Klaar voor een <span class="gold-text">strakke</span> website?</h2>
       <p class="lead">Stuur een appje met wat je zoekt. Je hoort dezelfde dag van me.</p>
       <div class="hero-cta">
-        <a class="btn btn--gold" href="https://wa.me/31623462397?text=Hoi%20StrakWerk%2C%20ik%20wil%20graag%20een%20website." target="_blank" rel="noopener">WhatsApp mij <span class="arr">→</span></a>
+        <a class="btn btn--gold" href="https://wa.me/31623462397?text=Hoi%20StrakWerk%2C%20ik%20wil%20graag%20een%20website." target="_blank" rel="noopener">WhatsApp mij</a>
         <a class="btn" href="#prijzen">Bereken je prijs</a>
       </div>
       <div class="contact">
@@ -848,7 +798,7 @@ CONFIG.groups.forEach(g => {
   g.items.forEach(it => {
     const row = document.createElement(it.qty ? "div" : "label");
     row.className = "opt-row"; row.dataset.row = it.id;
-    const live = it.live ? `<a class="live" href="#case-${it.live}">Live bij ${LIVE_NAMES[it.live]}</a>` : "";
+    const live = it.live ? `<a class="live" href="#case-${it.live}">Live bij ${LIVE_NAMES[it.live]} ↗</a>` : "";
     const ctl = it.qty
       ? `<div class="step" role="group" aria-label="${it.name} aantal"><button type="button" data-dec="${it.id}" aria-label="Minder">−</button><output id="q-${it.id}" aria-live="polite">0</output><button type="button" data-inc="${it.id}" aria-label="Meer">+</button></div>`
       : `<span class="sw"><input type="checkbox" id="o-${it.id}" data-opt="${it.id}"><span></span></span>`;
@@ -977,7 +927,6 @@ if (hasGsap){
     gsap.to(r, { v: 98, duration: 1.6, ease: "power2.out", onUpdate: () => setRing(r.v), scrollTrigger: { trigger: "#ring", start: "top 90%" } });
 
     // Werkwijze
-    gsap.fromTo("#steps .rail b", { scaleX: 0 }, { scaleX: 1, ease: "none", scrollTrigger: { trigger: "#steps", start: "top 75%", end: "bottom 55%", scrub: true } });
     gsap.from("#steps .stp", { y: 30, opacity: 0, stagger: .12, duration: .8, ease: "power3.out", scrollTrigger: { trigger: "#steps", start: "top 80%" } });
     gsap.from(".opt-row", { y: 16, opacity: 0, duration: .5, stagger: .03, ease: "power2.out", scrollTrigger: { trigger: "#options", start: "top 85%" } });
     gsap.from(".cta-box", { y: 40, opacity: 0, duration: 1, ease: "power3.out", scrollTrigger: { trigger: ".cta-box", start: "top 85%" } });
@@ -988,10 +937,8 @@ if (hasGsap){
     const sec = document.getElementById("werk"), track = document.getElementById("track");
     sec.classList.add("is-horizontal");
     const dist = () => track.scrollWidth - document.querySelector("#werk .hscroll").clientWidth + 1;
-    const bars = gsap.utils.toArray("#werk .progress b");
     const tw = gsap.to(track, { x: () => -dist(), ease: "none",
-      scrollTrigger: { trigger: sec, start: "top top", end: () => "+=" + dist(), pin: true, scrub: .8, invalidateOnRefresh: true,
-        onUpdate: s => bars.forEach((b, i) => gsap.set(b, { scaleX: gsap.utils.clamp(0, 1, s.progress * bars.length - i) })) } });
+      scrollTrigger: { trigger: sec, start: "top top", end: () => "+=" + dist(), pin: true, scrub: .8, invalidateOnRefresh: true } });
     gsap.utils.toArray("#werk .case-info").slice(1).forEach(el => gsap.from(el.children, { x: 60, opacity: 0, stagger: .05, ease: "power2.out",
       scrollTrigger: { trigger: el, containerAnimation: tw, start: "left 90%", end: "left 55%", scrub: true } }));
     return () => { sec.classList.remove("is-horizontal"); gsap.set(track, { clearProps: "transform" }); };
