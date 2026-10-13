@@ -6,7 +6,7 @@ Eén-pagina site voor StrakWerk (websites voor ondernemers, vanaf €200). Alle 
 - `index.html`: de hele site in één bestand (HTML, CSS en JS, animaties met GSAP + ScrollTrigger).
 - Prijzen en opties van de configurator staan onderaan in het script in het blok `CONFIG` (WhatsApp-nummer, basisprijs, opties, presets per portfolio-klant).
 - `assets/work/`: screenshots van projecten. Desktop (`vagpro.webp`, `detak.webp`, `detak-de.webp`, `cartronic.webp`, `cartronic-dashboard.webp`, 1600x905) staan in een laptopframe, mobiel (`*-mobiel.webp`) in een telefoon ervoor. De Tak heeft een NL/DE-wissel, CarTronic een wissel Website/Beheer (`.shot-tabs`). Nieuwe desktop-screenshots: scrollbalk rechts en de blauwe laadbalk bovenin wegknippen.
-- Achtergronden: in de hero een bewegende, schuine wand van eigen projecten (`.wall`, kleine versies in `assets/bg/`), korrel over de hele site (`assets/bg/grain.webp`), een zachte gloed per sectie (`#id::before`) en de werkplekfoto `assets/setup.webp` (met AI 4x opgeschaald van 335x597, licht wazig en donker) achter het contactblok (`.cta-photo`).
+- Achtergronden: in de hero een bewegende, schuine wand van eigen projecten (`.wall`, kleine versies in `assets/bg/`), korrel over de hele site (`assets/bg/grain.webp`), een zachte gloed per sectie (`#id::before`) en de werkplekfoto `assets/setup.webp` (1600x1200) in "Over mij" en licht wazig achter het contactblok (`.cta-photo`).
 - `assets/og.png`: preview-afbeelding voor delen via WhatsApp/socials.
 - `vercel.json` (redirects van oude pagina's zoals `/service-pro.html`), `robots.txt`, `sitemap.xml`.
 - Elke push naar `main` gaat automatisch live via Vercel.
