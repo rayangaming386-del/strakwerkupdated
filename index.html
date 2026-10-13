@@ -418,25 +418,36 @@ body::after{content:""; position:fixed; inset:0; z-index:300; pointer-events:non
 
 
 /* Over mij */
-.about{display:grid; grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr); gap:clamp(36px, 6vw, 88px); align-items:center}
-@media (max-width:900px){ .about{grid-template-columns:1fr} }
-.about-photo{position:relative; margin:0; max-width:460px; width:100%}
-.about-photo img{width:100%; height:auto; aspect-ratio:1/1; object-fit:cover; object-position:42% 50%; border-radius:24px; border:1px solid var(--line-2); box-shadow:0 40px 80px -30px rgba(0,0,0,.9); filter:saturate(.95) contrast(1.03)}
-.about-photo::before{content:""; position:absolute; inset:-12% -14%; z-index:-1; background:radial-gradient(closest-side, rgba(207,174,105,.20), transparent); pointer-events:none}
-.about-photo figcaption{position:absolute; left:-18px; bottom:28px; display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:12px; font-size:.82rem; font-weight:700; background:rgba(20,25,34,.9); border:1px solid var(--line-2); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); box-shadow:0 18px 40px -16px rgba(0,0,0,.8)}
-.about-photo figcaption small{display:block; font-weight:500; color:var(--muted); font-size:.72rem}
-.about-photo .ic{width:28px; height:28px; border-radius:8px; display:grid; place-items:center; background:rgba(207,174,105,.14); color:var(--gold); flex:none}
-.about-photo .ic svg{width:16px; height:16px}
-@media (max-width:900px){ .about-photo{margin-inline:auto} .about-photo figcaption{left:12px} }
-.about-text{display:grid; gap:20px}
-.about-text > p{color:var(--muted); max-width:58ch}
-.about-points{list-style:none; margin:4px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:10px}
-.about-points li{display:inline-flex; align-items:center; gap:9px; padding:9px 14px; border-radius:999px; border:1px solid var(--line-2); background:rgba(255,255,255,.03); font-size:.9rem; font-weight:600}
-.about-points svg{width:17px; height:17px; color:var(--gold); flex:none}
-.about-sign{display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap; margin-top:8px; padding-top:22px}
-.about-sign b{display:block; font:700 1.5rem/1.1 var(--f-display); letter-spacing:-.02em}
-.about-sign span{color:var(--muted); font-size:.9rem}
-#over::before{background:radial-gradient(700px 520px at 10% 50%, rgba(207,174,105,.08), transparent 70%), radial-gradient(600px 460px at 100% 20%, rgba(70,96,230,.08), transparent 70%)}
+.about-hero{position:relative; margin:0; border-radius:28px; overflow:hidden; border:1px solid var(--line-2); box-shadow:0 50px 100px -40px rgba(0,0,0,.9); aspect-ratio:21/9; isolation:isolate}
+.about-hero img{position:absolute; inset:0; width:100%; height:115%; object-fit:cover; object-position:50% 48%; will-change:transform}
+.about-hero::after{content:""; position:absolute; inset:0; z-index:1; background:linear-gradient(0deg, rgba(11,14,19,.95) 0%, rgba(11,14,19,.55) 38%, transparent 68%), linear-gradient(90deg, rgba(11,14,19,.7), transparent 55%)}
+.about-over{position:absolute; left:0; bottom:0; z-index:2; padding:clamp(24px, 4.5vw, 56px); display:grid; gap:12px; justify-items:start}
+.about-over .h2{font-size:clamp(2.2rem, 5.6vw, 4.6rem); letter-spacing:-.045em}
+.about-over .lead{color:#C9D1DC}
+.about-kicker{font:600 .78rem/1 var(--f-mono); letter-spacing:.14em; text-transform:uppercase; color:var(--gold)}
+.about-hero figcaption{position:absolute; top:clamp(16px, 2.5vw, 28px); right:clamp(16px, 2.5vw, 28px); z-index:2; display:flex; align-items:center; gap:10px; padding:8px 14px 8px 8px; border-radius:999px; font-size:.82rem; font-weight:600; background:rgba(11,14,19,.6); border:1px solid rgba(255,255,255,.16); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px)}
+.about-hero figcaption .ic{width:26px; height:26px; border-radius:50%; display:grid; place-items:center; background:var(--gold); color:var(--gold-ink)}
+.about-hero figcaption svg{width:14px; height:14px}
+@media (max-width:760px){ .about-hero{aspect-ratio:4/5} .about-hero img{object-position:42% 50%} .about-hero figcaption{left:16px; right:auto} }
+
+.about-body{display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr); gap:clamp(28px, 5vw, 72px); margin-top:clamp(32px, 5vw, 56px); align-items:start}
+@media (max-width:900px){ .about-body{grid-template-columns:1fr} }
+.about-story{display:grid; gap:18px; padding-top:6px}
+.about-story p{color:var(--muted); max-width:60ch}
+.about-story p.big{color:var(--text); font:600 clamp(1.35rem, 2.4vw, 1.85rem)/1.3 var(--f-display); letter-spacing:-.02em; max-width:30ch; text-wrap:balance}
+.about-card{display:grid; gap:22px; padding:clamp(22px, 3vw, 32px); border-radius:24px; background:linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015)); border:1px solid var(--line-2)}
+.about-id{display:flex; align-items:center; gap:14px}
+.avatar{width:52px; height:52px; border-radius:50%; display:grid; place-items:center; font:800 1.3rem/1 var(--f-display); color:var(--gold-ink); background:linear-gradient(135deg, var(--gold-hi), var(--gold)); box-shadow:0 0 0 4px rgba(207,174,105,.15)}
+.about-id b{display:block; font:700 1.25rem/1.15 var(--f-display)}
+.about-id div span{color:var(--muted); font-size:.88rem}
+.about-list{list-style:none; margin:0; padding:0; display:grid; gap:16px}
+.about-list li{display:flex; align-items:center; gap:14px}
+.about-list .ic{width:40px; height:40px; border-radius:12px; display:grid; place-items:center; flex:none; color:var(--gold); background:rgba(207,174,105,.1); border:1px solid rgba(207,174,105,.22)}
+.about-list svg{width:18px; height:18px}
+.about-list b{display:block; font-size:.98rem}
+.about-list small{color:var(--muted); font-size:.85rem}
+.about-card .btn{width:100%}
+#over::before{background:radial-gradient(800px 520px at 80% 62%, rgba(207,174,105,.08), transparent 70%)}
 
 /* ===== Beweging & kleur ===== */
 .loader{position:fixed; inset:0; z-index:200; background:var(--bg); display:none; place-items:center; --u:0}
@@ -999,27 +1010,34 @@ Locatie: Rijswijk<small>09:41 ✓✓</small></div>
 
   <!-- OVER MIJ -->
   <section class="sec" id="over">
-    <div class="wrap about">
-      <figure class="about-photo">
+    <div class="wrap">
+      <figure class="about-hero">
         <img src="assets/setup.webp" alt="De werkplek van Rayan: drie schermen met code op een houten bureau" width="1600" height="1200" loading="lazy">
-        <figcaption><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6l-6 6 6 6M16 6l6 6-6 6"/></svg></span><span>Hier wordt je site gebouwd<small>Mijn eigen werkplek</small></span></figcaption>
-      </figure>
-      <div class="about-text">
-        <div class="sec-head" style="margin-bottom:0">
+        <div class="about-over">
+          <span class="about-kicker">Over mij</span>
           <h2 class="h2">Hoi, ik ben <span class="gold-text">Rayan</span>.</h2>
-          <p class="lead">Achter StrakWerk zit geen groot bureau, maar ik. Ik ontwerp en bouw elke website zelf, van het eerste idee tot de dag dat hij live staat.</p>
+          <p class="lead">Achter StrakWerk zit geen groot bureau, maar ik.</p>
         </div>
-        <p>Ik ben met StrakWerk begonnen omdat ik zag hoe vaak ondernemers vastzitten aan een standaard template, of duizenden euro's kwijt zijn bij een bureau. Dat kan slimmer. Ik combineer een strak ontwerp met techniek die echt iets voor je doet, zoals een kentekencheck via de RDW of een beheerpaneel waarin je zelf alles aanpast.</p>
-        <p>Bij mij heb je één vast aanspreekpunt. Geen accountmanager ertussen en geen wachtrij: je appt mij en je praat direct met degene die je site bouwt.</p>
-        <ul class="about-points">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Eén vast aanspreekpunt</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.8 7L4 20l1.1-4.6A8 8 0 1 1 21 12z"/></svg>Direct contact via WhatsApp</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Vaste prijzen, vooraf bekend</li>
-        </ul>
-        <div class="about-sign">
-          <div><b>Rayan</b><span>Oprichter van StrakWerk</span></div>
-          <a class="btn btn--gold" href="https://wa.me/31623462397?text=Hoi%20Rayan%2C%20ik%20wil%20graag%20een%20website." target="_blank" rel="noopener">App Rayan</a>
+        <figcaption><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6l-6 6 6 6M16 6l6 6-6 6"/></svg></span>Hier wordt je site gebouwd</figcaption>
+      </figure>
+      <div class="about-body">
+        <div class="about-story">
+          <p class="big">Ik ontwerp en bouw elke website zelf, van het eerste idee tot de dag dat hij live staat.</p>
+          <p>Ik ben met StrakWerk begonnen omdat ik zag hoe vaak ondernemers vastzitten aan een standaard template, of duizenden euro's kwijt zijn bij een bureau. Dat kan slimmer. Ik combineer een strak ontwerp met techniek die echt iets voor je doet, zoals een kentekencheck via de RDW of een beheerpaneel waarin je zelf alles aanpast.</p>
+          <p>Geen accountmanager ertussen en geen wachtrij: je appt mij en je praat direct met degene die je site bouwt.</p>
         </div>
+        <aside class="about-card">
+          <div class="about-id">
+            <span class="avatar" aria-hidden="true">R</span>
+            <div><b>Rayan</b><span>Oprichter van StrakWerk</span></div>
+          </div>
+          <ul class="about-list">
+            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><div><b>Eén vast aanspreekpunt</b><small>Van intake tot oplevering</small></div></li>
+            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.8 7L4 20l1.1-4.6A8 8 0 1 1 21 12z"/></svg></span><div><b>Direct contact</b><small>Gewoon via WhatsApp</small></div></li>
+            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></span><div><b>Vaste prijzen</b><small>Vooraf bekend, geen verrassingen</small></div></li>
+          </ul>
+          <a class="btn btn--gold" href="https://wa.me/31623462397?text=Hoi%20Rayan%2C%20ik%20wil%20graag%20een%20website." target="_blank" rel="noopener">App Rayan <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </aside>
       </div>
     </div>
   </section>
@@ -1457,8 +1475,10 @@ if (hasGsap){
 
     /* FAQ, CTA en groot woordmerk */
     gsap.from("details", { y: 30, opacity: 0, duration: .7, stagger: .07, ease: "power3.out", scrollTrigger: { trigger: ".faq-list", start: "top 85%" } });
-    gsap.from(".about-photo", { y: 80, rotate: -4, opacity: 0, duration: 1.2, ease: "power4.out", scrollTrigger: { trigger: "#over", start: "top 80%" } });
-    gsap.from(".about-text > p, .about-points li, .about-sign", { y: 40, opacity: 0, duration: .9, stagger: .08, ease: "power3.out", scrollTrigger: { trigger: ".about-text", start: "top 80%" } });
+    gsap.from(".about-hero", { clipPath: "inset(12% 8% 12% 8% round 28px)", duration: 1.4, ease: "power4.out", scrollTrigger: { trigger: ".about-hero", start: "top 85%" } });
+    gsap.fromTo(".about-hero img", { yPercent: -10 }, { yPercent: 0, ease: "none", scrollTrigger: { trigger: ".about-hero", start: "top bottom", end: "bottom top", scrub: true } });
+    gsap.from(".about-over > *", { y: 40, opacity: 0, duration: 1, stagger: .1, ease: "power3.out", scrollTrigger: { trigger: ".about-hero", start: "top 70%" } });
+    gsap.from(".about-story > *, .about-card", { y: 40, opacity: 0, duration: .9, stagger: .08, ease: "power3.out", scrollTrigger: { trigger: ".about-body", start: "top 85%" } });
     gsap.from(".cta-box", { y: 80, scale: .94, opacity: 0, duration: 1.2, ease: "power4.out", scrollTrigger: { trigger: ".cta-box", start: "top 88%" } });
     gsap.fromTo(".giant div", { xPercent: 4 }, { xPercent: -22, ease: "none", scrollTrigger: { trigger: ".giant", start: "top bottom", end: "bottom top", scrub: true } });
   });
