@@ -18,9 +18,8 @@
 {"@context":"https://schema.org","@type":"ProfessionalService","name":"StrakWerk","url":"https://www.strakwerkk.nl/","image":"https://www.strakwerkk.nl/assets/og.png","description":"Websites op maat vanaf €200. Kies zelf je opties: beheerpaneel, kentekencheck, webshop en meer.","telephone":"+31623462397","email":"strakwerkk@gmail.com","priceRange":"€€","areaServed":"NL","founder":{"@type":"Person","name":"Rayan"}}
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@500;600&display=swap">
+<link rel="preload" href="assets/fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/fonts/fonts.css">
 <style>
 /* Layout: donker premium, merk-goud als enige accent. Hero = tekst links, device-compositie rechts.
    Bewust één thema (donker): dat is de huisstijl van StrakWerk. */
@@ -1455,7 +1454,7 @@ Locatie: Rijswijk<small>09:41 ✓✓</small></div>
     <nav class="foot-col" aria-label="Projecten"><b>Projecten</b><a href="werk/vagpro">VAGPRO</a><a href="werk/detak">Sleepdienst De Tak</a><a href="werk/cartronic">CarTronic</a></nav>
     <div class="foot-col"><b>Contact</b><a href="https://wa.me/31623462397" target="_blank" rel="noopener">WhatsApp</a><span>06 2346 2397</span><span>strakwerkk@gmail.com</span></div>
   </div>
-  <div class="wrap foot-bottom"><span>© <span id="year">2026</span> StrakWerk · Webdesign &amp; development</span><span class="clock">Den Haag · <b id="clock">--:--</b></span><a href="#hero">Terug naar boven ↑</a></div>
+  <div class="wrap foot-bottom"><span>© <span id="year">2026</span> StrakWerk · Webdesign &amp; development</span><span class="clock">Den Haag · <b id="clock">--:--</b></span><a href="privacy">Privacy</a><a href="#hero">Terug naar boven ↑</a></div>
 </footer>
 
 <a class="wa-fab" id="waFab" href="https://wa.me/31623462397?text=Hoi%20StrakWerk%2C%20ik%20heb%20een%20vraag." target="_blank" rel="noopener" aria-label="Stuur StrakWerk een WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.4 14.1c-.2.6-1.3 1.2-1.8 1.3-.5 0-1 .3-3.3-.7a11.4 11.4 0 0 1-4.6-4.1c-.3-.5-1.1-1.6-1.1-3s.8-2.1 1-2.4c.3-.3.6-.4.8-.4h.6c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.3.5-.4.5c-.2.2-.3.4-.1.7.2.4.9 1.5 2 2.4 1.4 1.2 2.5 1.6 2.9 1.7.3.2.5.1.7-.1l.9-1.1c.2-.3.5-.3.8-.2l2 1c.3.1.5.2.6.3.1.2.1.8-.2 1.4z"/></svg></a>
@@ -2024,7 +2023,8 @@ if (hasGsap){
       .to(".clients", { opacity: 0, ease: "none", duration: .25 }, 0)
       .to(zoomer, { x: () => innerWidth / 2 - geo().cx, y: () => innerHeight / 2 - geo().cy,
         scale: () => { const g = geo(); return Math.max(innerWidth / g.lw, innerHeight / g.lh) * 1.05; }, ease: "power2.inOut", duration: .75 }, .1)
-      .to(zoomer, { opacity: 0, ease: "none", duration: .2 }, .82);
+      .to(zoomer, { opacity: 0, ease: "none", duration: .2 }, .82)
+      .to(".clients", { opacity: 1, ease: "none", duration: .15 }, .87);
 
     const sec = document.getElementById("werk"), track = document.getElementById("track");
     sec.classList.add("is-horizontal");
@@ -2035,10 +2035,10 @@ if (hasGsap){
         onUpdate: st => sec.style.backgroundColor = gsap.utils.interpolate(bgs, st.progress),
         onLeaveBack: () => sec.style.backgroundColor = "", onLeave: () => sec.style.backgroundColor = bgs[2] } });
     gsap.utils.toArray("#werk .case").slice(1).forEach(c => {
-      gsap.from(c.querySelector(".case-visual"), { rotateY: -25, scale: .82, opacity: .3, transformPerspective: 1200, ease: "power2.out",
-        scrollTrigger: { trigger: c, containerAnimation: tw, start: "left 100%", end: "left 35%", scrub: true } });
-      gsap.from(c.querySelector(".case-info").children, { x: 80, opacity: 0, stagger: .06, ease: "power2.out",
-        scrollTrigger: { trigger: c, containerAnimation: tw, start: "left 80%", end: "left 30%", scrub: true } });
+      gsap.from(c.querySelector(".case-visual"), { y: 50, opacity: .2, ease: "power2.out",
+        scrollTrigger: { trigger: c, containerAnimation: tw, start: "left 95%", end: "left 45%", scrub: true } });
+      gsap.from(c.querySelector(".case-info").children, { y: 30, opacity: 0, stagger: .06, ease: "power2.out",
+        scrollTrigger: { trigger: c, containerAnimation: tw, start: "left 75%", end: "left 35%", scrub: true } });
     });
 
     // 3D-tilt van de devices met de muis

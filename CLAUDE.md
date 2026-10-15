@@ -13,7 +13,10 @@ Eén-pagina site voor StrakWerk (websites voor ondernemers, vanaf €200). Alle 
 - `assets/work/`: screenshots van projecten. Desktop (`vagpro*.webp` incl. over/zakelijk/contact, `detak*.webp` incl. de/aanvraag/onderweg, `cartronic.webp`, `cartronic-dashboard.webp`, 1600x905) staan in een laptopframe, mobiel (`*-mobiel.webp`) in een telefoon ervoor. Elk project heeft een paginawissel onder de laptop (`.shot-tabs`, wisselt automatisch). Nieuwe desktop-screenshots: scrollbalk rechts en de blauwe laadbalk bovenin wegknippen.
 - Achtergronden: in de hero een bewegende, schuine wand van eigen projecten (`.wall`, kleine versies in `assets/bg/`), korrel over de hele site (`assets/bg/grain.webp`), een zachte gloed per sectie (`#id::before`) en de werkplekfoto `assets/setup.webp` (1600x1200) in "Over mij" en licht wazig achter het contactblok (`.cta-photo`).
 - `assets/og.png`: preview-afbeelding voor delen via WhatsApp/socials.
+- `privacy.html` (privacyverklaring, gelinkt in de footers) en `404.html` (Vercel toont die automatisch; gebruikt absolute paden `/assets/...`).
+- Lettertypes lokaal in `assets/fonts/` (`fonts.css`, Geist + Geist Mono), geen Google Fonts.
 - `vercel.json` (redirects van oude pagina's zoals `/service-pro.html`), `robots.txt`, `sitemap.xml`.
+- Projectpagina's worden gegenereerd met een script; pas bij wijzigingen alle drie de bestanden in `werk/` consistent aan.
 - Elke push naar `main` gaat automatisch live via Vercel.
 
 ## Stijlafspraken (belangrijk)
@@ -24,13 +27,16 @@ Eén-pagina site voor StrakWerk (websites voor ondernemers, vanaf €200). Alle 
 - Screenshots zonder statusbalk en adresbalk.
 - Veel beweging, maar respecteer `prefers-reduced-motion` (rustige versie zonder animaties).
 - **Nooit** `scroll-behavior:smooth` in CSS: dat breekt de metingen van ScrollTrigger (animaties verspringen na terugscrollen). Lenis doet het vloeiende scrollen.
-- Vastgezette secties (hero, werk) alleen op desktop. Hero-zoom start op scrollpositie 0. Elementen binnen een vastgezette sectie niet als eigen trigger gebruiken.
+- Vastgezette secties (hero, werk) alleen op desktop. Hero-zoom start op scrollpositie 0. Elementen binnen een vastgezette sectie niet als eigen trigger gebruiken. Geen 3D-draai/schaal-animaties in de horizontale projectenstrook (die overlappen elkaar).
 - Test na wijzigingen: herberekenen (`ScrollTrigger.refresh()`) halverwege de pagina mag geen startposities veranderen.
 - Altijd testen op desktop én mobiel: geen console-fouten, niets dat horizontaal buiten beeld schuift.
 - Nooit reviews, klantcitaten of cijfers verzinnen; die komen van de eigenaar.
 
 ## Eigenaar
 - Rayan, oprichter van StrakWerk. Sectie `#over` ("Over mij") tussen Prijzen en Werkwijze.
+- Rayan wil **niet** met een foto op de site: geen portret toevoegen of vragen. De werkplekfoto blijft.
+- Geen KvK-nummer: niets over KvK of btw op de site zetten.
+- Nog geen reviews: geen review-sectie of beoordelingen tonen tot Rayan echte reviews aanlevert.
 
 ## Portfolio
 - VAGPRO (kentekencheck), De Tak (aanvraag via WhatsApp, meertalig, regiopagina's), CarTronic (webshop + geavanceerd beheerpaneel, `CONFIG.cartronicUrl`).
@@ -41,7 +47,6 @@ Eén-pagina site voor StrakWerk (websites voor ondernemers, vanaf €200). Alle 
 - Echte oude site van een klant voor de oud/nieuw-schuif (nu een nagebouwd voorbeeld van een verouderde site).
 - Volledige pagina-screenshots (van boven tot onder) per site, voor schermen die meescrollen.
 - Per project: wat wilde de klant en wat leverde het op (geen resultaten verzinnen).
-- Portretfoto van Rayan voor de "Over mij"-sectie (nu staat daar de werkplekfoto). De tekst in "Over mij" is geschreven zonder harde feiten (geen leeftijd, jaren ervaring of aantallen); vul die alleen aan met info van Rayan.
-- Echte klantreviews (bijv. Karim van CarTronic) voor een review-sectie.
-- Btw: zijn prijzen incl. of excl. btw? KvK-nummer voor in de footer.
+- De tekst in "Over mij" is geschreven zonder harde feiten (geen leeftijd, jaren ervaring of aantallen); vul die alleen aan met info van Rayan.
+- Echte klantreviews zodra Rayan ze heeft (dan pas een review-sectie maken).
 - Domein: controleren of strakwerkk.nl in Vercel aan dit project gekoppeld is.
