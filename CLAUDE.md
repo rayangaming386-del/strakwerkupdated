@@ -7,7 +7,9 @@ Eén-pagina site voor StrakWerk (websites voor ondernemers, vanaf €200). Alle 
 - `werk/vagpro.html`, `werk/detak.html`, `werk/cartronic.html`: projectpagina's (stijl in `assets/case.css`, gedrag in `assets/case.js`). Bereikbaar als `/werk/vagpro` enz. (Vercel cleanUrls). Links naar `/?preset=<project>#prijzen` vullen de configurator vooraf in.
 - Bibliotheken staan lokaal in `assets/js/` (GSAP 3.13 + ScrollTrigger, SplitText, DrawSVGPlugin, Lenis 1.3.4), geen CDN.
 - Effecten: vloeiend scrollen (Lenis, `window.__lenis`), koppen per regel (SplitText), hero-laptop zoomt in bij scrollen (alleen desktop, `.zoomer`), dienstenband die reageert op scrollsnelheid (`.marquee`), levende tegels (kenteken typt zichzelf, Google #9 naar #1, WhatsApp "typt..."), prijzen in tabs met vliegend kaartje naar de offerte, werkwijze-iconen tekenen zichzelf (DrawSVG), sectie "Voor wie" (`#branches`, presets per branche in `CONFIG.presets`), footer met grote CTA en klok.
-- Prijzen en opties van de configurator staan onderaan in het script in het blok `CONFIG` (WhatsApp-nummer, basisprijs, opties, presets per portfolio-klant).
+- Prijzen en opties van de configurator staan onderaan in het script in het blok `CONFIG`: `bases` (nieuwe website €200, website redesign €175), opties per groep (`nieuw:true` toont een Nieuw-label), presets (`base:"redesign"` kiest de redesign-basis).
+- Sectie `#nieuw` promoot de nieuwe diensten: website redesign (oud/nieuw-schuif, `#cv`) en kentekenherkenning met camera (scan-animatie, `.scan`). Knoppen `data-pick-base` en `data-pick-opt` zetten iets aan in de offerte en scrollen naar de prijzen.
+- Foto-achtergronden per sectie: `.sec-photo` met getinte, wazige foto's uit `assets/bg/ph-*.webp` (gemaakt uit de klantscreenshots, duotoon in goud/koper/teal/indigo).
 - `assets/work/`: screenshots van projecten. Desktop (`vagpro*.webp` incl. over/zakelijk/contact, `detak*.webp` incl. de/aanvraag/onderweg, `cartronic.webp`, `cartronic-dashboard.webp`, 1600x905) staan in een laptopframe, mobiel (`*-mobiel.webp`) in een telefoon ervoor. Elk project heeft een paginawissel onder de laptop (`.shot-tabs`, wisselt automatisch). Nieuwe desktop-screenshots: scrollbalk rechts en de blauwe laadbalk bovenin wegknippen.
 - Achtergronden: in de hero een bewegende, schuine wand van eigen projecten (`.wall`, kleine versies in `assets/bg/`), korrel over de hele site (`assets/bg/grain.webp`), een zachte gloed per sectie (`#id::before`) en de werkplekfoto `assets/setup.webp` (1600x1200) in "Over mij" en licht wazig achter het contactblok (`.cta-photo`).
 - `assets/og.png`: preview-afbeelding voor delen via WhatsApp/socials.
@@ -21,6 +23,9 @@ Eén-pagina site voor StrakWerk (websites voor ondernemers, vanaf €200). Alle 
 - **Geen** decoratieve liggende streepjes of lijntjes.
 - Screenshots zonder statusbalk en adresbalk.
 - Veel beweging, maar respecteer `prefers-reduced-motion` (rustige versie zonder animaties).
+- **Nooit** `scroll-behavior:smooth` in CSS: dat breekt de metingen van ScrollTrigger (animaties verspringen na terugscrollen). Lenis doet het vloeiende scrollen.
+- Vastgezette secties (hero, werk) alleen op desktop. Hero-zoom start op scrollpositie 0. Elementen binnen een vastgezette sectie niet als eigen trigger gebruiken.
+- Test na wijzigingen: herberekenen (`ScrollTrigger.refresh()`) halverwege de pagina mag geen startposities veranderen.
 - Altijd testen op desktop én mobiel: geen console-fouten, niets dat horizontaal buiten beeld schuift.
 - Nooit reviews, klantcitaten of cijfers verzinnen; die komen van de eigenaar.
 
@@ -32,9 +37,9 @@ Eén-pagina site voor StrakWerk (websites voor ondernemers, vanaf €200). Alle 
 - Teller staat op "20+ sites live".
 
 ## Openstaande punten (input van eigenaar nodig)
-- Screenshots die mid-gesprek gestuurd zijn kwamen niet als bestand binnen: De Tak werkgebied, CarTronic werkplaats/reviews/merken/video's/contact. Opnieuw laten sturen.
+- CarTronic werkplaats- en hero-screenshot opnieuw laten sturen als bestand (alleen merken/video's/contact/reviews zijn binnen).
+- Echte oude site van een klant voor de oud/nieuw-schuif (nu een nagebouwd voorbeeld van een verouderde site).
 - Volledige pagina-screenshots (van boven tot onder) per site, voor schermen die meescrollen.
-- Screenshots van een oude klantsite, voor een oud-versus-nieuw-schuif.
 - Per project: wat wilde de klant en wat leverde het op (geen resultaten verzinnen).
 - Portretfoto van Rayan voor de "Over mij"-sectie (nu staat daar de werkplekfoto). De tekst in "Over mij" is geschreven zonder harde feiten (geen leeftijd, jaren ervaring of aantallen); vul die alleen aan met info van Rayan.
 - Echte klantreviews (bijv. Karim van CarTronic) voor een review-sectie.
