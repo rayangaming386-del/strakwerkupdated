@@ -12,11 +12,15 @@ Eén-pagina site voor StrakWerk (websites voor ondernemers, vanaf €200). Alle 
 - Foto-achtergronden per sectie: `.sec-photo` met getinte, wazige foto's uit `assets/bg/ph-*.webp` (gemaakt uit de klantscreenshots, duotoon in goud/koper/teal/indigo).
 - `assets/work/`: screenshots van projecten. Desktop (`vagpro*.webp` incl. over/zakelijk/contact, `detak*.webp` incl. de/aanvraag/onderweg, `cartronic.webp`, `cartronic-dashboard.webp`, 1600x905) staan in een laptopframe, mobiel (`*-mobiel.webp`) in een telefoon ervoor. Elk project heeft een paginawissel onder de laptop (`.shot-tabs`, wisselt automatisch). Nieuwe desktop-screenshots: scrollbalk rechts en de blauwe laadbalk bovenin wegknippen.
 - Achtergronden: in de hero een bewegende, schuine wand van eigen projecten (`.wall`, kleine versies in `assets/bg/`), korrel over de hele site (`assets/bg/grain.webp`), een zachte gloed per sectie (`#id::before`) en de werkplekfoto `assets/setup.webp` (1600x1200) in "Over mij" en licht wazig achter het contactblok (`.cta-photo`).
-- `assets/og.png`: preview-afbeelding voor delen via WhatsApp/socials.
 - `privacy.html` (privacyverklaring, gelinkt in de footers) en `404.html` (Vercel toont die automatisch; gebruikt absolute paden `/assets/...`).
 - Lettertypes lokaal in `assets/fonts/` (`fonts.css`, Geist + Geist Mono), geen Google Fonts.
 - `vercel.json` (redirects van oude pagina's zoals `/service-pro.html`), `robots.txt`, `sitemap.xml`.
 - Projectpagina's worden gegenereerd met een script; pas bij wijzigingen alle drie de bestanden in `werk/` consistent aan.
+- `diensten/*.html`: acht dienst- en branchepagina's voor Google (website laten maken, redesign, webshop, garage, sleepdienst, kapper, horeca, bouw), zelfde stijl als de projectpagina's, met Service/FAQ/Breadcrumb-structuurdata. Links vanuit "Voor wie", de redesign-kaart en de footer. Pas bij wijzigingen alle acht consistent aan.
+- `demo.html`: interactieve demo van het beheerpaneel (Basis/Geavanceerd), live voorbeeldsite ernaast, wijzigingen alleen in localStorage (`sw-demo-v1`). Demo-foto's in `assets/demo/`. Bezoekersaantallen in het dashboard zijn gemarkeerd als "Voorbeeld".
+- `assets/video/configurator.mp4`: korte schermopname van de configurator (naast de prijzen, alleen desktop, speelt af in beeld).
+- `assets/og.png`: preview-afbeelding (1200x630) met CarTronic-laptop en De Tak-telefoon.
+- Mobiel: balk onderaan door de hele site (buiten de hero en het contactblok), bij de prijzen met je totaal.
 - Elke push naar `main` gaat automatisch live via Vercel.
 
 ## Stijlafspraken (belangrijk)

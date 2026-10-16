@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Demo beheerpaneel | StrakWerk</title>
+<meta name="description" content="Probeer zelf hoe het beheerpaneel van StrakWerk werkt: pas teksten, foto's, openingstijden en producten aan en zie je website direct veranderen.">
+<meta name="theme-color" content="#0B0E13">
+<link rel="canonical" href="https://www.strakwerkk.nl/demo">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Probeer het beheerpaneel van StrakWerk">
+<meta property="og:description" content="Pas zelf teksten, foto's en producten aan en zie je website direct veranderen. Geen account nodig.">
+<meta property="og:image" content="https://www.strakwerkk.nl/assets/og.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230B0E13'/%3E%3Ctext x='16' y='21' font-family='Arial' font-weight='900' font-size='15' fill='%23E8EDF3' text-anchor='middle'%3ESW%3C/text%3E%3Crect x='7' y='24' width='12' height='2.4' rx='1.2' fill='%23CFAE69'/%3E%3C/svg%3E">
+<link rel="preload" href="/assets/fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
+<script defer src="/_vercel/insights/script.js"></script>
+<style>
+:root{
+  --bg:#0B0E13; --bg-2:#0F1319; --card:#141922; --card-2:#1A202B; --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.14);
+  --text:#E8EDF3; --muted:#98A2B0; --gold:#CFAE69; --gold-hi:#EAD39C; --gold-ink:#17130B; --ok:#5BD39A; --warn:#F0A35E; --bad:#F07A7A;
+  --f:"Geist", system-ui, -apple-system, "Segoe UI", sans-serif; --mono:"Geist Mono", ui-monospace, Menlo, monospace;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{height:100%}
+body{margin:0; background:var(--bg); color:var(--text); font:15px/1.5 var(--f); -webkit-font-smoothing:antialiased; overflow:hidden}
+a{color:inherit; text-decoration:none}
+button,input,select,textarea{font:inherit; color:inherit}
+:focus-visible{outline:2px solid var(--gold); outline-offset:2px; border-radius:6px}
+::selection{background:var(--gold); color:var(--gold-ink)}
+
+/* Topbalk */
+.dtop{height:64px; display:flex; align-items:center; gap:14px; padding:0 18px; border-bottom:1px solid var(--line); background:rgba(11,14,19,.92); position:relative; z-index:20}
+.brand{font-weight:800; letter-spacing:.06em; font-size:19px; display:inline-flex; gap:4px; line-height:1}
+.brand .strak{position:relative}
+.brand .strak::after{content:""; position:absolute; left:0; right:0; height:2.5px; border-radius:2px; background:var(--gold); bottom:-6px}
+.pill{font:700 .68rem/1 var(--f); letter-spacing:.1em; text-transform:uppercase; padding:6px 9px; border-radius:99px; background:rgba(207,174,105,.14); color:var(--gold)}
+.seg{display:flex; gap:3px; padding:3px; border-radius:99px; border:1px solid var(--line-2); background:rgba(255,255,255,.02); margin-left:8px}
+.seg button{border:0; background:none; padding:7px 13px; border-radius:99px; font-weight:600; font-size:.84rem; color:var(--muted); cursor:pointer; white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--gold); color:var(--gold-ink)}
+.seg small{opacity:.75; font-weight:500; margin-left:4px}
+.sp{flex:1}
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 15px; border-radius:10px; border:1px solid var(--line-2); background:rgba(255,255,255,.03); font-weight:700; font-size:.86rem; cursor:pointer; white-space:nowrap; transition:border-color .2s, background .2s}
+.btn:hover{border-color:rgba(255,255,255,.3)}
+.btn--gold{background:var(--gold); border-color:var(--gold); color:var(--gold-ink)}
+.btn--gold:hover{background:var(--gold-hi); border-color:var(--gold-hi)}
+.btn svg{width:16px; height:16px}
+.back{color:var(--muted); font-weight:600; font-size:.86rem}
+.back:hover{color:var(--text)}
+
+/* Indeling */
+.shell{display:grid; grid-template-columns:220px minmax(0,1fr) minmax(0,46%); height:calc(100% - 64px)}
+.nav{border-right:1px solid var(--line); padding:14px 10px; overflow-y:auto; display:flex; flex-direction:column; gap:2px}
+.nav small{font:700 .66rem/1 var(--f); letter-spacing:.12em; text-transform:uppercase; color:var(--muted); padding:14px 10px 8px; opacity:.8}
+.nav button{display:flex; align-items:center; gap:10px; width:100%; border:0; background:none; padding:9px 10px; border-radius:9px; font-weight:500; font-size:.9rem; color:#C3CBD6; cursor:pointer; text-align:left}
+.nav button svg{width:17px; height:17px; flex:none; opacity:.85}
+.nav button:hover{background:rgba(255,255,255,.04)}
+.nav button[aria-current="page"]{background:rgba(207,174,105,.12); color:var(--text)}
+.nav button[aria-current="page"] svg{color:var(--gold); opacity:1}
+.nav .lock{margin-left:auto; font:700 .6rem/1 var(--f); letter-spacing:.06em; text-transform:uppercase; padding:4px 6px; border-radius:6px; background:rgba(255,255,255,.06); color:var(--muted)}
+.main{overflow-y:auto; padding:26px clamp(18px, 3vw, 36px) 80px}
+.prev{border-left:1px solid var(--line); background:#07090D; display:flex; flex-direction:column; min-width:0}
+.pv-bar{display:flex; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid var(--line); font-size:.8rem; color:var(--muted)}
+.pv-bar .url{flex:1; padding:6px 12px; border-radius:99px; background:rgba(255,255,255,.04); font-family:var(--mono); font-size:.76rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.pv-bar .live{display:inline-flex; align-items:center; gap:6px; color:var(--ok); font-weight:600}
+.pv-bar .live i{width:7px; height:7px; border-radius:50%; background:var(--ok); box-shadow:0 0 0 3px rgba(91,211,154,.2)}
+.pv-close{display:none}
+.pv{flex:1; overflow-y:auto; padding:16px}
+
+/* Panelen */
+.intro{display:flex; gap:14px; align-items:flex-start; padding:14px 16px; border-radius:14px; border:1px solid rgba(207,174,105,.3); background:rgba(207,174,105,.07); margin-bottom:22px; font-size:.9rem}
+.intro b{display:block}
+.intro p{margin:2px 0 0; color:#C3CBD6}
+.intro button{margin-left:auto; border:0; background:none; color:var(--muted); cursor:pointer; font-size:1.2rem; line-height:1; padding:2px 4px}
+h1.v{font-size:1.6rem; letter-spacing:-.03em; margin:0}
+p.vsub{color:var(--muted); margin:6px 0 22px}
+.card{border-radius:14px; border:1px solid var(--line); background:var(--card); padding:18px; margin-bottom:14px}
+.card h2{font-size:1rem; margin:0 0 12px}
+.field{display:grid; gap:6px; margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+.field label, .lbl{font-size:.78rem; font-weight:600; color:var(--muted)}
+.field input, .field textarea, .field select, .inp{width:100%; padding:10px 12px; border-radius:9px; border:1px solid var(--line-2); background:var(--bg); outline:none; transition:border-color .2s, box-shadow .2s}
+.field textarea{min-height:90px; resize:vertical}
+.field input:focus, .field textarea:focus, .field select:focus, .inp:focus{border-color:var(--gold); box-shadow:0 0 0 3px rgba(207,174,105,.16)}
+.cnt{font:500 .72rem var(--mono); color:var(--muted); justify-self:end}
+.cnt.over{color:var(--warn)}
+.row2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.stats{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; margin-bottom:14px}
+.stat{border-radius:14px; border:1px solid var(--line); background:var(--card); padding:16px}
+.stat span{font-size:.78rem; color:var(--muted)}
+.stat b{display:block; font-size:1.7rem; letter-spacing:-.03em; margin-top:4px}
+.stat em{font-style:normal; font-size:.74rem; color:var(--ok)}
+.tag{display:inline-block; font:600 .66rem/1 var(--f); letter-spacing:.08em; text-transform:uppercase; color:var(--muted); padding:4px 7px; border-radius:6px; background:rgba(255,255,255,.05); margin-left:8px; vertical-align:middle}
+.quick{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px}
+.quick button{display:flex; align-items:center; gap:10px; padding:12px; border-radius:11px; border:1px solid var(--line); background:rgba(255,255,255,.02); cursor:pointer; text-align:left; font-weight:600; font-size:.88rem}
+.quick button:hover{border-color:rgba(207,174,105,.4)}
+.quick svg{width:18px; height:18px; color:var(--gold); flex:none}
+.list{display:grid; gap:8px}
+.item{display:grid; grid-template-columns:minmax(0,1fr) 110px auto; gap:8px; align-items:center}
+.item.prod{grid-template-columns:minmax(0,1fr) 92px 112px auto auto}
+.del{width:36px; height:36px; border-radius:9px; border:1px solid var(--line-2); background:none; cursor:pointer; color:var(--muted); display:grid; place-items:center}
+.del:hover{color:var(--bad); border-color:rgba(240,122,122,.5)}
+.del svg{width:16px; height:16px}
+.eur{position:relative}
+.eur::before{content:"€"; position:absolute; left:11px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:.9rem}
+.eur .inp{padding-left:24px}
+.step{display:flex; align-items:center; border:1px solid var(--line-2); border-radius:9px; overflow:hidden}
+.step button{width:32px; height:36px; border:0; background:rgba(255,255,255,.03); cursor:pointer; font-weight:700}
+.step output{min-width:40px; text-align:center; font-family:var(--mono); font-size:.88rem}
+.sw{position:relative; width:42px; height:24px; flex:none}
+.sw input{position:absolute; inset:0; opacity:0; margin:0; cursor:pointer; z-index:1}
+.sw span{position:absolute; inset:0; border-radius:99px; background:rgba(255,255,255,.12); transition:background .2s}
+.sw span::after{content:""; position:absolute; left:3px; top:3px; width:18px; height:18px; border-radius:50%; background:#fff; transition:transform .2s}
+.sw input:checked + span{background:var(--gold)}
+.sw input:checked + span::after{transform:translateX(18px)}
+.sw input:focus-visible + span{outline:2px solid var(--gold); outline-offset:2px}
+.add{margin-top:10px}
+.hrs{display:grid; gap:8px}
+.hr{display:grid; grid-template-columns:110px auto 1fr; gap:12px; align-items:center}
+.hr .t{display:flex; gap:8px; align-items:center}
+.hr .t input{max-width:110px}
+.hr .closed{color:var(--muted); font-size:.86rem}
+.photos{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px}
+.photo{position:relative; aspect-ratio:4/3; border-radius:12px; overflow:hidden; border:2px solid transparent; cursor:pointer; background:#0c0f13 center/cover no-repeat; padding:0}
+.photo[aria-pressed="true"]{border-color:var(--gold)}
+.photo span{position:absolute; left:8px; bottom:8px; padding:4px 8px; border-radius:99px; font-size:.72rem; font-weight:600; background:rgba(11,14,19,.8)}
+.upload{display:grid; place-items:center; text-align:center; gap:4px; border:2px dashed var(--line-2); color:var(--muted); font-size:.8rem; font-weight:600}
+.upload svg{width:22px; height:22px; color:var(--gold)}
+.colors{display:flex; gap:10px; flex-wrap:wrap}
+.colors button{width:38px; height:38px; border-radius:50%; border:3px solid transparent; cursor:pointer; box-shadow:inset 0 0 0 1px rgba(255,255,255,.2)}
+.colors button[aria-pressed="true"]{border-color:#fff}
+table{width:100%; border-collapse:collapse; font-size:.88rem}
+th{text-align:left; font:600 .72rem var(--f); letter-spacing:.06em; text-transform:uppercase; color:var(--muted); padding:0 8px 10px}
+td{padding:10px 8px; border-top:1px solid var(--line)}
+td select{padding:6px 8px; border-radius:8px; border:1px solid var(--line-2); background:var(--bg)}
+.st{display:inline-block; padding:3px 8px; border-radius:99px; font-size:.74rem; font-weight:600}
+.st-Nieuw{background:rgba(207,174,105,.16); color:var(--gold)}
+.st-In\ behandeling{background:rgba(120,110,255,.18); color:#B3ABFF}
+.st-Verzonden{background:rgba(60,190,170,.16); color:#7FE0CF}
+.st-Afgerond{background:rgba(91,211,154,.16); color:var(--ok)}
+.serp{border-radius:12px; background:#fff; color:#202124; padding:16px; font-family:Arial, sans-serif}
+.serp .u{font-size:12px; color:#4d5156}
+.serp .t{font-size:19px; color:#1a0dab; margin:3px 0; line-height:1.3}
+.serp .d{font-size:13px; color:#4d5156; line-height:1.5}
+.locked{display:grid; justify-items:start; gap:12px; padding:26px; border-radius:16px; border:1px solid rgba(207,174,105,.3); background:linear-gradient(180deg, rgba(207,174,105,.08), rgba(207,174,105,.02))}
+.locked h2{margin:0; font-size:1.25rem}
+.locked p{margin:0; color:#C3CBD6; max-width:52ch}
+.locked ul{margin:0; padding-left:18px; color:#C3CBD6}
+.toast{position:fixed; left:50%; bottom:24px; transform:translate(-50%, 20px); opacity:0; z-index:60; padding:12px 16px; border-radius:12px; background:#1F5C47; color:#EAF7F0; font-weight:600; font-size:.88rem; box-shadow:0 16px 40px -12px rgba(0,0,0,.8); transition:opacity .25s, transform .25s; pointer-events:none; max-width:calc(100% - 32px); text-align:center}
+.toast.on{opacity:1; transform:translate(-50%, 0)}
+.pv-open{display:none}
+
+/* Voorbeeldsite */
+.site{--acc:#CFAE69; border-radius:14px; overflow:hidden; background:#fff; color:#15181d; font-family:var(--f); box-shadow:0 30px 60px -30px rgba(0,0,0,.9)}
+.site .flash{animation:flash 1.1s ease}
+@keyframes flash{0%{box-shadow:0 0 0 0 rgba(207,174,105,0)}20%{box-shadow:0 0 0 4px var(--acc)}100%{box-shadow:0 0 0 0 rgba(207,174,105,0)}}
+.s-nav{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 16px; background:#fff; border-bottom:1px solid #eef0f3}
+.s-nav b{font-size:.98rem; letter-spacing:-.01em}
+.s-nav nav{display:flex; gap:12px; font-size:.76rem; color:#5b6370}
+.s-btn{display:inline-block; white-space:nowrap; padding:8px 13px; border-radius:8px; background:var(--acc); color:#111; font-weight:700; font-size:.78rem}
+.s-hero{position:relative; padding:44px 20px 40px; color:#fff; background:#111 center/cover no-repeat; isolation:isolate}
+.s-hero::before{content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(90deg, rgba(0,0,0,.75), rgba(0,0,0,.25))}
+.s-hero h1{font-size:1.7rem; line-height:1.08; letter-spacing:-.03em; margin:0; max-width:16ch; overflow-wrap:anywhere}
+.s-hero p{margin:10px 0 16px; opacity:.9; font-size:.9rem; max-width:34ch}
+.s-status{display:inline-flex; align-items:center; gap:6px; margin-bottom:12px; padding:5px 10px; border-radius:99px; background:rgba(255,255,255,.14); font-size:.72rem; font-weight:600}
+.s-status i{width:7px; height:7px; border-radius:50%; background:#5BD39A}
+.s-status.closed i{background:#F07A7A}
+.s-sec{padding:22px 20px; border-bottom:1px solid #eef0f3}
+.s-sec h2{font-size:1.05rem; margin:0 0 12px; letter-spacing:-.01em}
+.s-serv{display:grid; gap:8px}
+.s-serv div{display:flex; justify-content:space-between; gap:10px; padding:10px 12px; border-radius:9px; background:#f5f6f8; font-size:.86rem}
+.s-serv b{white-space:nowrap}
+.s-shop{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px}
+.s-prod{border-radius:10px; border:1px solid #eceef2; padding:10px; font-size:.78rem; display:grid; gap:4px}
+.s-prod .img{aspect-ratio:1; border-radius:7px; background:linear-gradient(135deg, var(--acc), #e8eaee); opacity:.85}
+.s-prod b{font-size:.8rem; overflow-wrap:anywhere}
+.s-prod .out{color:#c0392b; font-weight:600}
+.s-prod .low{color:#b7791f; font-weight:600}
+.s-about p{margin:0; color:#4a5260; font-size:.88rem; white-space:pre-line; overflow-wrap:anywhere}
+.s-hours{display:grid; gap:4px; font-size:.84rem}
+.s-hours div{display:flex; justify-content:space-between}
+.s-hours .today{font-weight:700}
+.s-foot{padding:18px 20px; background:#15181d; color:#c9ced6; font-size:.78rem; display:grid; gap:3px}
+.s-foot b{color:#fff; font-size:.9rem}
+
+/* Mobiel */
+@media (max-width:1100px){
+  .shell{grid-template-columns:200px minmax(0,1fr)}
+  .prev{position:fixed; inset:0; z-index:40; transform:translateY(100%); transition:transform .35s cubic-bezier(.2,.8,.2,1); border:0}
+  .prev.open{transform:none}
+  .pv-close{display:inline-flex}
+  .pv-open{display:inline-flex; position:fixed; right:16px; bottom:calc(16px + env(safe-area-inset-bottom, 0px)); z-index:30; box-shadow:0 14px 34px -10px rgba(207,174,105,.6)}
+}
+@media (max-width:760px){
+  body{overflow:auto}
+  html,body{height:auto}
+  .dtop{height:auto; flex-wrap:wrap; padding:10px 14px; gap:10px; position:sticky; top:0; background:var(--bg)}
+  .dtop .back, .dtop .cta-full{display:none}
+  .seg{order:5; width:100%; margin:0}
+  .seg button{flex:1}
+  .shell{display:block; height:auto}
+  .nav{flex-direction:row; overflow-x:auto; border-right:0; border-bottom:1px solid var(--line); padding:10px 12px; gap:6px; position:sticky; top:var(--hh, 104px); background:var(--bg); z-index:15; scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
+  .nav small{display:none}
+  .nav button{width:auto; flex:none; padding:8px 12px; border:1px solid var(--line); white-space:nowrap}
+  .main{overflow:visible; padding:20px 16px 110px}
+  .stats{grid-template-columns:1fr 1fr}
+  .stat:last-child:nth-child(odd){grid-column:1 / -1}
+  .quick{grid-template-columns:1fr}
+  .photos{grid-template-columns:1fr 1fr}
+  .row2{grid-template-columns:1fr}
+  .item{grid-template-columns:minmax(0,1fr) 96px auto}
+  .item.prod{grid-template-columns:1fr auto auto; grid-template-areas:"n n n" "p s t"}
+  .item.prod > :nth-child(1){grid-column:1 / -1}
+  .hr{grid-template-columns:96px auto; }
+  .hr .t, .hr .closed{grid-column:1 / -1}
+  .tbl{overflow-x:auto}
+}
+@media (max-width:480px){ .s-nav nav{display:none} }
+@media (prefers-reduced-motion: reduce){ *{transition:none !important; animation:none !important} }
+</style>
+</head>
+<body>
+<header class="dtop">
+  <a class="brand" href="/" aria-label="StrakWerk, naar de homepage"><span class="strak">STRAK</span><span>WERK</span></a>
+  <span class="pill">Demo</span>
+  <div class="seg" role="group" aria-label="Niveau van het beheerpaneel">
+    <button type="button" data-level="basis" aria-pressed="true">Basis <small>+€50</small></button>
+    <button type="button" data-level="pro" aria-pressed="false">Geavanceerd <small>+€75</small></button>
+  </div>
+  <span class="sp"></span>
+  <a class="back" href="/">← Terug naar StrakWerk</a>
+  <button class="btn" type="button" id="reset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Reset</button>
+  <a class="btn btn--gold cta-full" id="want" href="/?preset=beheer#prijzen">Ik wil dit beheerpaneel</a>
+</header>
+
+<div class="shell">
+  <nav class="nav" id="nav" aria-label="Beheermenu"></nav>
+  <main class="main" id="main" tabindex="-1"></main>
+  <aside class="prev" id="prev" aria-label="Live voorbeeld van de website">
+    <div class="pv-bar"><span class="live"><i></i>Live</span><span class="url" id="pvUrl">jouwgarage.nl</span><button class="btn pv-close" type="button" id="pvClose">Sluiten</button></div>
+    <div class="pv" id="pv"></div>
+  </aside>
+</div>
+<button class="btn btn--gold pv-open" type="button" id="pvOpen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Bekijk website</button>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+"use strict";
+const KEY = "sw-demo-v1";
+const ICONS = {
+  dash:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
+  text:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  photo:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  info:'<path d="M3 21h18M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6"/>',
+  list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+  box:'<path d="M3 7l9-4 9 4v10l-9 4-9-4V7z"/><path d="M3 7l9 4 9-4M12 11v10"/>',
+  cart:'<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.5 12h11.5l2-8H6"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
+  trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+  up:'<path d="M12 16V4M6 10l6-6 6 6"/><path d="M4 20h16"/>'
+};
+const svg = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${ICONS[k]}</svg>`;
+const VIEWS = [
+  { id:"dash",  name:"Dashboard",           icon:"dash" },
+  { id:"text",  name:"Teksten",             icon:"text" },
+  { id:"photo", name:"Foto's",              icon:"photo" },
+  { id:"hours", name:"Openingstijden",      icon:"clock" },
+  { id:"info",  name:"Bedrijfsgegevens",    icon:"info" },
+  { id:"serv",  name:"Diensten & prijzen",  icon:"list",   pro:true },
+  { id:"prod",  name:"Producten",           icon:"box",    pro:true },
+  { id:"ord",   name:"Bestellingen",        icon:"cart",   pro:true },
+  { id:"seo",   name:"Vindbaar in Google",  icon:"search", pro:true }
+];
+const PHOTOS = [
+  { id:"goud",     name:"Goud",     src:"/assets/demo/foto-goud.webp" },
+  { id:"teal",     name:"Teal",     src:"/assets/demo/foto-teal.webp" },
+  { id:"werkplek", name:"Werkplek", src:"/assets/demo/foto-werkplek.webp" }
+];
+const COLORS = ["#CFAE69", "#E4572E", "#2E86DE", "#27AE60", "#8E44AD", "#F5C400"];
+const DAYS = ["Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag", "Zaterdag", "Zondag"];
+const STATUSES = ["Nieuw", "In behandeling", "Verzonden", "Afgerond"];
+const DEFAULT = () => ({
+  level: "basis", view: "dash", introClosed: false,
+  biz: { name: "Jouw Garage", phone: "06 12 34 56 78", email: "info@jouwgarage.nl", address: "Voorbeeldstraat 1, 1234 AB Jouwstad", color: "#CFAE69" },
+  texts: { heroTitle: "Je auto in goede handen.", heroSub: "APK, onderhoud en reparatie. Snel geholpen door vakmensen, voor een eerlijke prijs.", cta: "Maak een afspraak",
+           about: "Wij zijn een zelfstandige garage met liefde voor het vak. Bij ons weet je vooraf wat het kost en krijg je je auto netjes terug." },
+  photo: "goud", upload: null,
+  hours: DAYS.map((d, i) => ({ open: i < 6, from: i === 5 ? "09:00" : "08:00", to: i === 5 ? "14:00" : "17:30" })),
+  services: [{ name: "APK-keuring", price: "45" }, { name: "Kleine onderhoudsbeurt", price: "129" }, { name: "Storingsdiagnose", price: "59" }],
+  products: [{ name: "Ruitenwisserset", price: "24,95", stock: 12, on: true }, { name: "Telefoonhouder", price: "19,95", stock: 3, on: true }, { name: "Achteruitrijcamera", price: "249", stock: 0, on: true }],
+  orders: [{ nr: "1042", name: "M. de Vries", total: "44,90", status: "Nieuw" }, { nr: "1041", name: "S. Bakker", total: "249,00", status: "In behandeling" }, { nr: "1040", name: "J. Smit", total: "19,95", status: "Verzonden" }],
+  seo: { title: "Jouw Garage | APK, onderhoud en reparatie", desc: "Snel geholpen door vakmensen. Bekijk onze diensten en prijzen, of maak direct een afspraak." }
+});
+
+let S;
+try { S = Object.assign(DEFAULT(), JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) { S = DEFAULT(); }
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); return true; } catch (e) { return false; } };
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+const $ = (s, r = document) => r.querySelector(s);
+const pro = () => S.level === "pro";
+const slug = s => (String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "") || "jouwbedrijf") + ".nl";
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+let toastT;
+function toast(msg){ const t = $("#toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 2600); }
+
+/* Niveau */
+function setLevel(l){
+  S.level = l;
+  document.querySelectorAll("[data-level]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.level === l)));
+  $("#want").href = l === "pro" ? "/?preset=beheerpro#prijzen" : "/?preset=beheer#prijzen";
+  save(); renderNav(); renderView(); renderSite();
+}
+document.querySelectorAll("[data-level]").forEach(b => b.addEventListener("click", () => {
+  setLevel(b.dataset.level);
+  toast(b.dataset.level === "pro" ? "Geavanceerd: nu kun je ook diensten, producten, bestellingen en Google aanpassen." : "Basis: teksten, foto's, openingstijden en gegevens.");
+}));
+
+/* Menu */
+function renderNav(){
+  const nav = $("#nav");
+  nav.innerHTML = `<small>Website</small>` + VIEWS.map((v, i) =>
+    (i === 5 ? `<small>Geavanceerd</small>` : "") +
+    `<button type="button" data-view="${v.id}" ${S.view === v.id ? 'aria-current="page"' : ""}>${svg(v.icon)}<span>${v.name}</span>${v.pro && !pro() ? '<span class="lock">Pro</span>' : ""}</button>`).join("");
+  const cur = nav.querySelector("[aria-current]");
+  if (cur && nav.scrollWidth > nav.clientWidth) nav.scrollLeft = cur.offsetLeft - (nav.clientWidth - cur.offsetWidth) / 2;
+}
+$("#nav").addEventListener("click", e => {
+  const b = e.target.closest("[data-view]"); if (!b) return;
+  S.view = b.dataset.view; save(); renderNav(); renderView();
+  $("#main").scrollTop = 0;
+  if (innerWidth <= 760){ const y = $("#main").getBoundingClientRect().top + scrollY - document.querySelector(".dtop").offsetHeight - $("#nav").offsetHeight; scrollTo({ top: Math.max(0, y), behavior: "auto" }); }
+});
+
+/* Bewerkpaneel */
+const field = (label, key, val, opt = {}) => {
+  const id = "f-" + key.replace(/\W/g, "-");
+  const max = opt.max ? ` maxlength="${opt.max}"` : "";
+  const ctl = opt.area ? `<textarea id="${id}" data-k="${key}"${max}>${esc(val)}</textarea>` : `<input id="${id}" data-k="${key}" value="${esc(val)}"${max}${opt.type ? ` type="${opt.type}"` : ""}>`;
+  return `<div class="field"><label for="${id}">${label}</label>${ctl}${opt.max ? `<span class="cnt" data-cnt="${key}">${String(val).length}/${opt.max}</span>` : ""}</div>`;
+};
+const lockedPanel = v => `<div class="locked">
+    <span class="pill">Geavanceerd beheerpaneel · +€75</span>
+    <h2>${v.name} zit in het geavanceerde beheerpaneel</h2>
+    <p>Met Geavanceerd pas je letterlijk alles zelf aan. Bijvoorbeeld:</p>
+    <ul><li>Diensten en prijzen toevoegen en wijzigen</li><li>Producten, voorraad en bestellingen van je webshop</li><li>Hoe je site in Google verschijnt</li></ul>
+    <button class="btn btn--gold" type="button" data-go-pro>Bekijk in Geavanceerd</button>
+  </div>`;
+
+function renderView(){
+  const v = VIEWS.find(x => x.id === S.view) || VIEWS[0];
+  const m = $("#main");
+  const intro = S.introClosed ? "" : `<div class="intro"><div><b>Dit is een demo. Probeer gerust alles uit.</b><p>Pas iets aan en je ziet je website direct veranderen. Er wordt niets echt opgeslagen of gepubliceerd: alles blijft in jouw browser.</p></div><button type="button" data-close-intro aria-label="Melding sluiten">×</button></div>`;
+  const head = `<h1 class="v">${v.name}</h1>`;
+  if (v.pro && !pro()){ m.innerHTML = intro + head + `<p class="vsub">Alleen beschikbaar in het geavanceerde beheerpaneel.</p>` + lockedPanel(v); return; }
+  let body = "";
+  if (v.id === "dash"){
+    const newOrders = S.orders.filter(o => o.status === "Nieuw").length;
+    body = `<p class="vsub">Welkom terug. Hier zie je in één oogopslag hoe je site ervoor staat.</p>
+      <div class="stats">
+        <div class="stat"><span>Bezoekers deze week <span class="tag">Voorbeeld</span></span><b>214</b><em>+18% t.o.v. vorige week</em></div>
+        <div class="stat"><span>Aanvragen via WhatsApp <span class="tag">Voorbeeld</span></span><b>9</b><em>3 vandaag</em></div>
+        ${pro() ? `<div class="stat"><span>Nieuwe bestellingen</span><b>${newOrders}</b><em>${S.products.filter(p => p.on && +p.stock === 0).length} product(en) uitverkocht</em></div>`
+                : `<div class="stat"><span>Openingstijden</span><b>${isOpenNow() ? "Open" : "Dicht"}</b><em>volgens je ingestelde tijden</em></div>`}
+      </div>
+      <div class="card"><h2>Snel aanpassen</h2><div class="quick">
+        <button type="button" data-view-go="text">${svg("text")}Tekst op de homepage</button>
+        <button type="button" data-view-go="photo">${svg("photo")}Foto bovenaan wijzigen</button>
+        <button type="button" data-view-go="hours">${svg("clock")}Openingstijden</button>
+        <button type="button" data-view-go="${pro() ? "prod" : "info"}">${svg(pro() ? "box" : "info")}${pro() ? "Producten en voorraad" : "Telefoon en adres"}</button>
+      </div></div>
+      <div class="card"><h2>Klaar met aanpassen?</h2><p style="margin:0 0 12px;color:var(--muted)">In een echt beheerpaneel staat je wijziging na publiceren direct live.</p><button class="btn btn--gold" type="button" data-publish>Publiceren</button></div>`;
+  }
+  if (v.id === "text"){
+    body = `<p class="vsub">De belangrijkste teksten van je homepage.</p>
+      <div class="card"><h2>Bovenaan de pagina</h2>${field("Titel", "texts.heroTitle", S.texts.heroTitle, { max: 60 })}${field("Ondertitel", "texts.heroSub", S.texts.heroSub, { area: true, max: 160 })}${field("Tekst op de knop", "texts.cta", S.texts.cta, { max: 28 })}</div>
+      <div class="card"><h2>Over ons</h2>${field("Tekst", "texts.about", S.texts.about, { area: true, max: 400 })}</div>`;
+  }
+  if (v.id === "photo"){
+    body = `<p class="vsub">Kies de foto bovenaan je homepage, of upload je eigen foto.</p>
+      <div class="card"><div class="photos">
+        ${PHOTOS.map(p => `<button type="button" class="photo" data-photo="${p.id}" aria-pressed="${S.photo === p.id}" style="background-image:url(${p.src})"><span>${p.name}</span></button>`).join("")}
+        <label class="photo upload" ${S.photo === "upload" ? 'aria-pressed="true" style="border-style:solid;border-color:var(--gold);background-image:url(' + (S.upload || "") + ')"' : ""}>${svg("up")}<span style="position:static;background:none;padding:0">Eigen foto</span><input type="file" accept="image/*" id="up" hidden></label>
+      </div><p style="margin:12px 0 0;color:var(--muted);font-size:.82rem">Je eigen foto blijft in je browser en wordt nergens naartoe gestuurd.</p></div>`;
+  }
+  if (v.id === "hours"){
+    body = `<p class="vsub">Je website laat automatisch zien of je nu open bent.</p>
+      <div class="card"><div class="hrs">${DAYS.map((d, i) => { const h = S.hours[i]; return `<div class="hr">
+        <span class="lbl" style="font-size:.88rem;color:var(--text)">${d}</span>
+        <span class="sw"><input type="checkbox" data-hopen="${i}" ${h.open ? "checked" : ""} aria-label="${d} open"><span></span></span>
+        ${h.open ? `<span class="t"><input class="inp" type="time" data-hfrom="${i}" value="${h.from}" aria-label="${d} open vanaf"><span>tot</span><input class="inp" type="time" data-hto="${i}" value="${h.to}" aria-label="${d} open tot"></span>` : `<span class="closed">Gesloten</span>`}
+      </div>`; }).join("")}</div></div>`;
+  }
+  if (v.id === "info"){
+    body = `<p class="vsub">Je gegevens staan op meerdere plekken op je site. Hier pas je ze in één keer aan.</p>
+      <div class="card">${field("Bedrijfsnaam", "biz.name", S.biz.name, { max: 32 })}<div class="row2">${field("Telefoon", "biz.phone", S.biz.phone, { type: "tel" })}${field("E-mail", "biz.email", S.biz.email, { type: "email" })}</div>${field("Adres", "biz.address", S.biz.address)}</div>
+      <div class="card"><h2>Huisstijlkleur</h2><div class="colors">${COLORS.map(c => `<button type="button" data-color="${c}" aria-pressed="${S.biz.color === c}" style="background:${c}" aria-label="Kleur ${c}"></button>`).join("")}</div></div>`;
+  }
+  if (v.id === "serv"){
+    body = `<p class="vsub">Voeg diensten toe, verander prijzen of haal iets weg.</p>
+      <div class="card"><div class="list">${S.services.map((s, i) => `<div class="item">
+        <input class="inp" data-serv="${i}" data-f="name" value="${esc(s.name)}" aria-label="Naam dienst" maxlength="40">
+        <span class="eur"><input class="inp" data-serv="${i}" data-f="price" value="${esc(s.price)}" aria-label="Prijs" inputmode="decimal" maxlength="8"></span>
+        <button class="del" type="button" data-del-serv="${i}" aria-label="Dienst verwijderen">${svg("trash")}</button></div>`).join("")}</div>
+        ${S.services.length < 8 ? `<button class="btn add" type="button" data-add-serv>+ Dienst toevoegen</button>` : ""}</div>`;
+  }
+  if (v.id === "prod"){
+    body = `<p class="vsub">Beheer je webshop: prijzen, voorraad en wat er op je site staat.</p>
+      <div class="card"><div class="list">${S.products.map((p, i) => `<div class="item prod">
+        <input class="inp" data-prod="${i}" data-f="name" value="${esc(p.name)}" aria-label="Productnaam" maxlength="40">
+        <span class="eur"><input class="inp" data-prod="${i}" data-f="price" value="${esc(p.price)}" aria-label="Prijs" inputmode="decimal" maxlength="8"></span>
+        <span class="step" role="group" aria-label="Voorraad"><button type="button" data-stock="${i}" data-d="-1" aria-label="Minder">−</button><output>${p.stock}</output><button type="button" data-stock="${i}" data-d="1" aria-label="Meer">+</button></span>
+        <span class="sw" title="Op de site"><input type="checkbox" data-pon="${i}" ${p.on ? "checked" : ""} aria-label="Toon ${esc(p.name)} op de site"><span></span></span>
+        <button class="del" type="button" data-del-prod="${i}" aria-label="Product verwijderen">${svg("trash")}</button></div>`).join("")}</div>
+        ${S.products.length < 9 ? `<button class="btn add" type="button" data-add-prod>+ Product toevoegen</button>` : ""}</div>`;
+  }
+  if (v.id === "ord"){
+    body = `<p class="vsub">Bestellingen uit je webshop komen hier binnen. <span class="tag">Voorbeelddata</span></p>
+      <div class="card tbl"><table><thead><tr><th>Nr.</th><th>Klant</th><th>Totaal</th><th>Status</th></tr></thead><tbody>
+      ${S.orders.map((o, i) => `<tr><td>#${esc(o.nr)}</td><td>${esc(o.name)}</td><td>€ ${esc(o.total)}</td><td><select data-ord="${i}" aria-label="Status bestelling ${esc(o.nr)}">${STATUSES.map(s => `<option ${o.status === s ? "selected" : ""}>${s}</option>`).join("")}</select></td></tr>`).join("")}
+      </tbody></table></div>`;
+  }
+  if (v.id === "seo"){
+    body = `<p class="vsub">Bepaal hoe je site eruitziet in de zoekresultaten van Google.</p>
+      <div class="card">${field("Titel in Google", "seo.title", S.seo.title, { max: 60 })}${field("Omschrijving", "seo.desc", S.seo.desc, { area: true, max: 155 })}</div>
+      <div class="card"><h2>Zo zie je eruit in Google</h2><div class="serp"><div class="u">${esc(slug(S.biz.name))}</div><div class="t" id="serpT">${esc(S.seo.title)}</div><div class="d" id="serpD">${esc(S.seo.desc)}</div></div></div>`;
+  }
+  m.innerHTML = intro + head + body;
+}
+
+/* Invoer */
+const setPath = (path, val) => { const [a, b] = path.split("."); S[a][b] = val; };
+const FLASH = { "texts.heroTitle":"hero", "texts.heroSub":"hero", "texts.cta":"hero", "texts.about":"about", "biz.name":"nav", "biz.phone":"foot", "biz.email":"foot", "biz.address":"foot" };
+function flash(part){
+  const el = document.querySelector(`#pv [data-part="${part}"]`); if (!el) return;
+  if (!reduce){ el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); }
+  const pv = $("#pv"), r = el.getBoundingClientRect(), pr = pv.getBoundingClientRect();
+  if (r.top < pr.top || r.bottom > pr.bottom) pv.scrollTo({ top: pv.scrollTop + r.top - pr.top - 20, behavior: reduce ? "auto" : "smooth" });
+}
+const main = $("#main");
+main.addEventListener("input", e => {
+  const t = e.target;
+  if (t.dataset.k){
+    setPath(t.dataset.k, t.value);
+    const c = document.querySelector(`[data-cnt="${t.dataset.k}"]`); if (c){ c.textContent = `${t.value.length}/${t.maxLength}`; c.classList.toggle("over", t.value.length >= t.maxLength); }
+    if (t.dataset.k === "seo.title") $("#serpT").textContent = t.value;
+    if (t.dataset.k === "seo.desc") $("#serpD").textContent = t.value;
+    save(); renderSite(); flash(FLASH[t.dataset.k] || (t.dataset.k.startsWith("seo") ? "" : "hero"));
+  }
+  if (t.dataset.serv){ S.services[+t.dataset.serv][t.dataset.f] = t.value; save(); renderSite(); flash("serv"); }
+  if (t.dataset.prod){ S.products[+t.dataset.prod][t.dataset.f] = t.value; save(); renderSite(); flash("shop"); }
+});
+main.addEventListener("change", e => {
+  const t = e.target;
+  if (t.dataset.hopen){ S.hours[+t.dataset.hopen].open = t.checked; save(); renderView(); renderSite(); flash("hours"); }
+  if (t.dataset.hfrom){ S.hours[+t.dataset.hfrom].from = t.value; save(); renderSite(); flash("hours"); }
+  if (t.dataset.hto){ S.hours[+t.dataset.hto].to = t.value; save(); renderSite(); flash("hours"); }
+  if (t.dataset.pon){ S.products[+t.dataset.pon].on = t.checked; save(); renderSite(); flash("shop"); }
+  if (t.dataset.ord){ S.orders[+t.dataset.ord].status = t.value; save(); toast(`Bestelling #${S.orders[+t.dataset.ord].nr}: ${t.value}`); }
+  if (t.id === "up" && t.files && t.files[0]) loadUpload(t.files[0]);
+});
+main.addEventListener("click", e => {
+  const t = e.target.closest("button"); if (!t) return;
+  if (t.hasAttribute("data-close-intro")){ S.introClosed = true; save(); renderView(); return; }
+  if (t.hasAttribute("data-go-pro")){ setLevel("pro"); toast("Geavanceerd staat aan."); return; }
+  if (t.dataset.viewGo){ S.view = t.dataset.viewGo; save(); renderNav(); renderView(); main.scrollTop = 0; return; }
+  if (t.hasAttribute("data-publish")){ toast("Gepubliceerd! (Demo: alleen zichtbaar in jouw browser.)"); return; }
+  if (t.dataset.photo){ S.photo = t.dataset.photo; save(); renderView(); renderSite(); flash("hero"); return; }
+  if (t.dataset.color){ S.biz.color = t.dataset.color; save(); renderView(); renderSite(); flash("hero"); return; }
+  if (t.hasAttribute("data-add-serv")){ S.services.push({ name: "Nieuwe dienst", price: "0" }); save(); renderView(); renderSite(); flash("serv"); const ins = main.querySelectorAll('[data-f="name"]'); ins[ins.length - 1]?.select(); return; }
+  if (t.dataset.delServ){ S.services.splice(+t.dataset.delServ, 1); save(); renderView(); renderSite(); flash("serv"); return; }
+  if (t.hasAttribute("data-add-prod")){ S.products.push({ name: "Nieuw product", price: "9,95", stock: 5, on: true }); save(); renderView(); renderSite(); flash("shop"); const ins = main.querySelectorAll('[data-f="name"]'); ins[ins.length - 1]?.select(); return; }
+  if (t.dataset.delProd){ S.products.splice(+t.dataset.delProd, 1); save(); renderView(); renderSite(); flash("shop"); return; }
+  if (t.dataset.stock){ const p = S.products[+t.dataset.stock]; p.stock = Math.max(0, Math.min(999, (+p.stock || 0) + +t.dataset.d)); t.parentElement.querySelector("output").textContent = p.stock; save(); renderSite(); flash("shop"); return; }
+});
+
+function loadUpload(file){
+  if (!/^image\//.test(file.type)){ toast("Kies een afbeelding."); return; }
+  const r = new FileReader();
+  r.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, 1400 / img.width), c = document.createElement("canvas");
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      S.upload = c.toDataURL("image/jpeg", .8); S.photo = "upload";
+      if (!save()){ S.upload = null; S.photo = "goud"; save(); S.upload = c.toDataURL("image/jpeg", .8); S.photo = "upload"; toast("Foto staat erin, maar is te groot om te onthouden na herladen."); }
+      renderView(); renderSite(); flash("hero");
+    };
+    img.onerror = () => toast("Deze afbeelding kan niet worden geladen.");
+    img.src = r.result;
+  };
+  r.readAsDataURL(file);
+}
+
+/* Open of dicht */
+function isOpenNow(){
+  const d = new Date(), i = (d.getDay() + 6) % 7, h = S.hours[i];
+  if (!h.open) return false;
+  const now = d.getHours() * 60 + d.getMinutes(), m = t => { const [a, b] = String(t || "0:0").split(":"); return +a * 60 + +b; };
+  return now >= m(h.from) && now < m(h.to);
+}
+
+/* Voorbeeldsite */
+function renderSite(){
+  const ph = S.photo === "upload" && S.upload ? S.upload : (PHOTOS.find(p => p.id === S.photo) || PHOTOS[0]).src;
+  const today = (new Date().getDay() + 6) % 7, open = isOpenNow();
+  const shop = pro() ? S.products.filter(p => p.on) : [];
+  $("#pvUrl").textContent = slug(S.biz.name);
+  $("#pv").innerHTML = `<div class="site" style="--acc:${S.biz.color}">
+    <div class="s-nav" data-part="nav"><b>${esc(S.biz.name)}</b><nav><span>Diensten</span>${shop.length ? "<span>Webshop</span>" : ""}<span>Contact</span></nav><span class="s-btn">Bel ons</span></div>
+    <div class="s-hero" data-part="hero" style="background-image:url('${ph.replace(/'/g, "%27")}')">
+      <span class="s-status ${open ? "" : "closed"}"><i></i>${open ? "Nu open" : "Nu gesloten"}</span>
+      <h1>${esc(S.texts.heroTitle)}</h1><p>${esc(S.texts.heroSub)}</p><span class="s-btn">${esc(S.texts.cta)}</span>
+    </div>
+    <div class="s-sec" data-part="serv"><h2>Diensten en prijzen</h2><div class="s-serv">${S.services.map(s => `<div><span>${esc(s.name)}</span><b>€ ${esc(s.price)}</b></div>`).join("") || '<div><span>Nog geen diensten</span></div>'}</div></div>
+    ${shop.length ? `<div class="s-sec" data-part="shop"><h2>Webshop</h2><div class="s-shop">${shop.map(p => `<div class="s-prod"><div class="img"></div><b>${esc(p.name)}</b><span>€ ${esc(p.price)}</span>${+p.stock === 0 ? '<span class="out">Uitverkocht</span>' : +p.stock <= 3 ? `<span class="low">Nog ${p.stock} op voorraad</span>` : "<span>Op voorraad</span>"}</div>`).join("")}</div></div>` : ""}
+    <div class="s-sec s-about" data-part="about"><h2>Over ons</h2><p>${esc(S.texts.about)}</p></div>
+    <div class="s-sec" data-part="hours"><h2>Openingstijden</h2><div class="s-hours">${DAYS.map((d, i) => { const h = S.hours[i]; return `<div class="${i === today ? "today" : ""}"><span>${d}</span><span>${h.open ? `${esc(h.from)} – ${esc(h.to)}` : "Gesloten"}</span></div>`; }).join("")}</div></div>
+    <div class="s-foot" data-part="foot"><b>${esc(S.biz.name)}</b><span>${esc(S.biz.phone)} · ${esc(S.biz.email)}</span><span>${esc(S.biz.address)}</span></div>
+  </div>`;
+}
+
+/* Voorbeeld op mobiel */
+const prev = $("#prev");
+$("#pvOpen").addEventListener("click", () => { prev.classList.add("open"); $("#pvClose").focus(); });
+$("#pvClose").addEventListener("click", () => { prev.classList.remove("open"); $("#pvOpen").focus(); });
+addEventListener("keydown", e => { if (e.key === "Escape" && prev.classList.contains("open")) prev.classList.remove("open"); });
+
+$("#reset").addEventListener("click", () => {
+  const keepIntro = S.introClosed; S = DEFAULT(); S.introClosed = keepIntro;
+  try { localStorage.removeItem(KEY); } catch (e) {}
+  setLevel("basis"); toast("De demo staat weer zoals in het begin.");
+});
+
+const top = document.querySelector(".dtop");
+const setHH = () => document.documentElement.style.setProperty("--hh", top.offsetHeight + "px");
+setHH(); addEventListener("resize", setHH);
+if (!VIEWS.some(v => v.id === S.view)) S.view = "dash";
+setLevel(S.level === "pro" ? "pro" : "basis");
+})();
+</script>
+</body>
+</html>
