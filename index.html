@@ -908,7 +908,7 @@ body.mbar-on .wa-fab{transform:scale(0)}
         </div>
         <div class="float f2">
           <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 12h.01M10 12h8"/></svg></span>
-          <span>Kentekencheck<small>RDW-koppeling</small></span><span class="amt">+€50</span>
+          <span>Kentekencheck<small>RDW-koppeling</small></span><span class="amt">+€25</span>
         </div>
         <div class="float f3">
           <span class="ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2z"/></svg></span>
@@ -1206,7 +1206,7 @@ Locatie: Rijswijk<small>09:41 ✓✓</small></div>
             <div class="scan-out"><span class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Herkend</span><b>GH-512-K</b><small>Volkswagen Golf · 2019</small></div>
           </div>
           <div class="sp-body">
-            <div class="sp-top"><h3>Kentekenherkenning</h3><span class="sp-price">+€75</span></div>
+            <div class="sp-top"><h3>Kentekenherkenning</h3><span class="sp-price">+€35</span></div>
             <p>De klant maakt een foto van de kentekenplaat en de site vult het kenteken zelf in. Geen typefouten en sneller een aanvraag, ideaal langs de weg.</p>
             <ul class="sp-list"><li>Werkt met de camera van de telefoon</li><li>Samen met de kentekencheck: merk en model erbij</li><li>Live bij Sleepdienst De Tak</li></ul>
             <button class="btn btn--gold" type="button" data-pick-opt="kentekenfoto">Zet aan in je offerte</button>
@@ -1369,7 +1369,7 @@ Locatie: Rijswijk<small>09:41 ✓✓</small></div>
           <ul class="qlines" id="qlines"></ul>
           <div class="qtotal">
             <div class="row"><span class="lbl">Totaal eenmalig</span><span class="big" id="qtotal">€200</span></div>
-            <div class="row" id="qmo-row" hidden><span class="lbl">Per maand</span><span class="mo" id="qmo">€15</span></div>
+            <div class="row" id="qmo-row" hidden><span class="lbl">Per maand</span><span class="mo" id="qmo">€9</span></div>
           </div>
           <div class="qactions">
             <a class="btn btn--gold" id="qwa" href="https://wa.me/31623462397" target="_blank" rel="noopener">
@@ -1552,34 +1552,34 @@ const CONFIG = {
     { title: "Functies", items: [
       { id:"beheer",   name:"Beheerpaneel basis",      price:50,  desc:"Zelf teksten, foto's en bedrijfsgegevens aanpassen, zonder code.", excl:"beheerpro", demo:true },
       { id:"beheerpro",name:"Beheerpaneel geavanceerd",price:75,  desc:"Letterlijk alles zelf aanpassen: producten, merken, diensten, SEO en webshop.", live:"cartronic", excl:"beheer", demo:true },
-      { id:"kenteken", name:"Kentekencheck (RDW)",     price:50,  desc:"Klant typt een kenteken, merk en model verschijnen direct.", live:"vagpro" },
-      { id:"kentekenfoto", name:"Kentekenherkenning met camera", price:75, desc:"Klant maakt een foto van de kentekenplaat, de site leest het kenteken zelf uit.", live:"detak", nieuw:true },
-      { id:"aanvraag", name:"Aanvraag via WhatsApp",   price:35,  desc:"Formulier dat aanvragen kant-en-klaar naar je WhatsApp stuurt.", live:"detak" },
-      { id:"locatie",  name:"Locatie delen",           price:25,  desc:"Met één tik deelt de klant zijn locatie in de aanvraag.", live:"detak", nieuw:true },
-      { id:"booking",  name:"Afspraken plannen",       price:75,  desc:"Klanten kiezen zelf een datum en tijd." },
-      { id:"calculator", name:"Prijscalculator",       price:75,  desc:"Klanten stellen zelf hun prijs samen, zoals op deze site.", nieuw:true },
-      { id:"chat",     name:"Chatassistent",           price:95,  desc:"Beantwoordt dag en nacht de meest gestelde vragen en stuurt door naar WhatsApp.", nieuw:true },
-      { id:"webshop",  name:"Webshop",                 price:150, desc:"Producten, winkelwagen en online betalen met iDEAL.", live:"cartronic" }
+      { id:"kenteken", name:"Kentekencheck (RDW)",     price:25,  desc:"Klant typt een kenteken, merk en model verschijnen direct.", live:"vagpro" },
+      { id:"kentekenfoto", name:"Kentekenherkenning met camera", price:35, desc:"Klant maakt een foto van de kentekenplaat, de site leest het kenteken zelf uit.", live:"detak", nieuw:true },
+      { id:"aanvraag", name:"Aanvraag via WhatsApp",   price:15,  desc:"Formulier dat aanvragen kant-en-klaar naar je WhatsApp stuurt.", live:"detak" },
+      { id:"locatie",  name:"Locatie delen",           price:10,  desc:"Met één tik deelt de klant zijn locatie in de aanvraag.", live:"detak", nieuw:true },
+      { id:"booking",  name:"Afspraken plannen",       price:35,  desc:"Klanten kiezen zelf een datum en tijd." },
+      { id:"calculator", name:"Prijscalculator",       price:35,  desc:"Klanten stellen zelf hun prijs samen, zoals op deze site.", nieuw:true },
+      { id:"chat",     name:"Chatassistent",           price:45,  desc:"Beantwoordt dag en nacht de meest gestelde vragen en stuurt door naar WhatsApp.", nieuw:true },
+      { id:"webshop",  name:"Webshop",                 price:95, desc:"Producten, winkelwagen en online betalen met iDEAL.", live:"cartronic" }
     ]},
     { title: "Uitbreiden", items: [
-      { id:"pagina",   name:"Extra pagina",            price:25,  desc:"Bijvoorbeeld een pagina per dienst.", qty:true, max:12, unit:"pagina" },
-      { id:"taal",     name:"Extra taal",              price:50,  desc:"Je site ook in het Engels, Duits of een andere taal.", qty:true, max:4, unit:"taal", live:"detak" },
-      { id:"regio",    name:"Regiopagina's",           price:50,  desc:"Beter gevonden in Google in de plaatsen om je heen.", live:"detak" },
-      { id:"reviews",  name:"Google reviews & kaart",  price:25,  desc:"Je beste reviews en een routekaart op je site." },
-      { id:"blog",     name:"Blog of kennisbank",      price:50,  desc:"Artikelen en antwoorden op vragen, goed voor Google.", live:"detak" },
-      { id:"portfolio",name:"Portfolio & video's",     price:35,  desc:"Laat je werk zien met projecten, foto's en video's.", live:"cartronic" },
-      { id:"vacatures",name:"Vacaturepagina",          price:25,  desc:"Vacatures plaatsen en sollicitaties via WhatsApp of mail." },
-      { id:"nieuwsbrief", name:"Nieuwsbrief-aanmelding", price:25, desc:"Bezoekers schrijven zich in voor je nieuwsbrief." }
+      { id:"pagina",   name:"Extra pagina",            price:15,  desc:"Bijvoorbeeld een pagina per dienst.", qty:true, max:12, unit:"pagina" },
+      { id:"taal",     name:"Extra taal",              price:25,  desc:"Je site ook in het Engels, Duits of een andere taal.", qty:true, max:4, unit:"taal", live:"detak" },
+      { id:"regio",    name:"Regiopagina's",           price:25,  desc:"Beter gevonden in Google in de plaatsen om je heen.", live:"detak" },
+      { id:"reviews",  name:"Google reviews & kaart",  price:10,  desc:"Je beste reviews en een routekaart op je site." },
+      { id:"blog",     name:"Blog of kennisbank",      price:25,  desc:"Artikelen en antwoorden op vragen, goed voor Google.", live:"detak" },
+      { id:"portfolio",name:"Portfolio & video's",     price:15,  desc:"Laat je werk zien met projecten, foto's en video's.", live:"cartronic" },
+      { id:"vacatures",name:"Vacaturepagina",          price:10,  desc:"Vacatures plaatsen en sollicitaties via WhatsApp of mail." },
+      { id:"nieuwsbrief", name:"Nieuwsbrief-aanmelding", price:10, desc:"Bezoekers schrijven zich in voor je nieuwsbrief." }
     ]},
     { title: "Extra", items: [
-      { id:"anim",     name:"Premium animaties",       price:50,  desc:"Vloeiende scroll-animaties, zoals op deze site." },
-      { id:"logo",     name:"Logo-ontwerp",            price:50,  desc:"Een strak logo in een paar varianten." },
-      { id:"teksten",  name:"Teksten laten schrijven", price:40,  desc:"Ik schrijf de teksten voor je, gericht op Google." },
-      { id:"gbp",      name:"Google Bedrijfsprofiel",  price:35,  desc:"Ik zet je profiel op of maak het compleet, met foto's en openingstijden.", nieuw:true },
-      { id:"avg",      name:"Cookiebanner & privacy",  price:25,  desc:"Cookiemelding en privacyverklaring volgens de AVG." },
-      { id:"spoed",    name:"Spoedlevering",           price:75,  desc:"Je basissite binnen 3 werkdagen online.", nieuw:true },
-      { id:"onderhoud",name:"Hosting & onderhoud",     price:15,  desc:"Updates, back-ups en kleine aanpassingen.", monthly:true, excl:"onderhoudplus" },
-      { id:"onderhoudplus", name:"Onderhoud Plus",     price:29,  desc:"Hosting, updates en elke maand een uur aanpassingen.", monthly:true, excl:"onderhoud", nieuw:true }
+      { id:"anim",     name:"Premium animaties",       price:25,  desc:"Vloeiende scroll-animaties, zoals op deze site." },
+      { id:"logo",     name:"Logo-ontwerp",            price:25,  desc:"Een strak logo in een paar varianten." },
+      { id:"teksten",  name:"Teksten laten schrijven", price:20,  desc:"Ik schrijf de teksten voor je, gericht op Google." },
+      { id:"gbp",      name:"Google Bedrijfsprofiel",  price:15,  desc:"Ik zet je profiel op of maak het compleet, met foto's en openingstijden.", nieuw:true },
+      { id:"avg",      name:"Cookiebanner & privacy",  price:10,  desc:"Cookiemelding en privacyverklaring volgens de AVG." },
+      { id:"spoed",    name:"Spoedlevering",           price:35,  desc:"Je basissite binnen 3 werkdagen online.", nieuw:true },
+      { id:"onderhoud",name:"Hosting & onderhoud",     price:9,  desc:"Updates, back-ups en kleine aanpassingen.", monthly:true, excl:"onderhoudplus" },
+      { id:"onderhoudplus", name:"Onderhoud Plus",     price:19,  desc:"Hosting, updates en elke maand een uur aanpassingen.", monthly:true, excl:"onderhoud", nieuw:true }
     ]}
   ],
   presets: {
