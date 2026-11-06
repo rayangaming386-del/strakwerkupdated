@@ -2,6 +2,14 @@
 (() => {
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  // Meten: WhatsApp- en calculatorklikken op subpagina's (anoniem)
+  document.addEventListener("click", e => {
+    const l = e.target.closest("a[href]"); if (!l || !window.va) return;
+    const page = location.pathname.replace(/\.html$/, "");
+    if (/wa\.me\//.test(l.href)) window.va("event", { name: "WhatsApp", data: { plek: page } });
+    else if (/#prijzen$/.test(l.getAttribute("href"))) window.va("event", { name: "Naar calculator", data: { plek: page } });
+  }, { capture: true });
+
   // Paginawissel op het grote scherm
   const imgs = [...document.querySelectorAll(".screen > img")], btns = [...document.querySelectorAll(".tabs button")];
   let cur = 0, auto;
@@ -42,8 +50,13 @@
 
   if (document.querySelector(".c-stage .win")) gsap.to(".c-stage .win", { scale: 1.04, ease: "none", scrollTrigger: { trigger: ".c-stage", start: "top top", end: "bottom top", scrub: true } });
 
-  if (window.SplitText) document.querySelectorAll(".c-head h2, .c-box h2").forEach(h => SplitText.create(h, { type: "lines", mask: "lines", linesClass: "split-line", autoSplit: true,
-    onSplit: self => gsap.from(self.lines, { yPercent: 110, duration: 1.1, stagger: .09, ease: "power4.out", scrollTrigger: { trigger: h, start: "top 86%", once: true } }) }));
+  if (window.SplitText){
+    // Koppen pas splitsen als ze in de buurt van het scherm komen
+    const io = new IntersectionObserver(es => es.forEach(en => { if (!en.isIntersecting) return; io.unobserve(en.target); const h = en.target;
+      SplitText.create(h, { type: "lines", mask: "lines", linesClass: "split-line", autoSplit: true,
+        onSplit: self => { if (h.dataset.shown) return; return gsap.from(self.lines, { yPercent: 110, duration: 1.1, stagger: .09, ease: "power4.out", onComplete: () => h.dataset.shown = 1, scrollTrigger: { trigger: h, start: "top 86%", once: true } }); } }); }), { rootMargin: "700px 0px" });
+    document.querySelectorAll(".c-head h2, .c-box h2").forEach(h => io.observe(h));
+  }
   gsap.utils.toArray(".c-head p, .c-head .kicker").forEach(el => gsap.from(el, { y: 30, opacity: 0, duration: 1, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 88%" } }));
   gsap.utils.toArray(".feat").forEach(g => gsap.from(g.children, { y: 70, opacity: 0, duration: 1, stagger: .07, ease: "power4.out", scrollTrigger: { trigger: g, start: "top 84%" } }));
   gsap.utils.toArray(".gal figure").forEach((f, i) => {

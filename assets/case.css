@@ -130,3 +130,42 @@ footer a:hover{color:var(--gold)}
 .d-more{display:flex; flex-wrap:wrap; gap:8px}
 .d-more a{padding:9px 14px; border-radius:99px; border:1px solid var(--line-2); font-size:.9rem; font-weight:600; transition:border-color .25s, color .25s}
 .d-more a:hover{border-color:var(--gold); color:var(--gold)}
+
+/* Actiebalk (tijdelijk, via case.js) */
+.promo-strip{display:flex; justify-content:center; align-items:center; gap:10px; flex-wrap:wrap; padding:9px 16px; background:linear-gradient(90deg, #A9843F, #CFAE69 50%, #A9843F); color:#17130B; font-size:.86rem; font-weight:600; text-align:center}
+.promo-strip b{padding:3px 9px; border-radius:99px; background:#17130B; color:#CFAE69; font-size:.7rem; letter-spacing:.08em; text-transform:uppercase}
+
+/* Kennisbank */
+.kb-list{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:16px}
+@media (max-width:760px){ .kb-list{grid-template-columns:1fr} }
+.kb-card{display:grid; gap:10px; padding:26px; border-radius:var(--r); background:var(--card); border:1px solid var(--line); transition:border-color .3s, transform .3s}
+.kb-card:hover{border-color:rgba(207,174,105,.45); transform:translateY(-3px)}
+.kb-card small{font:600 .74rem var(--f-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--gold)}
+.kb-card h2{font-size:1.35rem; letter-spacing:-.02em}
+.kb-card p{color:var(--muted); font-size:.95rem}
+.kb-card span{color:var(--gold); font-weight:700; font-size:.9rem; margin-top:4px}
+.art{max-width:760px}
+.art-meta{display:flex; gap:10px; flex-wrap:wrap; color:var(--muted); font-size:.9rem}
+.art-meta span + span::before{content:"·"; margin-right:10px; opacity:.6}
+.art-body{display:grid; gap:18px; color:#C9D1DC; font-size:1.06rem; line-height:1.7}
+.art-body h2{font-size:clamp(1.45rem, 3vw, 1.9rem); color:var(--text); margin-top:22px; letter-spacing:-.025em}
+.art-body h3{font-size:1.15rem; color:var(--text); margin-top:8px}
+.art-body ul{margin:0; padding-left:20px; display:grid; gap:8px}
+.art-body strong{color:var(--text)}
+.art-body a{color:var(--gold); text-decoration:underline; text-underline-offset:3px}
+.art-tip{padding:18px 20px; border-radius:14px; border:1px solid rgba(207,174,105,.35); background:rgba(207,174,105,.07)}
+.art-tbl{width:100%; border-collapse:collapse; font-size:.95rem}
+.art-tbl th, .art-tbl td{text-align:left; padding:12px 10px; border-bottom:1px solid var(--line); vertical-align:top}
+.art-tbl th{color:var(--text); font-weight:600}
+.art-scroll{overflow-x:auto}
+.promo-strip .s{display:none}
+@media (max-width:600px){
+  .art-tbl thead{display:none}
+  .art-tbl, .art-tbl tbody, .art-tbl tr, .art-tbl td{display:block; width:100%}
+  .art-tbl tr{padding:14px 16px; margin-bottom:10px; border-radius:14px; border:1px solid var(--line); background:var(--card)}
+  .art-tbl td{border:0; padding:4px 0}
+  .art-tbl td[data-l]::before{content:attr(data-l); display:block; font:600 .72rem var(--f-mono); letter-spacing:.1em; text-transform:uppercase; color:var(--gold); margin-top:6px}
+  .promo-strip{font-size:.8rem; padding:8px 12px; flex-wrap:nowrap; gap:8px}
+  .promo-strip .l{display:none}
+  .promo-strip .s{display:inline}
+}
