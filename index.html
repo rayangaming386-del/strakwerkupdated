@@ -56,6 +56,9 @@
   --gold-hi:#EAD39C;
   --gold-ink:#17130B;
   --ok:#5BD39A;
+  --red:#DC2626;
+  --red-2:#B91C1C;
+  --red-hi:#F87171;
 
   --f-display:"Geist", "Segoe UI", system-ui, sans-serif;
   --f-body:"Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -286,7 +289,8 @@ h1,h2,h3{font-family:var(--f-display); margin:0; text-wrap:balance; line-height:
 /* Configurator */
 #prijzen{background:linear-gradient(var(--bg), var(--bg-2) 200px, var(--bg-2) calc(100% - 200px), var(--bg))}
 .cfg{display:grid; grid-template-columns:minmax(0,1.45fr) minmax(0,1fr); gap:clamp(24px, 4vw, 48px); align-items:start; position:relative}
-@media (max-width:980px){ .cfg{grid-template-columns:1fr} }
+@media (max-width:980px){ .cfg{grid-template-columns:minmax(0,1fr)} }
+.cfg > *{min-width:0}
 .base{position:relative; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:20px; padding:28px; border-radius:var(--r); background:var(--card); border:1px solid rgba(207,174,105,.4)}
 .base .tagline{font:700 .7rem/1 var(--f-body); letter-spacing:.14em; text-transform:uppercase; color:var(--gold)}
 .base h3{font-size:1.5rem; margin-top:8px}
@@ -699,11 +703,113 @@ body::after{transform:translateZ(0)}
 .opt-row .amt small.free{color:var(--ok); font-weight:700; font-size:.78rem}
 .sw input:disabled{cursor:default}
 .qlines li.is-incl span:last-child{color:var(--ok); font-size:.85em; font-weight:600}
-.promo-bar{display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:12px 16px; margin-bottom:12px; border-radius:14px; background:linear-gradient(90deg, rgba(207,174,105,.18), rgba(207,174,105,.06)); border:1px solid rgba(207,174,105,.45); font-size:.92rem}
-.promo-bar b{padding:4px 10px; border-radius:99px; background:var(--gold); color:var(--gold-ink); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase}
-.promo-bar span{flex:1; min-width:200px}
-.promo-bar strong{color:var(--gold-hi)}
-.promo-bar em{font-style:normal; font:600 .78rem var(--f-mono); color:var(--gold)}
+.promo-bar{display:flex; align-items:center; justify-content:space-between; gap:14px 22px; flex-wrap:wrap; padding:14px 16px 14px 18px; margin-bottom:12px; border-radius:16px; color:#fff;
+  background:linear-gradient(120deg, var(--red-2), var(--red) 55%, #EF4444); border:1px solid rgba(255,255,255,.14); box-shadow:0 24px 60px -30px rgba(220,38,38,.75)}
+.pb-txt{display:flex; align-items:center; gap:12px; flex:1 1 280px; min-width:0}
+.pb-txt p{font-size:.95rem; line-height:1.45}
+.pb-txt strong{color:#fff; font-weight:800}
+.promo-bar .pb-txt b, .promo.red b{display:inline-flex; align-items:center; gap:7px; padding:5px 11px; border-radius:99px; font:800 .72rem/1 var(--f-body); letter-spacing:.08em; text-transform:uppercase; flex:none}
+.promo-bar .pb-txt b{background:#fff; color:var(--red-2)}
+.promo-bar .pb-txt b .dot{background:var(--red)}
+.promo-bar .pb-txt b .dot::after{border-color:rgba(220,38,38,.7)}
+.pb-cd{display:grid; grid-template-columns:repeat(4, auto); gap:6px}
+.pb-cd span{display:grid; justify-items:center; min-width:52px; padding:7px 6px 6px; border-radius:11px; background:rgba(0,0,0,.24); border:1px solid rgba(255,255,255,.14)}
+.pb-cd b{font:800 1.35rem/1 var(--f-mono); font-variant-numeric:tabular-nums; color:#fff}
+.pb-cd small{font:600 .6rem/1 var(--f-body); letter-spacing:.1em; text-transform:uppercase; opacity:.85; margin-top:4px}
+@media (max-width:560px){ .pb-cd{grid-template-columns:repeat(4, minmax(0,1fr)); width:100%} .pb-cd span{min-width:0} }
+.dot{position:relative; width:7px; height:7px; border-radius:50%; background:#fff; flex:none}
+.dot::after{content:""; position:absolute; inset:-4px; border-radius:50%; border:2px solid rgba(255,255,255,.75); animation:ping 1.6s cubic-bezier(0,0,.2,1) infinite}
+.promo.red{border-color:rgba(248,113,113,.5); background:rgba(220,38,38,.16); padding-right:12px}
+.promo.red b{background:var(--red); color:#fff}
+.promo.red:hover{border-color:var(--red-hi); background:rgba(220,38,38,.26)}
+.promo .cd{display:inline-flex; align-items:center; gap:5px; font:600 .78rem/1 var(--f-mono); font-style:normal; font-variant-numeric:tabular-nums; color:#FFB4B4; white-space:nowrap}
+.promo .cd .ck{width:13px; height:13px; color:var(--red-hi)}
+.promo .s, .promo .cds{display:none}
+@media (max-width:600px){ .promo .l, .promo .cdl{display:none} .promo .s, .promo .cds{display:inline} .promo{gap:8px; font-size:.8rem} }
+.mbar .mb-promo{display:none}
+.mbar.has-promo:not(.is-prices) .mb-g.mb-txt{display:none}
+.mbar.has-promo:not(.is-prices) .mb-promo{display:block}
+.mbar .mb-promo b{font-size:.92rem; font-family:var(--f-body); font-weight:800; white-space:nowrap}
+@media (max-width:370px){ .mbar .mb-promo b{font-size:.82rem} .mbar .mb-promo small{font-size:.68rem} }
+@media (max-width:340px){ .mbar .mb-promo b{display:none} .mbar .mb-promo small{font-size:.74rem} }
+.mbar .mb-promo small{font-variant-numeric:tabular-nums}
+.mbar .mb-promo .red{color:var(--red-hi); font-weight:800; text-transform:uppercase; letter-spacing:.06em}
+@media (prefers-reduced-motion: reduce){ .dot::after{animation:none} }
+/* Calculator-extra's */
+.pk-save{display:inline-block; margin-top:6px; align-self:flex-start; padding:3px 8px; border-radius:99px; font:700 .68rem/1.2 var(--f-body); background:rgba(91,211,154,.14); color:var(--ok)}
+.base-switch.pk button[aria-checked="true"] .pk-save{background:rgba(0,0,0,.14); color:var(--gold-ink)}
+.kh{margin-bottom:12px}
+.kh-open{display:flex; align-items:center; gap:10px; width:100%; padding:12px 16px; border-radius:14px; border:1px dashed var(--line-2); background:rgba(255,255,255,.02); color:var(--muted); font:500 .92rem var(--f-body); cursor:pointer; text-align:left; transition:border-color .25s, background .25s}
+.kh-open b{color:var(--text); font-weight:700}
+.kh-open svg{width:20px; height:20px; color:var(--gold); flex:none}
+.kh-open:hover, .kh-open[aria-expanded="true"]{border-color:rgba(207,174,105,.5); background:rgba(207,174,105,.06)}
+.kh-panel{margin-top:8px; padding:18px; border-radius:16px; border:1px solid rgba(207,174,105,.35); background:var(--card)}
+.kh-q{font:700 1.08rem/1.3 var(--f-display); margin-bottom:12px}
+.kh-q span{display:block; font:600 .7rem/1 var(--f-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--gold); margin-bottom:8px}
+.kh-opts{display:flex; flex-wrap:wrap; gap:8px}
+.kh-opts button{padding:11px 16px; border-radius:12px; border:1px solid var(--line-2); background:rgba(255,255,255,.03); color:var(--text); font:600 .9rem var(--f-body); cursor:pointer; transition:border-color .2s, background .2s}
+.kh-opts button:hover{border-color:var(--gold); background:rgba(207,174,105,.1)}
+.kh-advies{font-size:1rem; line-height:1.55}
+.kh-advies b{color:var(--gold-hi)}
+.kh-lbl{display:block; font:600 .7rem/1 var(--f-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--gold); margin-bottom:8px}
+.kh-why{display:block; margin-top:6px; color:var(--muted); font-size:.9rem}
+.kh-acts{display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin-top:14px}
+.pk-cmp{margin:0 0 14px; border-radius:16px; border:1px solid var(--line); background:rgba(255,255,255,.015)}
+.pk-cmp summary{cursor:pointer; list-style:none; padding:13px 16px; font-weight:600; font-size:.92rem; color:var(--muted); position:relative; padding-right:44px}
+.pk-cmp summary::-webkit-details-marker{display:none}
+.pk-cmp summary::after{content:"+"; position:absolute; right:18px; top:50%; transform:translateY(-50%); color:var(--gold); font-size:1.2rem; font-weight:400}
+.pk-cmp[open] summary::after{content:"−"}
+.pk-cmp[open] summary{color:var(--text)}
+.pk-scroll{overflow-x:auto; padding:0 6px 12px}
+.pk-cmp table{width:100%; border-collapse:collapse; font-size:.86rem}
+.pk-cmp th, .pk-cmp td{padding:9px 8px; border-top:1px solid var(--line); text-align:center; vertical-align:middle}
+.pk-cmp th[scope="row"]{text-align:left; font-weight:500; color:#C3CBD6}
+.pk-cmp thead th{border-top:0; font:700 .95rem var(--f-display); color:var(--text)}
+.pk-cmp thead th small{display:block; font:600 .78rem var(--f-mono); color:var(--gold); margin-top:2px}
+.pk-cmp .y{display:inline-grid; place-items:center; width:22px; height:22px; border-radius:50%; background:rgba(207,174,105,.16); color:var(--gold)}
+.pk-cmp .y svg{width:13px; height:13px}
+.pk-cmp .n{color:var(--muted); opacity:.6}
+.pk-cmp .t{font:600 .8rem var(--f-body); color:var(--gold-hi)}
+.pk-cmp tr.sum th, .pk-cmp tr.sum td{font-weight:700; color:var(--text)}
+.pk-cmp tfoot td{border-top:1px solid var(--line); padding-top:12px}
+.pk-cmp tfoot button{padding:8px 10px; border-radius:10px; border:1px solid rgba(207,174,105,.45); background:rgba(207,174,105,.08); color:var(--gold); font:700 .78rem var(--f-body); cursor:pointer}
+@media (max-width:560px){ .pk-cmp table{font-size:.78rem} .pk-cmp th, .pk-cmp td{padding:8px 4px} .pk-cmp thead th{font-size:.84rem} .pk-cmp tfoot button{padding:7px 6px; font-size:.72rem} .pk-scroll{padding:0 4px 10px} }
+.pk-cmp tfoot button:hover{background:rgba(207,174,105,.16)}
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+.qrestored{margin:0; padding:10px 24px; font-size:.8rem; color:var(--muted); background:rgba(207,174,105,.06); border-bottom:1px solid var(--line)}
+.qrestored button{border:0; background:none; padding:0; color:var(--gold); font:600 .8rem var(--f-body); cursor:pointer; text-decoration:underline; text-underline-offset:3px}
+.qtip{margin:0 24px 14px; padding:12px 14px; border-radius:12px; border:1px solid rgba(91,211,154,.4); background:rgba(91,211,154,.08); display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; font-size:.86rem}
+.qtip b{color:var(--text)}
+.qtip button{padding:8px 12px; border-radius:10px; border:0; background:var(--ok); color:#06261A; font:700 .8rem var(--f-body); cursor:pointer; white-space:nowrap}
+.qsave .sv{display:grid; justify-items:end; text-align:right}
+.qsave b{font:700 1rem var(--f-mono); color:var(--ok)}
+.qsave small{font-size:.72rem; color:var(--muted)}
+.qmini{display:flex; justify-content:center; gap:4px 16px; flex-wrap:wrap; padding-top:2px}
+.qmini button{border:0; background:none; padding:6px 2px; color:var(--muted); font:600 .82rem var(--f-body); cursor:pointer}
+.qmini button:hover{color:var(--text)}
+#printQuote{display:none}
+@media print{
+  @page{margin:16mm}
+  html.pq, html.pq body{background:#fff !important; color:#111 !important}
+  html.pq body > *:not(#printQuote){display:none !important}
+  html.pq body::after, html.pq body::before{display:none !important}
+  html.pq #printQuote{display:block !important; font-family:"Geist", Arial, sans-serif; color:#111; font-size:11pt}
+  .pq-head{display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:12pt; border-bottom:2pt solid #CFAE69; margin-bottom:14pt}
+  .pq-brand{font-weight:800; letter-spacing:.06em; font-size:18pt}
+  .pq-brand span{margin-right:5pt; border-bottom:3pt solid #CFAE69}
+  .pq-head h1{font-size:20pt; margin:0; text-align:right}
+  .pq-head p{margin:2pt 0 0; color:#555; text-align:right}
+  .pq-lines{width:100%; border-collapse:collapse}
+  .pq-lines th{text-align:left; font-size:9pt; text-transform:uppercase; letter-spacing:.06em; color:#555; border-bottom:1pt solid #ccc; padding:6pt 0}
+  .pq-lines th:last-child, .pq-lines td:last-child{text-align:right}
+  .pq-lines td{padding:6pt 0; border-bottom:1pt solid #eee}
+  .pq-tot{margin:12pt 0 14pt; margin-left:auto; width:60%}
+  .pq-tot p{display:flex; justify-content:space-between; margin:4pt 0}
+  .pq-tot p:first-child b{font-size:16pt}
+  .pq-save b{color:#1a7f4b}
+  .pq-note{color:#444; font-size:9.5pt; margin:5pt 0; word-break:break-all}
+  .pq-contact{margin-top:18pt; padding-top:10pt; border-top:1pt solid #ddd; font-size:9.5pt}
+}
 /* ===== Beweging & kleur ===== */
 .loader{position:fixed; inset:0; z-index:200; background:var(--bg); display:none; place-items:center; --u:0}
 .js .loader{display:grid}
@@ -904,7 +1010,7 @@ body.mbar-on .wa-fab{transform:scale(0)}
     <div class="hero-bg" aria-hidden="true"><div class="wall"><div class="wall-in"><div class="wcol d"><div class="wtrack"><img src="assets/bg/vagpro.webp" srcset="assets/bg/vagpro-360.webp 360w, assets/bg/vagpro.webp 720w" sizes="(max-width: 980px) 220px, 24vw" alt="" width="720" height="407" decoding="async" fetchpriority="low"><img src="assets/bg/cartronic-dashboard.webp" srcset="assets/bg/cartronic-dashboard-360.webp 360w, assets/bg/cartronic-dashboard.webp 720w" sizes="(max-width: 980px) 220px, 24vw" alt="" width="720" height="407" decoding="async" fetchpriority="low"><img src="assets/bg/detak.webp" srcset="assets/bg/detak-360.webp 360w, assets/bg/detak.webp 720w" sizes="(max-width: 980px) 220px, 24vw" alt="" width="720" height="407" decoding="async" fetchpriority="low"><img src="assets/bg/vagpro.webp" srcset="assets/bg/vagpro-360.webp 360w, assets/bg/vagpro.webp 720w" sizes="(max-width: 980px) 220px, 24vw" alt="" width="720" height="407" decoding="async" fetchpriority="low"><img src="assets/bg/cartronic-dashboard.webp" srcset="assets/bg/cartronic-dashboard-360.webp 360w, assets/bg/cartronic-dashboard.webp 720w" sizes="(max-width: 980px) 220px, 24vw" alt="" width="720" height="407" decoding="async" fetchpriority="low"><img src="assets/bg/detak.webp" srcset="assets/bg/detak-360.webp 360w, assets/bg/detak.webp 720w" sizes="(max-width: 980px) 220px, 24vw" alt="" width="720" height="407" decoding="async" fetchpriority="low"></div></div><div class="wcol p"><div class="wtrack"><img src="assets/bg/detak-mobiel.webp" alt="" width="300" height="593" decoding="async" fetchpriority="low"><img src="assets/bg/vagpro-mobiel.webp" alt="" width="300" height="593" decoding="async" fetchpriority="low"><img src="assets/bg/detak-mobiel.webp" alt="" width="300" height="593" decoding="async" fetchpriority="low"><img src="assets/bg/vagpro-mobiel.webp" alt="" width="300" height="593" decoding="async" fetchpriority="low"></div></div><div class="wcol d"><div class="wtrack"><img src="assets/bg/cartronic.webp" srcset="assets/bg/cartronic-360.webp 360w, assets/bg/cartronic.webp 720w" sizes="(max-width: 980px) 220px, 24vw" alt="" width="720" height="407" decoding="async" fetchpriority="low"><img src="assets/bg/detak-de.webp" srcset="assets/bg/detak-de-360.webp 360w, assets/bg/detak-de.webp 720w" sizes="(max-width: 980px) 220px, 24vw" alt="" width="720" height="407" decoding="async" fetchpriority="low"><img src="assets/bg/vagpro.webp" srcset="assets/bg/vagpro-360.webp 360w, assets/bg/vagpro.webp 720w" sizes="(max-width: 980px) 220px, 24vw" alt="" width="720" height="407" decoding="async" fetchpriority="low"><img src="assets/bg/cartronic.webp" srcset="assets/bg/cartronic-360.webp 360w, assets/bg/cartronic.webp 720w" sizes="(max-width: 980px) 220px, 24vw" alt="" width="720" height="407" decoding="async" fetchpriority="low"><img src="assets/bg/detak-de.webp" srcset="assets/bg/detak-de-360.webp 360w, assets/bg/detak-de.webp 720w" sizes="(max-width: 980px) 220px, 24vw" alt="" width="720" height="407" decoding="async" fetchpriority="low"><img src="assets/bg/vagpro.webp" srcset="assets/bg/vagpro-360.webp 360w, assets/bg/vagpro.webp 720w" sizes="(max-width: 980px) 220px, 24vw" alt="" width="720" height="407" decoding="async" fetchpriority="low"></div></div><div class="wcol d"><div class="wtrack"><img src="assets/bg/detak.webp" srcset="assets/bg/detak-360.webp 360w, assets/bg/detak.webp 720w" sizes="(max-width: 980px) 220px, 24vw" alt="" width="720" height="407" decoding="async" fetchpriority="low"><img src="assets/bg/cartronic.webp" srcset="assets/bg/cartronic-360.webp 360w, assets/bg/cartronic.webp 720w" sizes="(max-width: 980px) 220px, 24vw" alt="" width="720" height="407" decoding="async" fetchpriority="low"><img src="assets/bg/cartronic-dashboard.webp" srcset="assets/bg/cartronic-dashboard-360.webp 360w, assets/bg/cartronic-dashboard.webp 720w" sizes="(max-width: 980px) 220px, 24vw" alt="" width="720" height="407" decoding="async" fetchpriority="low"><img src="assets/bg/detak.webp" srcset="assets/bg/detak-360.webp 360w, assets/bg/detak.webp 720w" sizes="(max-width: 980px) 220px, 24vw" alt="" width="720" height="407" decoding="async" fetchpriority="low"><img src="assets/bg/cartronic.webp" srcset="assets/bg/cartronic-360.webp 360w, assets/bg/cartronic.webp 720w" sizes="(max-width: 980px) 220px, 24vw" alt="" width="720" height="407" decoding="async" fetchpriority="low"><img src="assets/bg/cartronic-dashboard.webp" srcset="assets/bg/cartronic-dashboard-360.webp 360w, assets/bg/cartronic-dashboard.webp 720w" sizes="(max-width: 980px) 220px, 24vw" alt="" width="720" height="407" decoding="async" fetchpriority="low"></div></div><div class="wcol p"><div class="wtrack"><img src="assets/bg/cartronic-mobiel.webp" alt="" width="300" height="593" decoding="async" fetchpriority="low"><img src="assets/bg/detak-mobiel.webp" alt="" width="300" height="593" decoding="async" fetchpriority="low"><img src="assets/bg/cartronic-mobiel.webp" alt="" width="300" height="593" decoding="async" fetchpriority="low"><img src="assets/bg/detak-mobiel.webp" alt="" width="300" height="593" decoding="async" fetchpriority="low"></div></div></div></div><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span><span class="spot" id="spot"></span></div>
     <div class="wrap">
       <div class="hero-copy">
-        <a class="promo" id="promoPill" href="#prijzen" hidden><b>Actie</b><span>Gratis logo + Google Bedrijfsprofiel t/m 30 nov</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="promo red" id="promoPill" href="#prijzen" hidden><b><i class="dot" aria-hidden="true"></i>Actie</b><span class="l">Gratis logo + Google Bedrijfsprofiel</span><span class="s">Gratis logo + profiel</span><em class="cd"><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="cdl" data-cd="short">t/m 30 nov</span><span class="cds" data-cd="dhs">t/m 30 nov</span></em></a>
         <a class="promo" id="newPill" href="#nieuw"><b>Nieuw</b><span>Website redesign vanaf €175</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         <h1>
           <span class="ln"><span>Websites die je</span></span>
@@ -1388,13 +1494,28 @@ Locatie: Rijswijk<small>09:41 ✓✓</small></div>
 
       <div class="cfg">
         <div>
-          <div class="promo-bar" id="promoBar" hidden><b>Actie</b><span>Tot en met 30 november: <strong>gratis logo-ontwerp en Google Bedrijfsprofiel</strong> bij elke website.</span><em id="promoLeft"></em></div>
+          <div class="promo-bar" id="promoBar" hidden>
+            <div class="pb-txt"><b><i class="dot" aria-hidden="true"></i>Actie</b><p>Tot en met 30 november: <strong>gratis logo-ontwerp en Google Bedrijfsprofiel</strong> bij elke website.</p></div>
+            <div class="pb-cd" data-cd="blocks" role="timer" aria-label="Actie loopt tot en met 30 november">
+              <span><b data-u="d">--</b><small>dagen</small></span><span><b data-u="h">--</b><small>uur</small></span><span><b data-u="m">--</b><small>min</small></span><span><b data-u="s">--</b><small>sec</small></span>
+            </div>
+          </div>
+          <div class="kh" id="kh">
+            <button class="kh-open" type="button" aria-expanded="false" aria-controls="khPanel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17h.01"/></svg><span>Twijfel je? <b>Vind je pakket in 3 vragen</b></span></button>
+            <div class="kh-panel" id="khPanel" hidden>
+              <div class="kh-step" data-step="1"><p class="kh-q"><span>Vraag 1 van 3</span>Heb je al een website?</p><div class="kh-opts"><button type="button" data-a="nee">Nee, nog niet</button><button type="button" data-a="ja">Ja, maar hij kan beter</button></div></div>
+              <div class="kh-step" data-step="2" hidden><p class="kh-q"><span>Vraag 2 van 3</span>Wil je zelf dingen aanpassen op je site?</p><div class="kh-opts"><button type="button" data-a="nee">Nee, dat regel jij</button><button type="button" data-a="basis">Ja, teksten en foto's</button><button type="button" data-a="alles">Ja, letterlijk alles</button></div></div>
+              <div class="kh-step" data-step="3" hidden><p class="kh-q"><span>Vraag 3 van 3</span>Wil je online verkopen of afspraken laten maken?</p><div class="kh-opts"><button type="button" data-a="nee">Nee</button><button type="button" data-a="shop">Ja, verkopen</button><button type="button" data-a="afspraak">Ja, afspraken</button></div></div>
+              <div class="kh-result" hidden><p class="kh-advies" id="khAdvies"></p><div class="kh-acts"><button class="btn btn--gold" type="button" data-kh-apply>Zet dit in mijn offerte</button><button class="link-soft" type="button" data-kh-reset>Opnieuw</button></div></div>
+            </div>
+          </div>
           <div class="base-switch pk" role="radiogroup" aria-label="Kies een pakket">
             <button type="button" role="radio" aria-checked="true" data-base="nieuw"><span class="pk-sub">Strakke basis</span><b>Starter</b><span class="pk-price">€200</span><span class="pk-pitch">Complete website tot 3 pagina's</span></button>
-            <button type="button" role="radio" aria-checked="false" data-base="premium"><span class="pk-sub">Aanrader</span><b>Premium</b><span class="pk-price">€350</span><span class="pk-pitch">Zelf aanpassen, aanvragen via WhatsApp en vindbaar in Google</span></button>
-            <button type="button" role="radio" aria-checked="false" data-base="pro"><span class="pk-sub">Compleet</span><b>Pro</b><span class="pk-price">€500</span><span class="pk-pitch">Geavanceerd beheer, extra taal, blog, logo en regiopagina's</span></button>
+            <button type="button" role="radio" aria-checked="false" data-base="premium"><span class="pk-sub">Aanrader</span><b>Premium</b><span class="pk-price">€350</span><span class="pk-save" data-save="premium" hidden></span><span class="pk-pitch">Zelf aanpassen, aanvragen via WhatsApp en vindbaar in Google</span></button>
+            <button type="button" role="radio" aria-checked="false" data-base="pro"><span class="pk-sub">Compleet</span><b>Pro</b><span class="pk-price">€500</span><span class="pk-save" data-save="pro" hidden></span><span class="pk-pitch">Geavanceerd beheer, extra taal, blog, logo en regiopagina's</span></button>
             <button type="button" role="radio" aria-checked="false" data-base="redesign"><span class="pk-sub">Al een website</span><b>Redesign</b><span class="pk-price">€175</span><span class="pk-pitch">Je bestaande site strak vernieuwd</span></button>
           </div>
+          <details class="pk-cmp" id="pkCmp"><summary>Vergelijk de pakketten naast elkaar</summary><div class="pk-cmp-body" id="pkCmpBody"></div></details>
           <div class="base">
             <div>
               <span class="tagline">Altijd inbegrepen</span>
@@ -1426,9 +1547,12 @@ Locatie: Rijswijk<small>09:41 ✓✓</small></div>
 
         <aside class="quote" id="offerte" aria-label="Jouw offerte">
           <div class="quote-head"><h3>Jouw offerte</h3><span id="qnr">SW-2026</span></div>
+          <p class="qrestored" id="qrestored" hidden>Je vorige keuze staat weer klaar. <button type="button" id="qreset">Opnieuw beginnen</button></p>
           <ul class="qlines" id="qlines"></ul>
+          <div class="qtip" id="qtip" hidden></div>
           <div class="qtotal">
             <div class="row"><span class="lbl">Totaal eenmalig</span><span class="big" id="qtotal">€200</span></div>
+            <div class="row qsave" id="qsave" hidden><span class="lbl">Je voordeel</span><span class="sv"><b id="qsavev">€0</b><small id="qsaved"></small></span></div>
             <div class="row" id="qmo-row" hidden><span class="lbl">Per maand</span><span class="mo" id="qmo">€15</span></div>
           </div>
           <div class="qactions">
@@ -1437,7 +1561,11 @@ Locatie: Rijswijk<small>09:41 ✓✓</small></div>
               Verstuur via WhatsApp
             </a>
             <a class="btn" id="qintake" href="https://wa.me/31623462397" target="_blank" rel="noopener">Plan een gratis intake</a>
-            <button class="btn btn--ghost" type="button" id="qcopy">Kopieer offerte</button>
+            <div class="qmini">
+              <button type="button" id="qcopy">Kopieer tekst</button>
+              <button type="button" id="qlink">Kopieer link</button>
+              <button type="button" id="qpdf">Download PDF</button>
+            </div>
           </div>
           <p class="qnote">Indicatieprijs. De definitieve prijs spreken we af in het gratis intakegesprek. Liever mailen? <b>strakwerkk@gmail.com</b></p>
         </aside>
@@ -1588,6 +1716,7 @@ Locatie: Rijswijk<small>09:41 ✓✓</small></div>
 <div class="mbar" id="mbar">
   <div class="mb-txt mb-p"><small>Jouw website</small><b id="mtotal">€200</b></div>
   <div class="mb-txt mb-g"><small>Nieuw of redesign</small><b>vanaf €175</b></div>
+  <div class="mb-txt mb-promo"><small><span class="red">Actie</span> · nog <span data-cd="dhs">t/m 30 nov</span></small><b>Gratis logo + profiel</b></div>
   <div class="mb-act">
     <a class="btn btn--gold mb-p" href="#offerte">Bekijk offerte</a>
     <a class="btn btn--gold mb-g" href="#prijzen">Bereken je prijs</a>
@@ -1825,7 +1954,8 @@ function quoteText(){
   const { once, mo } = totals();
   const l = lines().map(x => `• ${x.n}: ${x.t || euro(x.p) + (x.m ? " p/m" : "")}`).join("\n");
   const promo = promoOn() ? `\n\n${CONFIG.promo.label}: logo-ontwerp en Google Bedrijfsprofiel gratis.` : "";
-  return `Hoi StrakWerk, ${baseKey === "redesign" ? "ik wil mijn website laten vernieuwen" : "ik wil graag een website"}.\n\nMijn keuze:\n${l}\n\nTotaal: ${euro(once)} eenmalig${mo ? ` + ${euro(mo)} per maand` : ""}${promo}\n\nMijn bedrijf: `;
+  const sv = pkgSave(baseKey) + promoSave(baseKey);
+  return `Hoi StrakWerk, ${baseKey === "redesign" ? "ik wil mijn website laten vernieuwen" : "ik wil graag een website"}.\n\nMijn keuze:\n${l}\n\nTotaal: ${euro(once)} eenmalig${mo ? ` + ${euro(mo)} per maand` : ""}${sv ? `\nMijn voordeel: ${euro(sv)}` : ""}${promo}\n\nMijn keuze online: ${cfgLink()}\n\nMijn bedrijf: `;
 }
 function render(){
   document.querySelectorAll("[data-base]").forEach(b => b.setAttribute("aria-checked", String(b.dataset.base === baseKey)));
@@ -1860,11 +1990,149 @@ function render(){
   const paint = () => { tEl.textContent = euro(shown.v); mEl.textContent = euro(shown.v); };
   if (hasGsap && !reduce){ gsap.to(shown, { v: once, duration: .6, ease: "power3.out", onUpdate: paint, overwrite: true }); }
   else { shown.v = once; paint(); }
+  afterRender();
 }
+/* ===== Calculator-extra's: voordeel, tip, bewaren en delen, keuzehulp, vergelijking, PDF ===== */
+const RANK = ["nieuw", "premium", "pro"];
+const SITE = /^https?:$/.test(location.protocol) && !/^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? location.origin + "/" : "https://www.strakwerkk.nl/";
+const itemOf = id => items.find(i => i.id === id);
+/* Losse waarde van een pakket = Starter + alle inbegrepen opties */
+const valueOf = key => CONFIG.bases.nieuw.price + Object.entries(CONFIG.bases[key].incl || {}).reduce((t, [id, n]) => t + itemOf(id).price * n, 0);
+const pkgSave = key => CONFIG.bases[key].incl ? Math.max(0, valueOf(key) - CONFIG.bases[key].price) : 0;
+const promoSave = key => promoOn() ? Object.entries(CONFIG.promo.free).reduce((t, [id, n]) => t + ((CONFIG.bases[key].incl || {})[id] ? 0 : itemOf(id).price * n), 0) : 0;
+/* Wat de bezoeker zelf heeft gekozen bovenop het pakket */
+function extras(){ const inc = inclNow(), out = {}; items.forEach(it => { const n = state[it.id] - (inc[it.id] || 0); if (n > 0) out[it.id] = n; }); return out; }
+const encodeCfg = () => [baseKey, ...Object.entries(extras()).map(([id, n]) => n > 1 ? `${id}.${n}` : id)].join("~");
+function decodeCfg(str){
+  const parts = String(str || "").split("~").filter(Boolean); if (!parts.length || !CONFIG.bases[parts[0]]) return null;
+  const ex = {};
+  parts.slice(1).forEach(p => { const [id, n] = p.split("."); const it = itemOf(id); if (!it) return; ex[id] = Math.max(1, Math.min(it.max || (it.qty ? 10 : 1), parseInt(n || "1", 10) || 1)); });
+  return { base: parts[0], extras: ex };
+}
+function applyCfg(c){
+  items.forEach(it => state[it.id] = 0); baseKey = c.base;
+  Object.entries(c.extras).forEach(([id, n]) => { const it = itemOf(id); if (it.excl && state[it.excl]) state[it.excl] = 0; state[id] = n; });
+  enforce(); clearPresets(); render();
+}
+const cfgLink = () => SITE + "?cfg=" + encodeURIComponent(encodeCfg()) + "#prijzen";
+/* Wat zou de huidige keuze kosten in een ander pakket? null = past niet (bijv. geavanceerd beheer in Premium) */
+function costIf(key){
+  const tgt = inclOf(key); let cost = CONFIG.bases[key].price;
+  for (const it of items){
+    const n = state[it.id]; if (!n || it.monthly) continue;
+    if (it.excl && tgt[it.excl]){ if (itemOf(it.excl).price >= it.price) continue; return null; }
+    cost += Math.max(0, n - (tgt[it.id] || 0)) * it.price;
+  }
+  return cost;
+}
+function bestUpgrade(){
+  const r = RANK.indexOf(baseKey); if (r < 0) return null;
+  const now = totals().once; let best = null;
+  RANK.slice(r + 1).forEach(key => { const c = costIf(key); if (c !== null && c <= now && (!best || c <= best.cost)) best = { key, cost: c }; });
+  return best && { ...best, save: now - best.cost };
+}
+const STORE = "sw-offerte-v1"; let saveT;
+function afterRender(){
+  /* voordeel */
+  const ps = pkgSave(baseKey), pr = promoSave(baseKey), sv = ps + pr;
+  document.getElementById("qsave").hidden = !sv;
+  document.getElementById("qsavev").textContent = euro(sv);
+  document.getElementById("qsaved").textContent = [ps ? `pakket ${euro(ps)}` : "", pr ? `actie ${euro(pr)}` : ""].filter(Boolean).join(" · ");
+  /* slimme tip */
+  const up = bestUpgrade(), tip = document.getElementById("qtip");
+  tip.hidden = !up;
+  if (up){ const nm = CONFIG.bases[up.key].name;
+    tip.innerHTML = `<p>${up.save ? `Tip: met <b>${nm}</b> betaal je <b>${euro(up.save)} minder</b> én krijg je er meer bij.` : `Tip: met <b>${nm}</b> krijg je voor hetzelfde bedrag meer.`}</p><button type="button" data-tip="${up.key}">Kies ${nm}</button>`; }
+  /* bewaren */
+  clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(STORE, encodeCfg()); } catch (e) {} }, 250);
+}
+document.getElementById("qtip").addEventListener("click", e => { const b = e.target.closest("[data-tip]"); if (!b) return;
+  setBase(b.dataset.tip); clearPresets(); render(); try { window.va && window.va("event", { name: "Tip gevolgd", data: { pakket: CONFIG.bases[baseKey].name } }); } catch (x) {} });
+document.getElementById("qreset").addEventListener("click", () => { document.getElementById("qrestored").hidden = true; applyPreset("reset", false); });
+/* Besparing op de pakketkaarten */
+document.querySelectorAll("[data-save]").forEach(el => { const v = pkgSave(el.dataset.save); if (v){ el.textContent = `Bespaar ${euro(v)}`; el.hidden = false; } });
+
+/* Vergelijkingstabel, gebouwd uit CONFIG */
+(() => {
+  const host = document.getElementById("pkCmpBody"), K = RANK, BS = CONFIG.bases;
+  const ids = [];
+  K.forEach(k => Object.keys(BS[k].incl || {}).forEach(id => { const g = id === "beheerpro" ? "beheer" : id; if (!ids.includes(g)) ids.push(g); }));
+  ids.sort((a, b) => items.indexOf(itemOf(a)) - items.indexOf(itemOf(b)));
+  const yes = `<span class="y" aria-label="inbegrepen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg></span>`, no = `<span class="n" aria-label="niet inbegrepen">–</span>`;
+  const cell = (k, id) => { const inc = BS[k].incl || {};
+    if (id === "beheer") return inc.beheerpro ? `<span class="t">Geavanceerd</span>` : inc.beheer ? `<span class="t">Basis</span>` : no;
+    const n = inc[id]; if (!n) return no; return itemOf(id).qty ? `<span class="t">${n}×</span>` : yes; };
+  const base = ["Website op maat, tot 3 pagina's", "Mobiel, snel en vindbaar in Google", "Contactformulier en WhatsApp-knop", "Eigen domein en SSL", "Binnen 7 dagen online"];
+  let h = `<table><thead><tr><th scope="col"><span class="sr">Onderdeel</span></th>${K.map(k => `<th scope="col">${BS[k].name}<small>${euro(BS[k].price)}</small></th>`).join("")}</tr></thead><tbody>`;
+  base.forEach(t => h += `<tr><th scope="row">${t}</th>${K.map(() => `<td>${yes}</td>`).join("")}</tr>`);
+  ids.forEach(id => h += `<tr><th scope="row">${id === "beheer" ? "Beheerpaneel" : itemOf(id).name}</th>${K.map(k => `<td>${cell(k, id)}</td>`).join("")}</tr>`);
+  h += `<tr class="sum"><th scope="row">Losse waarde</th>${K.map(k => `<td>${euro(valueOf(k))}</td>`).join("")}</tr>`;
+  h += `<tr class="sum"><th scope="row">Je voordeel</th>${K.map(k => `<td>${pkgSave(k) ? euro(pkgSave(k)) : no}</td>`).join("")}</tr>`;
+  h += `</tbody><tfoot><tr><td></td>${K.map(k => `<td><button type="button" data-pick-pk="${k}">Kies ${BS[k].name}</button></td>`).join("")}</tr></tfoot></table>`;
+  host.innerHTML = `<div class="pk-scroll">${h}</div>`;
+  host.addEventListener("click", e => { const b = e.target.closest("[data-pick-pk]"); if (!b) return; setBase(b.dataset.pickPk); clearPresets(); render();
+    document.querySelector(`.base-switch.pk [data-base="${b.dataset.pickPk}"]`)?.focus({ preventScroll: true }); });
+})();
+
+/* Keuzehulp: drie vragen, advies uit CONFIG */
+(() => {
+  const root = document.getElementById("kh"), open = root.querySelector(".kh-open"), panel = document.getElementById("khPanel");
+  const steps = [...root.querySelectorAll(".kh-step")], result = root.querySelector(".kh-result"), A = {};
+  let advice = null;
+  const why = { nieuw: "Een complete, strakke website. Aanpassingen regel ik voor je.", premium: "Je past zelf teksten en foto's aan, aanvragen komen binnen via WhatsApp en je bent vindbaar in Google.",
+    pro: "Je past letterlijk alles zelf aan, met een extra taal, een blog, een logo en regiopagina's.", redesign: "Je huidige site wordt strak vernieuwd. Je domein, teksten en foto's neem ik mee." };
+  const show = i => { steps.forEach((s, j) => s.hidden = j !== i); result.hidden = i !== steps.length; };
+  function compute(){
+    const base = A[1] === "ja" ? "redesign" : A[2] === "alles" ? "pro" : A[2] === "basis" ? "premium" : "nieuw";
+    const ex = {};
+    if (base === "redesign"){ if (A[2] === "basis") ex.beheer = 1; if (A[2] === "alles") ex.beheerpro = 1; }
+    if (A[3] === "shop") ex.webshop = 1; if (A[3] === "afspraak") ex.booking = 1;
+    const own = CONFIG.bases[base].incl || {};
+    const total = CONFIG.bases[base].price + Object.entries(ex).reduce((t, [id, n]) => t + (own[id] ? 0 : itemOf(id).price * n), 0);
+    advice = { base, extras: ex };
+    const parts = [`<b>${base === "redesign" ? "Website redesign" : "Pakket " + CONFIG.bases[base].name}</b> (${euro(CONFIG.bases[base].price)})`]
+      .concat(Object.keys(ex).map(id => `${itemOf(id).name} (+${euro(itemOf(id).price)})`));
+    document.getElementById("khAdvies").innerHTML = `<span class="kh-lbl">Mijn advies</span>${parts.join(" + ")} = <b>${euro(total)}</b><span class="kh-why">${why[base]}${promoOn() ? " En nu met gratis logo en Google Bedrijfsprofiel." : ""}</span>`;
+  }
+  open.addEventListener("click", () => { const o = panel.hidden; panel.hidden = !o; open.setAttribute("aria-expanded", String(o)); if (o){ show(0); steps[0].querySelector("button").focus({ preventScroll: true }); } });
+  steps.forEach((st, i) => st.addEventListener("click", e => { const b = e.target.closest("[data-a]"); if (!b) return;
+    A[i + 1] = b.dataset.a; if (i + 1 < steps.length) { show(i + 1); steps[i + 1].querySelector("button").focus({ preventScroll: true }); } else { compute(); show(steps.length); result.querySelector("[data-kh-apply]").focus({ preventScroll: true }); } }));
+  root.querySelector("[data-kh-reset]").addEventListener("click", () => { Object.keys(A).forEach(k => delete A[k]); show(0); });
+  root.querySelector("[data-kh-apply]").addEventListener("click", () => { if (!advice) return; applyCfg(advice); panel.hidden = true; open.setAttribute("aria-expanded", "false");
+    try { window.va && window.va("event", { name: "Keuzehulp", data: { advies: advice.base } }); } catch (x) {}
+    const q = document.getElementById("offerte"); if (innerWidth <= 980){ if (window.__lenis) window.__lenis.scrollTo(q, { offset: -80, duration: 1.2 }); else q.scrollIntoView({ behavior: reduce ? "auto" : "smooth" }); } });
+})();
+
+/* Offerte als PDF (via de printfunctie van de browser) */
+function printQuote(){
+  let el = document.getElementById("printQuote"); if (!el){ el = document.createElement("div"); el.id = "printQuote"; document.body.appendChild(el); }
+  const { once, mo } = totals(), sv = pkgSave(baseKey) + promoSave(baseKey);
+  const date = new Intl.DateTimeFormat("nl-NL", { day: "numeric", month: "long", year: "numeric" }).format(new Date());
+  el.innerHTML = `<div class="pq-head"><span class="pq-brand"><span>STRAK</span>WERK</span><div><h1>Offerte</h1><p>${document.getElementById("qnr").textContent} · ${date}</p></div></div>
+    <table class="pq-lines"><thead><tr><th>Onderdeel</th><th>Bedrag</th></tr></thead><tbody>${lines().map(x => `<tr><td>${x.n}</td><td>${x.t || euro(x.p) + (x.m ? " per maand" : "")}</td></tr>`).join("")}</tbody></table>
+    <div class="pq-tot"><p><span>Totaal eenmalig</span><b>${euro(once)}</b></p>${mo ? `<p><span>Per maand</span><b>${euro(mo)}</b></p>` : ""}${sv ? `<p class="pq-save"><span>Je voordeel</span><b>${euro(sv)}</b></p>` : ""}</div>
+    ${promoOn() ? `<p class="pq-note">${CONFIG.promo.label}: logo-ontwerp en Google Bedrijfsprofiel gratis bij elke website.</p>` : ""}
+    <p class="pq-note">Indicatieprijs. De definitieve prijs spreken we af in het gratis intakegesprek.</p>
+    <p class="pq-note">Bekijk of wijzig je keuze online: ${cfgLink()}</p>
+    <p class="pq-contact"><b>StrakWerk</b> · Rayan · WhatsApp en telefoon 06 2346 2397 · strakwerkk@gmail.com · strakwerkk.nl</p>`;
+  try { window.va && window.va("event", { name: "Offerte PDF", data: { pakket: B().name, totaal: once } }); } catch (x) {}
+  const root = document.documentElement; root.classList.add("pq");
+  addEventListener("afterprint", () => root.classList.remove("pq"), { once: true });
+  window.print();
+}
+document.getElementById("qpdf").addEventListener("click", printQuote);
+document.getElementById("qlink").addEventListener("click", e => { copy(cfgLink(), e.currentTarget, "Link gekopieerd ✓"); try { window.va && window.va("event", { name: "Offerte-link gekopieerd", data: { pakket: B().name } }); } catch (x) {} });
+
 enforce();
 render();
-/* Vanaf een projectpagina: ?preset=vagpro vult de configurator alvast in */
-(() => { const k = new URLSearchParams(location.search).get("preset"); if (k && CONFIG.presets[k]) applyPreset(k, false); })();
+/* Startkeuze: gedeelde link (?cfg=), dan een voorbeeld (?preset=), dan de vorige keuze van deze bezoeker */
+(() => {
+  const q = new URLSearchParams(location.search), c = decodeCfg(q.get("cfg"));
+  if (c){ applyCfg(c); return; }
+  const k = q.get("preset"); if (k && CONFIG.presets[k]){ applyPreset(k, false); return; }
+  let saved = null; try { saved = decodeCfg(localStorage.getItem(STORE)); } catch (e) {}
+  if (saved && (saved.base !== "nieuw" || Object.keys(saved.extras).length)){ applyCfg(saved); document.getElementById("qrestored").hidden = false; }
+})();
 
 /* Meten wat werkt (Vercel Web Analytics, anoniem en zonder cookies) */
 const track = (name, data) => { try { window.va && window.va("event", { name, data }); } catch (e) {} };
@@ -1879,11 +2147,32 @@ document.querySelectorAll("[data-base]").forEach(b => b.addEventListener("click"
 optRoot.addEventListener("change", e => { const id = e.target.dataset.opt; if (id && e.target.checked) track("Optie aan", { optie: id }); });
 document.getElementById("qcopy").addEventListener("click", () => track("Offerte gekopieerd", { pakket: B().name, totaal: totals().once }));
 
-/* Actie tonen zolang hij loopt */
+/* Actie tonen zolang hij loopt, met live aftelling */
+const pad2 = n => String(n).padStart(2, "0");
+function promoTick(){
+  const ms = Math.max(0, Date.parse(CONFIG.promo.until) - Date.now());
+  const d = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5) % 24, m = Math.floor(ms / 6e4) % 60, sec = Math.floor(ms / 1e3) % 60;
+  document.querySelectorAll("[data-cd]").forEach(el => {
+    const f = el.dataset.cd;
+    if (f === "blocks"){ const set = (u, v) => { const b = el.querySelector(`[data-u="${u}"]`); if (b.textContent !== v) b.textContent = v; }; set("d", String(d)); set("h", pad2(h)); set("m", pad2(m)); set("s", pad2(sec)); }
+    else { const v = f === "dhs" ? `${d}d ${pad2(h)}u` : f === "dh" ? `${d}d ${pad2(h)}u ${pad2(m)}m` : `${d}d ${pad2(h)}u ${pad2(m)}m ${pad2(sec)}s`; if (el.textContent !== v) el.textContent = v; }
+  });
+  return ms;
+}
+function promoUI(on){
+  document.getElementById("promoBar").hidden = !on; document.getElementById("promoPill").hidden = !on; document.getElementById("newPill").hidden = on;
+  document.getElementById("mbar").classList.toggle("has-promo", on);
+  document.querySelectorAll("[data-promo-only]").forEach(el => el.hidden = !on);
+}
 (() => { if (!promoOn()) return;
-  document.getElementById("promoBar").hidden = false; document.getElementById("promoPill").hidden = false; document.getElementById("newPill").hidden = true;
-  const days = Math.ceil((Date.parse(CONFIG.promo.until) - Date.now()) / 864e5);
-  document.getElementById("promoLeft").textContent = days <= 1 ? "Laatste dag" : `Nog ${days} dagen`; })();
+  promoUI(true); promoTick();
+  const t = setInterval(() => {
+    if (promoTick() > 0) return;
+    clearInterval(t); promoUI(false);
+    /* Actie voorbij terwijl de pagina open staat: gratis actie-opties weer uit de offerte halen */
+    const own = B().incl || {}; Object.keys(CONFIG.promo.free).forEach(id => { if (!own[id]) state[id] = Math.max(0, state[id] - CONFIG.promo.free[id]); });
+    enforce(); render();
+  }, 1000); })();
 
 /* Nieuwe site of redesign */
 function goPrices(){ const t = document.getElementById("prijzen");

@@ -132,8 +132,10 @@ footer a:hover{color:var(--gold)}
 .d-more a:hover{border-color:var(--gold); color:var(--gold)}
 
 /* Actiebalk (tijdelijk, via case.js) */
-.promo-strip{display:flex; justify-content:center; align-items:center; gap:10px; flex-wrap:wrap; padding:9px 16px; background:linear-gradient(90deg, #A9843F, #CFAE69 50%, #A9843F); color:#17130B; font-size:.86rem; font-weight:600; text-align:center}
-.promo-strip b{padding:3px 9px; border-radius:99px; background:#17130B; color:#CFAE69; font-size:.7rem; letter-spacing:.08em; text-transform:uppercase}
+.promo-strip{display:flex; justify-content:center; align-items:center; gap:10px; flex-wrap:wrap; padding:9px 16px; background:linear-gradient(90deg, #B91C1C, #DC2626 50%, #B91C1C); color:#fff; font-size:.86rem; font-weight:600; text-align:center}
+.promo-strip b{display:inline-flex; align-items:center; gap:6px; padding:3px 9px; border-radius:99px; background:#fff; color:#B91C1C; font-size:.7rem; letter-spacing:.08em; text-transform:uppercase}
+.promo-strip em{font:600 .8rem var(--f-mono); font-style:normal; font-variant-numeric:tabular-nums; white-space:nowrap; padding:3px 8px; border-radius:8px; background:rgba(0,0,0,.22)}
+.promo-strip:hover{background:linear-gradient(90deg, #A51818, #C81E1E 50%, #A51818)}
 
 /* Kennisbank */
 .kb-list{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:16px}
@@ -165,7 +167,18 @@ footer a:hover{color:var(--gold)}
   .art-tbl tr{padding:14px 16px; margin-bottom:10px; border-radius:14px; border:1px solid var(--line); background:var(--card)}
   .art-tbl td{border:0; padding:4px 0}
   .art-tbl td[data-l]::before{content:attr(data-l); display:block; font:600 .72rem var(--f-mono); letter-spacing:.1em; text-transform:uppercase; color:var(--gold); margin-top:6px}
-  .promo-strip{font-size:.8rem; padding:8px 12px; flex-wrap:nowrap; gap:8px}
+  .promo-strip{font-size:.78rem; padding:8px 10px; flex-wrap:nowrap; gap:7px}
+  .promo-strip em{font-size:.74rem; padding:3px 6px}
   .promo-strip .l{display:none}
   .promo-strip .s{display:inline}
+}
+@media (max-width:370px){
+  .promo-strip{font-size:.72rem; gap:5px; padding:8px 8px}
+  .promo-strip b{font-size:.6rem; padding:3px 6px}
+  .promo-strip em{font-size:.68rem; padding:2px 5px}
+}
+@media (max-width:380px){
+  .top .wrap{gap:10px}
+  .top .btn{padding:10px 12px; font-size:.8rem}
+  .top .brand{font-size:18px}
 }

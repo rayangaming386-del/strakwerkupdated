@@ -10,6 +10,15 @@
     else if (/#prijzen$/.test(l.getAttribute("href"))) window.va("event", { name: "Naar calculator", data: { plek: page } });
   }, { capture: true });
 
+  // Aftelling in de actiebalk (de balk zelf verdwijnt na de einddatum)
+  const strip = document.querySelector(".promo-strip"), cd = strip && strip.querySelector("[data-cd]");
+  if (cd){
+    const end = Date.parse(strip.dataset.until), p2 = n => String(n).padStart(2, "0");
+    const tick = () => { const ms = end - Date.now(); if (ms <= 0){ strip.remove(); clearInterval(t); return; }
+      cd.textContent = `${Math.floor(ms / 864e5)}d ${p2(Math.floor(ms / 36e5) % 24)}u ${p2(Math.floor(ms / 6e4) % 60)}m ${p2(Math.floor(ms / 1e3) % 60)}s`; };
+    const t = setInterval(tick, 1000); tick();
+  }
+
   // Paginawissel op het grote scherm
   const imgs = [...document.querySelectorAll(".screen > img")], btns = [...document.querySelectorAll(".tabs button")];
   let cur = 0, auto;
