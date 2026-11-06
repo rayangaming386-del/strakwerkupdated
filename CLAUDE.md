@@ -10,21 +10,26 @@ Eén-pagina site voor StrakWerk (websites voor ondernemers, vanaf €200). Alle 
 - Prijzen en opties van de configurator staan onderaan in het script in het blok `CONFIG`:
   - `bases` = de pakketten: `nieuw` (Starter €200), `premium` (€350), `pro` (€500), `redesign` (€175). `incl` per pakket = opties die erin zitten (aantallen bij qty-opties, bijv. `pagina:2`). Inbegrepen opties staan vergrendeld op "Inbegrepen"; opties die botsen met iets inbegrepens (`excl`) zijn uitgeschakeld. Logica: `inclOf()`, `enforce()`, `setBase()`.
   - Opties per groep (`nieuw:true` toont een Nieuw-label), presets (`base:"redesign"` kiest de redesign-basis).
-  - `promo`: tijdelijke actie (nu t/m 30 november 2026: logo-ontwerp en Google Bedrijfsprofiel gratis bij elke website). Verloopt vanzelf via `until`. Toont de hero-pill `#promoPill` (in plaats van `#newPill`) en de balk `#promoBar` boven de pakketten, en zet de gratis opties als "Gratis (actie)" in de offerte.
+  - `promo`: tijdelijke actie (nu t/m 30 november 2026: logo-ontwerp en Google Bedrijfsprofiel gratis bij elke website). Verloopt vanzelf via `until`, ook als de pagina open staat (`promoUI(false)` haalt de gratis opties weer uit de offerte). Rood (`--red`) met live aftelling: hero-pill `#promoPill` (in plaats van `#newPill`), blok `#promoBar` met dagen/uur/min/sec boven de pakketten, en in de mobiele balk (`.mbar.has-promo`). Aftelvelden: `data-cd="blocks"`, `"short"`, `"dh"`, `"dhs"`; `promoTick()` werkt ze elke seconde bij.
+  - Calculator-extra's (alles afgeleid uit `CONFIG`, geen vaste getallen in de HTML): voordeel in de offerte (`pkgSave()` = losse waarde min pakketprijs, `promoSave()` = actie), "Bespaar"-labels op de pakketkaarten, slimme tip als een groter pakket goedkoper of even duur uitkomt (`bestUpgrade()`), keuzehulp in 3 vragen (`#kh`), vergelijkingstabel (`#pkCmp`), keuze onthouden in localStorage (`sw-offerte-v1`, met melding "Je vorige keuze staat weer klaar"), deellink `?cfg=pakket~optie~optie.aantal` (gaat vóór `?preset=`), offerte als PDF via `printQuote()` (print-CSS alleen actief met `html.pq`, gewone Ctrl+P blijft normaal).
+- Contact: bel- en maillinks (tel:/mailto:) in contactblok, footer en mobiel menu; werkgebied met links naar de stadspagina's (`.c-area`); formulier kan ook via e-mail (`#f-mail`, onderwerp en tekst ingevuld).
+- Gratis snelheidscheck (`#speedcheck` in de sectie Nieuw): opent Google PageSpeed Insights voor het ingevulde adres en biedt daarna een WhatsApp-link om de uitslag te sturen.
+- Kennisbank-teaser op de homepage (`#kennis`, de 3 nieuwste artikelen) en een lijst in de footer; bij een nieuw artikel beide bijwerken (komen uit dezelfde lijst als de generator).
+- Structuurdata op de homepage: ProfessionalService met `hasOfferCatalog` (de pakketprijzen), `areaServed` (Nederland + de vijf steden) en `contactPoint`; `FAQPage` gemaakt uit de FAQ op de pagina. Bij nieuwe prijzen of FAQ-vragen die ook bijwerken.
 - Sectie `#nieuw` promoot de nieuwe diensten: website redesign (oud/nieuw-schuif, `#cv`) en kentekenherkenning met camera (scan-animatie, `.scan`). Knoppen `data-pick-base` en `data-pick-opt` zetten iets aan in de offerte en scrollen naar de prijzen.
 - Foto-achtergronden per sectie: `.sec-photo` met getinte, wazige foto's uit `assets/bg/ph-*.webp` (gemaakt uit de klantscreenshots, duotoon in goud/koper/teal/indigo).
 - `assets/work/`: screenshots van projecten. Desktop (`vagpro*.webp` incl. over/zakelijk/contact, `detak*.webp` incl. de/aanvraag/onderweg, `cartronic.webp`, `cartronic-dashboard.webp`, 1600x905) staan in een laptopframe, mobiel (`*-mobiel.webp`) in een telefoon ervoor. Elk project heeft een paginawissel onder de laptop (`.shot-tabs`, wisselt automatisch). Nieuwe desktop-screenshots: scrollbalk rechts en de blauwe laadbalk bovenin wegknippen.
 - Achtergronden: in de hero een bewegende, schuine wand van eigen projecten (`.wall`, kleine versies in `assets/bg/`), korrel over de hele site (`assets/bg/grain.webp`), een zachte gloed per sectie (`#id::before`) en de werkplekfoto `assets/setup.webp` (1600x1200) in "Over mij" en licht wazig achter het contactblok (`.cta-photo`).
 - Subpagina's (werk/, diensten/, kennisbank) hebben een actiebalk `.promo-strip` direct na `<body>`, met een inline script dat hem na de einddatum meteen verwijdert. Bij een nieuwe actie: `CONFIG.promo` op de homepage én de balk op alle subpagina's aanpassen (of weghalen).
-- `kennisbank.html` (overzicht, in de root zodat `/kennisbank` werkt met cleanUrls) en `kennisbank/*.html` (vier artikelen). Gebruiken absolute paden (`/assets/...`, `/kennisbank/...`). Artikelen bevatten geen verzonnen cijfers.
+- `kennisbank.html` (overzicht, in de root zodat `/kennisbank` werkt met cleanUrls) en `kennisbank/*.html` (zes artikelen, nieuwste eerst; elk met eigen datum). Het artikel over Google Bedrijfsprofiel heeft een actievak `.art-promo` dat na de einddatum zichzelf verwijdert. Gebruiken absolute paden (`/assets/...`, `/kennisbank/...`). Artikelen bevatten geen verzonnen cijfers.
 - `privacy.html` (privacyverklaring, gelinkt in de footers) en `404.html` (Vercel toont die automatisch; gebruikt absolute paden `/assets/...`).
 - Lettertypes lokaal in `assets/fonts/` (`fonts.css`, Geist + Geist Mono), geen Google Fonts.
 - `vercel.json` (redirects van oude pagina's zoals `/service-pro.html`), `robots.txt`, `sitemap.xml`.
 - Projectpagina's worden gegenereerd met een script; pas bij wijzigingen alle drie de bestanden in `werk/` consistent aan.
 - `diensten/*.html`: acht dienst- en branchepagina's voor Google (website laten maken, redesign, webshop, garage, sleepdienst, kapper, horeca, bouw) plus vijf stadspagina's (`website-laten-maken-den-haag`, `-rijswijk`, `-delft`, `-zoetermeer`, `-westland`). Zelfde stijl als de projectpagina's, met Service/FAQ/Breadcrumb-structuurdata (stadspagina's met `areaServed` = de stad). Stadspagina's noemen alleen projecten die echt in die plaats zitten (VAGPRO en De Tak: Den Haag, CarTronic: Rijswijk). Links vanuit "Voor wie", de redesign-kaart en de footer. Pas bij wijzigingen alle pagina's consistent aan.
-- Meten: alle pagina's hebben de Vercel Analytics-stub (`window.va`) vóór het insights-script. Eigen events: WhatsApp, Offerte verstuurd, Intake aangevraagd, Offerte gekopieerd, Pakket gekozen, Optie aan, Demo geopend, Demo bekeken, Demo: ik wil dit, Naar calculator. Zonder cookies en zonder persoonsgegevens. Eigen events zijn in Vercel alleen zichtbaar op een Pro-abonnement.
+- Meten: alle pagina's hebben de Vercel Analytics-stub (`window.va`) vóór het insights-script. Eigen events: WhatsApp, Bellen, E-mail, Formulier verstuurd (via WhatsApp of e-mail), Offerte verstuurd, Intake aangevraagd, Offerte gekopieerd, Offerte-link gekopieerd, Offerte PDF, Pakket gekozen, Optie aan, Tip gevolgd, Keuzehulp, Snelheidscheck, Demo geopend, Demo bekeken, Demo: ik wil dit, Naar calculator. Zonder cookies en zonder persoonsgegevens. Eigen events zijn in Vercel alleen zichtbaar op een Pro-abonnement.
 - `demo.html`: interactieve demo van het beheerpaneel (Basis/Geavanceerd), live voorbeeldsite ernaast, wijzigingen alleen in localStorage (`sw-demo-v1`). Demo-foto's in `assets/demo/`. Bezoekersaantallen in het dashboard zijn gemarkeerd als "Voorbeeld".
-- `assets/video/configurator.mp4`: korte schermopname van de configurator (naast de prijzen, alleen desktop, speelt af in beeld).
+- `assets/video/configurator.mp4`: schermopname van ~10 s van de configurator met de pakketten (Premium + kentekencheck + afspraken). Opgenomen met een datum ná de actie, zodat er geen actie in beeld is. Opnieuw opnemen als de calculator er anders uit gaat zien.
 - `assets/og.png`: preview-afbeelding (1200x630) met CarTronic-laptop en De Tak-telefoon.
 - Mobiel: balk onderaan door de hele site (buiten de hero en het contactblok), bij de prijzen met je totaal.
 - Snelheid (Lighthouse, gemeten november 2026): homepage mobiel ~90 (was 52), desktop 100, subpagina's 98-100, toegankelijkheid/best practices/SEO overal 100. Afspraken die dat zo houden:
@@ -47,6 +52,7 @@ Eén-pagina site voor StrakWerk (websites voor ondernemers, vanaf €200). Alle 
 - Vastgezette secties (hero, werk) alleen op desktop. Hero-zoom start op scrollpositie 0. Elementen binnen een vastgezette sectie niet als eigen trigger gebruiken. Geen 3D-draai/schaal-animaties in de horizontale projectenstrook (die overlappen elkaar).
 - Test na wijzigingen: herberekenen (`ScrollTrigger.refresh()`) halverwege de pagina mag geen startposities veranderen.
 - Altijd testen op desktop én mobiel: geen console-fouten, niets dat horizontaal buiten beeld schuift.
+- Let op: `main` heeft `overflow-x:clip`, dus te brede inhoud geeft géén horizontale scroll maar wordt stil afgeknipt. Test daarom ook of elementen buiten beeld vallen (op 320, 360, 390 en 768 px). Grid-kinderen met brede inhoud (tabellen) hebben `min-width:0` nodig (zie `.cfg > *`).
 - Nooit reviews, klantcitaten of cijfers verzinnen; die komen van de eigenaar.
 
 ## Eigenaar
@@ -56,7 +62,7 @@ Eén-pagina site voor StrakWerk (websites voor ondernemers, vanaf €200). Alle 
 - Nog geen reviews: geen review-sectie of beoordelingen tonen tot Rayan echte reviews aanlevert.
 
 ## Portfolio
-- VAGPRO (kentekencheck), De Tak (aanvraag via WhatsApp, meertalig, regiopagina's), CarTronic (webshop + geavanceerd beheerpaneel, `CONFIG.cartronicUrl`).
+- VAGPRO (kentekencheck), De Tak (aanvraag via WhatsApp, meertalig, regiopagina's), CarTronic (webshop + geavanceerd beheerpaneel). CarTronic staat live op https://cartronic.nl (`CONFIG.cartronicUrl`, ook in `werk/cartronic.html`).
 - Teller staat op "20+ sites live".
 
 ## Openstaande punten (input van eigenaar nodig)
@@ -66,4 +72,5 @@ Eén-pagina site voor StrakWerk (websites voor ondernemers, vanaf €200). Alle 
 - Per project: wat wilde de klant en wat leverde het op (geen resultaten verzinnen).
 - De tekst in "Over mij" is geschreven zonder harde feiten (geen leeftijd, jaren ervaring of aantallen); vul die alleen aan met info van Rayan.
 - Echte klantreviews zodra Rayan ze heeft (dan pas een review-sectie maken).
+- Na 30 november: de actie verdwijnt vanzelf. Haal daarna `CONFIG.promo`, de `.promo-strip` op de subpagina's en het actievak in het Google Bedrijfsprofiel-artikel weg (of vervang door een nieuwe actie).
 - Domein: controleren of strakwerkk.nl in Vercel aan dit project gekoppeld is.

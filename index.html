@@ -21,10 +21,13 @@
 <link rel="manifest" href="/site.webmanifest">
 <meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"ProfessionalService","name":"StrakWerk","url":"https://www.strakwerkk.nl/","image":"https://www.strakwerkk.nl/assets/og.png","description":"Websites op maat vanaf €200. Kies zelf je opties: beheerpaneel, kentekencheck, webshop en meer.","telephone":"+31623462397","email":"strakwerkk@gmail.com","priceRange":"€€","areaServed":"NL","founder":{"@type":"Person","name":"Rayan"},"logo":"https://www.strakwerkk.nl/icon-512.png"}
+{"@context":"https://schema.org","@type":"ProfessionalService","name":"StrakWerk","url":"https://www.strakwerkk.nl/","image":"https://www.strakwerkk.nl/assets/og.png","description":"Websites op maat vanaf €200. Kies zelf je opties: beheerpaneel, kentekencheck, webshop en meer.","telephone":"+31623462397","email":"strakwerkk@gmail.com","priceRange":"€€","areaServed":[{"@type":"Country","name":"Nederland"},{"@type":"City","name":"Den Haag"},{"@type":"City","name":"Rijswijk"},{"@type":"City","name":"Delft"},{"@type":"City","name":"Zoetermeer"},{"@type":"City","name":"Westland"}],"founder":{"@type":"Person","name":"Rayan"},"logo":"https://www.strakwerkk.nl/icon-512.png","hasOfferCatalog":{"@type":"OfferCatalog","name":"Websitepakketten","itemListElement":[{"@type":"Offer","name":"Starter","price":"200","priceCurrency":"EUR","description":"Complete website op maat tot 3 pagina's, mobiel, met contactformulier en WhatsApp-knop.","url":"https://www.strakwerkk.nl/#prijzen"},{"@type":"Offer","name":"Premium","price":"350","priceCurrency":"EUR","description":"Starter met beheerpaneel, aanvragen via WhatsApp, Google reviews en Bedrijfsprofiel, extra pagina's, teksten en animaties.","url":"https://www.strakwerkk.nl/#prijzen"},{"@type":"Offer","name":"Pro","price":"500","priceCurrency":"EUR","description":"Premium met geavanceerd beheerpaneel, extra taal, blog, logo-ontwerp en regiopagina's.","url":"https://www.strakwerkk.nl/#prijzen"},{"@type":"Offer","name":"Website redesign","price":"175","priceCurrency":"EUR","description":"Je bestaande website strak vernieuwd, met je eigen domein, teksten en foto's.","url":"https://www.strakwerkk.nl/#prijzen"}]},"contactPoint":{"@type":"ContactPoint","telephone":"+31623462397","email":"strakwerkk@gmail.com","contactType":"customer service","availableLanguage":["nl"]}}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebSite","name":"StrakWerk","alternateName":"StrakWerk Webdesign","url":"https://www.strakwerkk.nl/"}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Wat is het verschil tussen Starter, Premium en Pro?","acceptedAnswer":{"@type":"Answer","text":"Starter (€200) is een complete website tot 3 pagina's. Premium (€350) voegt daar een beheerpaneel, aanvragen via WhatsApp, Google reviews en Bedrijfsprofiel, 2 extra pagina's, teksten, een cookiebanner en premium animaties aan toe. Pro (€500) heeft het geavanceerde beheerpaneel, 4 extra pagina's, een extra taal, een blog, een logo en regiopagina's. Bij elk pakket kun je losse opties bijzetten."}},{"@type":"Question","name":"Wat krijg ik voor €200?","acceptedAnswer":{"@type":"Answer","text":"Een complete website tot 3 pagina's: mobiel-first, met contactformulier, WhatsApp-knop, basis-SEO en je eigen domein met SSL. Alles daarbovenop kies je zelf bij de opties."}},{"@type":"Question","name":"Hoe snel staat mijn site online?","acceptedAnswer":{"@type":"Answer","text":"Een basissite staat meestal binnen 7 dagen online. Grotere opties zoals een webshop of beheerpaneel kosten iets meer tijd. Dat hoor je vooraf."}},{"@type":"Question","name":"Kan ik later zelf dingen aanpassen?","acceptedAnswer":{"@type":"Answer","text":"Ja. Met het basis beheerpaneel (€50) pas je zelf teksten en foto's aan. Met het geavanceerde beheerpaneel (€75) pas je letterlijk alles aan, van producten tot je webshop. Allebei zonder code. Zonder beheerpaneel regel ik kleine aanpassingen voor je. Benieuwd hoe het werkt? Probeer de demo."}},{"@type":"Question","name":"Ik heb al een website. Kan die vernieuwd worden?","acceptedAnswer":{"@type":"Answer","text":"Ja, met een website redesign vanaf €175. Ik bouw je site opnieuw op in een strak, snel en mobiel ontwerp en neem je teksten en foto's mee. Je bestaande domein koppel ik aan de nieuwe site en je e-mail blijft gewoon werken."}},{"@type":"Question","name":"Hoe werkt kentekenherkenning?","acceptedAnswer":{"@type":"Answer","text":"De klant tikt op de cameraknop naast het kentekenveld en maakt een foto van de kentekenplaat. De site leest het kenteken uit en vult het in. Wil de klant liever typen, dan kan dat altijd gewoon."}},{"@type":"Question","name":"Kan ik later nog opties toevoegen?","acceptedAnswer":{"@type":"Answer","text":"Altijd. Je betaalt dan alleen de prijs van de optie die je erbij neemt."}}]}
 </script>
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script>
 <script defer src="/_vercel/insights/script.js"></script>
@@ -755,10 +758,9 @@ body::after{transform:translateZ(0)}
 .kh-why{display:block; margin-top:6px; color:var(--muted); font-size:.9rem}
 .kh-acts{display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin-top:14px}
 .pk-cmp{margin:0 0 14px; border-radius:16px; border:1px solid var(--line); background:rgba(255,255,255,.015)}
-.pk-cmp summary{cursor:pointer; list-style:none; padding:13px 16px; font-weight:600; font-size:.92rem; color:var(--muted); position:relative; padding-right:44px}
+.pk-cmp summary{cursor:pointer; list-style:none; padding:13px 48px 13px 16px; font-weight:600; font-size:.92rem; color:var(--muted); position:relative}
+.pk-cmp summary::after{right:20px}
 .pk-cmp summary::-webkit-details-marker{display:none}
-.pk-cmp summary::after{content:"+"; position:absolute; right:18px; top:50%; transform:translateY(-50%); color:var(--gold); font-size:1.2rem; font-weight:400}
-.pk-cmp[open] summary::after{content:"−"}
 .pk-cmp[open] summary{color:var(--text)}
 .pk-scroll{overflow-x:auto; padding:0 6px 12px}
 .pk-cmp table{width:100%; border-collapse:collapse; font-size:.86rem}
@@ -810,6 +812,47 @@ body::after{transform:translateZ(0)}
   .pq-note{color:#444; font-size:9.5pt; margin:5pt 0; word-break:break-all}
   .pq-contact{margin-top:18pt; padding-top:10pt; border-top:1pt solid #ddd; font-size:9.5pt}
 }
+/* Contact, werkgebied, snelheidscheck */
+.contact .c-acts{display:flex; gap:16px; flex-wrap:wrap; font-size:.8rem}
+.contact .c-acts a{color:var(--gold); font:600 .8rem var(--f-body)}
+.contact .c-acts a:hover, .contact button:hover{text-decoration:underline; text-underline-offset:3px}
+.c-area{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:4px; position:relative; font-size:.86rem}
+.c-area span{width:100%; font-size:.8rem; color:var(--muted); font-weight:600}
+.c-area a{padding:6px 12px; border-radius:99px; border:1px solid var(--line-2); background:rgba(11,14,19,.4); font-weight:600; transition:border-color .2s, color .2s}
+.c-area a:hover{border-color:var(--gold); color:var(--gold)}
+.c-area em{font-style:normal; color:var(--muted); font-size:.82rem}
+.form .hint a{color:var(--gold); text-decoration:underline; text-underline-offset:3px}
+.mnav-foot span a{color:inherit}
+.speedcheck{display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:clamp(20px, 4vw, 48px); align-items:center; margin-top:18px; padding:clamp(22px, 3vw, 34px); border-radius:24px; border:1px solid var(--line-2); background:linear-gradient(120deg, rgba(60,190,170,.10), rgba(207,174,105,.06) 60%, transparent), var(--card)}
+@media (max-width:900px){ .speedcheck{grid-template-columns:1fr} }
+.sc-txt{display:grid; gap:10px; justify-items:start}
+.sc-txt h3{font-size:clamp(1.35rem, 2.4vw, 1.75rem); font-weight:700; letter-spacing:-.02em}
+.sc-txt p{color:var(--muted); max-width:52ch}
+.sc-form{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px}
+.sc-form input{width:100%; min-width:0; padding:15px 16px; border-radius:12px; border:1px solid var(--line-2); background:var(--bg); color:var(--text); font:500 1rem var(--f-body); outline:none; transition:border-color .2s, box-shadow .2s}
+.sc-form input:focus{border-color:var(--gold); box-shadow:0 0 0 3px rgba(207,174,105,.18)}
+.sc-msg{grid-column:1 / -1; font-size:.86rem; min-height:1.2em}
+.sc-msg.err{color:#FCA5A5}
+.sc-msg.ok{color:#C3CBD6}
+.sc-msg a{color:var(--ok); font-weight:700; text-decoration:underline; text-underline-offset:3px}
+@media (max-width:420px){ .sc-form{grid-template-columns:1fr} }
+.ww-more{margin-top:28px; color:var(--muted); text-align:center}
+.ww-more a{color:var(--gold); font-weight:700}
+.ww-more a::after{content:" →"}
+/* Kennisbank-teaser */
+.kb-teaser{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:16px}
+@media (max-width:900px){ .kb-teaser{grid-template-columns:1fr} }
+.kbt{position:relative; display:flex; flex-direction:column; gap:10px; padding:24px; border-radius:var(--r); background:var(--card); border:1px solid var(--line); transition:border-color .3s, transform .3s}
+.kbt:hover{border-color:rgba(207,174,105,.45); transform:translateY(-3px)}
+.kbt small{font:600 .72rem var(--f-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--gold)}
+.kbt h3{font-size:1.2rem; line-height:1.25; font-weight:700}
+.kbt p{color:var(--muted); font-size:.92rem}
+.kbt span{margin-top:auto; padding-top:6px; color:var(--gold); font-weight:700; font-size:.9rem}
+.kbt span::after{content:" →"; transition:margin .25s}
+.kbt:hover span::after{margin-left:4px}
+.kb-all{margin-top:22px; text-align:center}
+.kb-all a{color:var(--gold); font-weight:700}
+.kb-all a::after{content:" →"}
 /* ===== Beweging & kleur ===== */
 .loader{position:fixed; inset:0; z-index:200; background:var(--bg); display:none; place-items:center; --u:0}
 .js .loader{display:grid}
@@ -996,11 +1039,12 @@ body.mbar-on .wa-fab{transform:scale(0)}
     <a href="#werkwijze">Werkwijze</a>
     <a href="#over">Over mij</a>
     <a href="demo">Demo beheer</a>
+    <a href="kennisbank">Kennisbank</a>
     <a href="#contact">Contact</a>
   </nav>
   <div class="mnav-foot">
     <a class="btn btn--gold" href="https://wa.me/31623462397?text=Hoi%20StrakWerk%2C%20ik%20wil%20graag%20een%20website." target="_blank" rel="noopener">WhatsApp mij</a>
-    <span>06 2346 2397 · strakwerkk@gmail.com</span>
+    <span><a href="tel:+31623462397">06 2346 2397</a> · <a href="mailto:strakwerkk@gmail.com?subject=Vraag%20over%20een%20website">strakwerkk@gmail.com</a></span>
   </div>
 </div>
 
@@ -1244,7 +1288,7 @@ body.mbar-on .wa-fab{transform:scale(0)}
               <li class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>Voertuigzoeker</li>
             </ul>
             <div class="case-links">
-              <a class="link" data-cartronic-link href="https://cartronic.vercel.app" target="_blank" rel="noopener">Bekijk live <span>↗</span></a>
+              <a class="link" data-cartronic-link href="https://cartronic.nl" target="_blank" rel="noopener">Bekijk live <span>↗</span></a>
               <a class="link-soft" href="werk/cartronic">Bekijk het project →</a>
               <button class="link-soft" type="button" data-preset="cartronic">Wat kost zo'n site?</button>
             </div>
@@ -1375,6 +1419,19 @@ Locatie: Rijswijk<small>09:41 ✓✓</small></div>
           </div>
         </article>
       </div>
+      <div class="speedcheck" id="speedcheck">
+        <div class="sc-txt">
+          <span class="kicker">Gratis check</span>
+          <h3>Hoe snel is jouw huidige website?</h3>
+          <p>Vul je adres in en Google meet de snelheid op mobiel en desktop. Is je site traag of verouderd? Stuur me de uitslag, dan kijk ik gratis met je mee.</p>
+        </div>
+        <form class="sc-form" id="scForm" novalidate>
+          <label class="sr" for="scUrl">Adres van je website</label>
+          <input id="scUrl" type="text" inputmode="url" placeholder="jouwbedrijf.nl" autocomplete="url" autocapitalize="none" spellcheck="false" aria-describedby="scMsg">
+          <button class="btn btn--gold" type="submit">Test mijn site</button>
+          <p class="sc-msg" id="scMsg" role="status" aria-live="polite"></p>
+        </form>
+      </div>
     </div>
   </section>
 
@@ -1479,7 +1536,7 @@ Locatie: Rijswijk<small>09:41 ✓✓</small></div>
             <p class="lead">Zet de functies aan die je wilt. Je offerte rekent direct mee en verstuur je met één tik via WhatsApp.</p>
           </div>
           <ul class="how">
-            <li><b>Kies je start</b><span>Een nieuwe website vanaf €200, of je huidige site vernieuwd vanaf €175.</span></li>
+            <li><b>Kies een pakket</b><span>Starter €200, Premium €350 of Pro €500. Heb je al een website? Een redesign start op €175.</span></li>
             <li><b>Zet functies aan</b><span>Elke optie heeft een vaste prijs. Je totaal rekent direct mee.</span></li>
             <li><b>Verstuur je offerte</b><span>Met één tik via WhatsApp. Je hoort dezelfde dag van me.</span></li>
           </ul>
@@ -1488,7 +1545,7 @@ Locatie: Rijswijk<small>09:41 ✓✓</small></div>
           <div class="handset"><div class="screen">
             <video id="howVid" muted loop playsinline preload="none" poster="assets/video/configurator-poster.webp" aria-hidden="true"><source src="assets/video/configurator.mp4" type="video/mp4"></video>
           </div></div>
-          <figcaption>Zo werkt het, in 13 seconden</figcaption>
+          <figcaption>Zo werkt het, in 10 seconden</figcaption>
         </figure>
       </div>
 
@@ -1633,6 +1690,24 @@ Locatie: Rijswijk<small>09:41 ✓✓</small></div>
           <div class="big" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.3-2 5-2 5s3.7-.5 5-2c.7-.8.7-2.1-.1-2.9a2.2 2.2 0 0 0-2.9-.1z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.9A12.9 12.9 0 0 1 22 2c0 2.7-.8 7.5-6 11a22.4 22.4 0 0 1-4 2z"/><path d="M9 12H4s.6-3 2-4c1.6-1.1 5 0 5 0M12 15v5s3-.6 4-2c1.1-1.6 0-5 0-5"/></svg></div>
         </article>
       </div>
+      <p class="ww-more">Wat heb ik van jou nodig? <a href="kennisbank/checklist-website-laten-maken">Bekijk de checklist</a></p>
+    </div>
+  </section>
+
+  <!-- KENNISBANK -->
+  <section class="sec" id="kennis" style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="kicker">Kennisbank</span>
+        <h2 class="h2">Slimmer met je website.</h2>
+        <p class="lead">Praktische uitleg zonder vakjargon: over prijzen, keuzes en hoe je beter gevonden wordt.</p>
+      </div>
+      <div class="kb-teaser">
+        <a class="kbt" href="kennisbank/google-bedrijfsprofiel-aanmaken"><small>Lokaal gevonden worden · 5 min</small><h3>Google Bedrijfsprofiel: zo word je gevonden in Google Maps</h3><p>Met een gratis Google Bedrijfsprofiel sta je in Google Maps en in de zoekresultaten. Zo maak je het aan, verifieer je het en haal je er het meeste uit.</p><span>Lees artikel</span></a>
+        <a class="kbt" href="kennisbank/website-toe-aan-redesign"><small>Redesign · 5 min</small><h3>Is je website toe aan een redesign? 8 signalen</h3><p>Hoe weet je of je website toe is aan vernieuwing? Acht duidelijke signalen, en wat je eraan kunt doen.</p><span>Lees artikel</span></a>
+        <a class="kbt" href="kennisbank/wat-kost-een-website"><small>Prijzen · 5 min</small><h3>Wat kost een website in 2026?</h3><p>Wat kost een website laten maken in 2026? Een eerlijk overzicht: zelf bouwen, een freelancer of een bureau, en waar de prijs van afhangt.</p><span>Lees artikel</span></a>
+      </div>
+      <p class="kb-all"><a href="kennisbank">Alle artikelen in de kennisbank</a></p>
     </div>
   </section>
 
@@ -1670,9 +1745,10 @@ Locatie: Rijswijk<small>09:41 ✓✓</small></div>
         <a class="btn" href="#prijzen">Bereken je prijs</a>
       </div>
       <div class="contact">
-        <div><span>Telefoon / WhatsApp</span><b>06 2346 2397</b><button type="button" data-copy="0623462397">Kopieer nummer</button></div>
-        <div><span>E-mail</span><b>strakwerkk@gmail.com</b><button type="button" data-copy="strakwerkk@gmail.com">Kopieer e-mail</button></div>
+        <div><span>Telefoon / WhatsApp</span><b>06 2346 2397</b><span class="c-acts"><a href="tel:+31623462397">Bel direct</a><button type="button" data-copy="0623462397">Kopieer nummer</button></span></div>
+        <div><span>E-mail</span><b>strakwerkk@gmail.com</b><span class="c-acts"><a href="mailto:strakwerkk@gmail.com?subject=Vraag%20over%20een%20website">Stuur een mail</a><button type="button" data-copy="strakwerkk@gmail.com">Kopieer e-mail</button></span></div>
       </div>
+      <p class="c-area"><span>Werkgebied</span><a href="diensten/website-laten-maken-den-haag">Den Haag</a><a href="diensten/website-laten-maken-rijswijk">Rijswijk</a><a href="diensten/website-laten-maken-delft">Delft</a><a href="diensten/website-laten-maken-zoetermeer">Zoetermeer</a><a href="diensten/website-laten-maken-westland">Westland</a><em>en de rest van Nederland, op afstand</em></p>
       </div>
       <form class="form" id="lead" novalidate>
         <h3>Vertel kort wat je zoekt</h3>
@@ -1684,7 +1760,7 @@ Locatie: Rijswijk<small>09:41 ✓✓</small></div>
           <select id="f-type"><option>Een nieuwe website</option><option>Een webshop</option><option>Mijn huidige site vernieuwen</option><option>Een extra functie op mijn site</option><option>Iets anders</option></select></div>
         <div class="field"><label for="f-msg">Bericht</label><textarea id="f-msg" placeholder="Bijvoorbeeld: ik heb een garage en wil een site met kentekencheck."></textarea></div>
         <a class="btn btn--gold" id="f-send" href="https://wa.me/31623462397" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.4 14.1c-.2.6-1.3 1.2-1.8 1.3-.5 0-1 .3-3.3-.7a11.4 11.4 0 0 1-4.6-4.1c-.3-.5-1.1-1.6-1.1-3s.8-2.1 1-2.4c.3-.3.6-.4.8-.4h.6c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.3.5-.4.5c-.2.2-.3.4-.1.7.2.4.9 1.5 2 2.4 1.4 1.2 2.5 1.6 2.9 1.7.3.2.5.1.7-.1l.9-1.1c.2-.3.5-.3.8-.2l2 1c.3.1.5.2.6.3.1.2.1.8-.2 1.4z"/></svg>Verstuur via WhatsApp</a>
-        <p class="hint">Je bericht opent in WhatsApp, klaar om te versturen.</p>
+        <p class="hint">Je bericht opent in WhatsApp, klaar om te versturen. Liever e-mail? <a id="f-mail" href="mailto:strakwerkk@gmail.com">Verstuur via e-mail</a></p>
       </form>
     </div>
   </section>
@@ -1701,11 +1777,11 @@ Locatie: Rijswijk<small>09:41 ✓✓</small></div>
     <div class="foot-brand"><span class="brand"><span class="strak">STRAK</span><span>WERK</span></span><p>Websites op maat vanaf €200. Snel online, mobiel-first en vindbaar in Google.</p></div>
     <nav class="foot-col" aria-label="Footer"><b>Navigatie</b><a href="#werk">Werk</a><a href="#features">Diensten</a><a href="#prijzen">Prijzen</a><a href="#over">Over mij</a><a href="demo">Demo beheerpaneel</a><a href="kennisbank">Kennisbank</a><a href="#vragen">FAQ</a></nav>
     <nav class="foot-col" aria-label="Projecten"><b>Projecten</b><a href="werk/vagpro">VAGPRO</a><a href="werk/detak">Sleepdienst De Tak</a><a href="werk/cartronic">CarTronic</a></nav>
-    <div class="foot-col"><b>Contact</b><a href="https://wa.me/31623462397" target="_blank" rel="noopener">WhatsApp</a><span>06 2346 2397</span><span>strakwerkk@gmail.com</span></div>
+    <div class="foot-col"><b>Contact</b><a href="https://wa.me/31623462397" target="_blank" rel="noopener">WhatsApp</a><a href="tel:+31623462397">06 2346 2397</a><a href="mailto:strakwerkk@gmail.com?subject=Vraag%20over%20een%20website">strakwerkk@gmail.com</a></div>
   </div>
   <nav class="wrap foot-serv" aria-label="Diensten"><b>Diensten</b><a href="diensten/website-laten-maken">Website laten maken</a><a href="diensten/website-redesign">Website redesign</a><a href="diensten/webshop-laten-maken">Webshop laten maken</a><a href="diensten/website-garage">Website voor garages</a><a href="diensten/website-sleepdienst">Website voor sleepdiensten</a><a href="diensten/website-kapper">Website voor kappers & beauty</a><a href="diensten/website-horeca">Website voor horeca</a><a href="diensten/website-bouwbedrijf">Website voor bouw & installatie</a></nav>
   <nav class="wrap foot-serv" aria-label="Regio"><b>Website laten maken in</b><a href="diensten/website-laten-maken-den-haag">Den Haag</a><a href="diensten/website-laten-maken-rijswijk">Rijswijk</a><a href="diensten/website-laten-maken-delft">Delft</a><a href="diensten/website-laten-maken-zoetermeer">Zoetermeer</a><a href="diensten/website-laten-maken-westland">Westland</a></nav>
-  <nav class="wrap foot-serv" aria-label="Kennisbank"><b>Kennisbank</b><a href="kennisbank/wat-kost-een-website">Wat kost een website in 2026?</a><a href="kennisbank/wix-of-website-op-maat">Wix of een website op maat: wat past bij jou?</a><a href="kennisbank/waarom-is-mijn-website-traag">Waarom is mijn website traag? 7 oorzaken</a><a href="kennisbank/checklist-website-laten-maken">Website laten maken? Deze checklist helpt je op weg</a></nav>
+  <nav class="wrap foot-serv" aria-label="Kennisbank"><b>Kennisbank</b><a href="kennisbank/google-bedrijfsprofiel-aanmaken">Google Bedrijfsprofiel: zo word je gevonden in Google Maps</a><a href="kennisbank/website-toe-aan-redesign">Is je website toe aan een redesign? 8 signalen</a><a href="kennisbank/wat-kost-een-website">Wat kost een website in 2026?</a><a href="kennisbank/wix-of-website-op-maat">Wix of een website op maat: wat past bij jou?</a><a href="kennisbank/waarom-is-mijn-website-traag">Waarom is mijn website traag? 7 oorzaken</a><a href="kennisbank/checklist-website-laten-maken">Website laten maken? Deze checklist helpt je op weg</a></nav>
   <div class="wrap foot-bottom"><span>© <span id="year">2026</span> StrakWerk · Webdesign &amp; development</span><span class="clock">Den Haag · <b id="clock">--:--</b></span><a href="privacy">Privacy</a><a href="#hero">Terug naar boven ↑</a></div>
 </footer>
 
@@ -1749,7 +1825,7 @@ const CONFIG = {
   },
   /* Actie: tot en met deze datum gaan deze opties gratis mee bij elke website. Verloopt vanzelf. */
   promo: { until: "2026-12-01T00:00:00+01:00", free: { logo:1, gbp:1 }, label: "Actie t/m 30 november" },
-  cartronicUrl: "https://cartronic.vercel.app",   // later: https://cartronic.nl
+  cartronicUrl: "https://cartronic.nl",
   groups: [
     { title: "Functies", items: [
       { id:"beheer",   name:"Beheerpaneel basis",      price:50,  desc:"Zelf teksten, foto's en bedrijfsgegevens aanpassen, zonder code.", excl:"beheerpro", demo:true },
@@ -2140,6 +2216,10 @@ document.addEventListener("click", e => {
   const a = e.target.closest("a[href]"); if (!a) return;
   if (a.id === "qwa") track("Offerte verstuurd", { pakket: B().name, totaal: totals().once });
   else if (a.id === "qintake") track("Intake aangevraagd", { pakket: B().name });
+  else if (a.id === "f-send") track("Formulier verstuurd", { soort: document.getElementById("f-type").value, via: "WhatsApp" });
+  else if (a.id === "f-mail") track("Formulier verstuurd", { soort: document.getElementById("f-type").value, via: "e-mail" });
+  else if (/^tel:/.test(a.href)) track("Bellen", { plek: a.closest("section, footer, .mnav")?.id || "site" });
+  else if (/^mailto:/.test(a.href)) track("E-mail", { plek: a.closest("section, footer, .mnav")?.id || "site" });
   else if (/wa\.me\//.test(a.href)) track("WhatsApp", { plek: a.closest("section, footer, header, .mbar, .mnav")?.id || a.className || "site" });
   else if (/\/demo$|^demo$/.test(a.getAttribute("href"))) track("Demo geopend", { plek: a.closest("section, footer, .mnav")?.id || "site" });
 }, { capture: true });
@@ -2245,6 +2325,20 @@ addEventListener("keydown", e => { if (e.key === "Escape" && !mnav.hidden) close
   const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ e.target.classList.add("ld"); io.unobserve(e.target); } }), { rootMargin: "900px 0px" });
   els.forEach(e => io.observe(e)); })();
 
+/* Gratis snelheidscheck via Google PageSpeed Insights */
+(() => { const f = document.getElementById("scForm"); if (!f) return;
+  const inp = document.getElementById("scUrl"), msg = document.getElementById("scMsg");
+  f.addEventListener("submit", e => { e.preventDefault();
+    let v = inp.value.trim().replace(/\s+/g, ""); if (v && !/^https?:\/\//i.test(v)) v = "https://" + v;
+    let u = null; try { u = new URL(v); } catch (x) {}
+    if (!u || !/^[a-z0-9-]+(\.[a-z0-9-]+)+$/i.test(u.hostname)){ msg.className = "sc-msg err"; msg.textContent = "Vul een geldig adres in, bijvoorbeeld jouwbedrijf.nl"; inp.focus(); return; }
+    const url = u.origin + (u.pathname === "/" ? "" : u.pathname);
+    window.open("https://pagespeed.web.dev/report?url=" + encodeURIComponent(url), "_blank", "noopener");
+    const wa = `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(`Hoi Rayan, ik heb de snelheid van ${url} getest. Kun je gratis met me meekijken?`)}`;
+    msg.className = "sc-msg ok"; msg.innerHTML = `De test opent in een nieuw tabblad en duurt ongeveer een halve minuut. Traag of rood? <a href="${wa}" target="_blank" rel="noopener">Stuur me de uitslag via WhatsApp</a>`;
+    try { window.va && window.va("event", { name: "Snelheidscheck", data: {} }); } catch (x) {}
+  }); })();
+
 /* Oud/nieuw-schuif */
 const cv = document.getElementById("cv");
 if (cv){ const range = cv.querySelector(".cv-range"); range.addEventListener("input", () => cv.style.setProperty("--pos", range.value + "%")); }
@@ -2264,7 +2358,12 @@ function leadText(){
   const v = id => document.getElementById(id).value.trim();
   return `Hoi StrakWerk!\n\nNaam: ${v("f-naam") || "-"}\nBedrijf: ${v("f-bedrijf") || "-"}\nIk zoek: ${v("f-type")}\n\n${v("f-msg")}`;
 }
-const syncLead = () => fsend.href = `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(leadText())}`;
+const fmail = document.getElementById("f-mail");
+const syncLead = () => {
+  fsend.href = `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(leadText())}`;
+  const bedrijf = document.getElementById("f-bedrijf").value.trim();
+  fmail.href = `mailto:strakwerkk@gmail.com?subject=${encodeURIComponent("Websiteaanvraag" + (bedrijf ? " van " + bedrijf : ""))}&body=${encodeURIComponent(leadText())}`;
+};
 lead.addEventListener("input", syncLead); lead.addEventListener("change", syncLead); syncLead();
 lead.addEventListener("submit", e => { e.preventDefault(); fsend.click(); });
 
@@ -2422,6 +2521,9 @@ if (hasGsap){
         .to({}, { duration: 2.4 });
       whenVisible(scan, () => st.play(), () => st.pause());
     }
+
+    /* Kennisbank-teaser */
+    gsap.from(".kbt", { y: 60, opacity: 0, duration: 1, stagger: .08, ease: "power4.out", scrollTrigger: { trigger: ".kb-teaser", start: "top 86%" } });
 
     /* Branches */
     gsap.from(".br", { y: 70, opacity: 0, duration: 1.1, stagger: .08, ease: "power4.out", scrollTrigger: { trigger: ".branches", start: "top 84%" } });

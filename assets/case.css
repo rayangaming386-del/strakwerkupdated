@@ -182,3 +182,6 @@ footer a:hover{color:var(--gold)}
   .top .btn{padding:10px 12px; font-size:.8rem}
   .top .brand{font-size:18px}
 }
+.art-promo{border-color:rgba(248,113,113,.5); background:linear-gradient(120deg, rgba(220,38,38,.18), rgba(220,38,38,.06))}
+.art-promo strong{color:#fff}
+.art-promo a{color:#FCA5A5}
