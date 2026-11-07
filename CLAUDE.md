@@ -36,7 +36,7 @@ Site van StrakWerk, webdesignbedrijf uit **Zoetermeer** (websites voor onderneme
 - `assets/video/configurator.mp4`: schermopname van ~10 s van de configurator met de pakketten (Premium + kentekencheck + afspraken). Opgenomen met een datum ná de actie, zodat er geen actie in beeld is. Opnieuw opnemen als de calculator er anders uit gaat zien.
 - `assets/og.png`: preview-afbeelding (1200x630) met CarTronic-laptop en De Tak-telefoon.
 - Mobiel: balk onderaan door de hele site (buiten de hero en het contactblok), bij de prijzen met je totaal.
-- Snelheid (Lighthouse-lab op een lokale server, 7 november 2026): homepage mobiel ~92 (mediaan, TBT ~180 ms), desktop 100, subpagina's 96-100, toegankelijkheid/best practices/SEO overal 100. Velddata (echte bezoekers) is nog niet bekend. Afspraken die dat zo houden:
+- Snelheid (Lighthouse-lab, 7 november 2026, live op Vercel): homepage mobiel ~93 (LCP ~2,6 s, TBT ~150 ms), desktop 100, subpagina's 97-100, toegankelijkheid/best practices/SEO overal 100 (404 heeft bewust noindex). Links in lopende tekst altijd onderstrepen (`.tl` op subpagina's), anders zakt toegankelijkheid. Velddata (echte bezoekers) is nog niet bekend. Afspraken die dat zo houden:
   - Bibliotheken met `defer`, hoofdscript na `DOMContentLoaded`. Op telefoons/tablets (`html.noload`) wordt de hero-inhoud niet verborgen en opnieuw ingeschoven (dat gaf een flits); op desktop wel, achter de loader.
   - Op telefoons is de introtekst (`.hero .lead`) het LCP-element: houd decoratieve wandtegels daar kleiner (`.wcol.d` 180px, `sizes` 120px/50px zodat de `-360`/`-150`-varianten laden).
   - De videoposter (`data-poster`) laadt pas in de buurt van het scherm.

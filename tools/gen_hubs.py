@@ -102,7 +102,7 @@ opts = ''.join(f'<article class="f"><span class="ic">{ICON}</span><h3>{e(ITEMS[k
 body = h + '\n' + sec('Wat ik bouw', 'Kies waar je begint.', f'<div class="h-cards">{main3}</div>', top0=False) + '\n' \
     + sec('Per branche', 'Gebouwd voor jouw branche.', f'<div class="h-cards">{branches}</div>', 'Elke branche heeft andere functies nodig. Op deze pagina\'s zie je wat er past bij jouw soort bedrijf.') + '\n' \
     + sec('In de regio', 'Vanuit Zoetermeer.', f'<div class="h-cards two">{regio}</div>', 'StrakWerk zit in Zoetermeer. Ondernemers buiten de regio help ik op afstand, via WhatsApp, telefoon en e-mail.') + '\n' \
-    + sec('Functies', 'Zet erbij wat je nodig hebt.', f'<div class="feat">{opts}</div><p class="note" style="margin-top:22px">Dit is een greep uit de opties. Bekijk <a href="/prijzen" style="color:var(--gold)">alle prijzen</a> of stel je site samen in de <a href="/#prijzen" style="color:var(--gold)">calculator</a>.</p>', 'Elke optie heeft een vaste prijs, die je vooraf ziet.') + '\n' \
+    + sec('Functies', 'Zet erbij wat je nodig hebt.', f'<div class="feat">{opts}</div><p class="note" style="margin-top:22px">Dit is een greep uit de opties. Bekijk <a href="/prijzen" class="tl">alle prijzen</a> of stel je site samen in de <a href="/#prijzen" class="tl">calculator</a>.</p>', 'Elke optie heeft een vaste prijs, die je vooraf ziet.') + '\n' \
     + endbox('Benieuwd wat het voor jou kost?', 'Stel je website samen in de calculator en stuur je keuze met één tik via WhatsApp. Of app me, dan denk ik met je mee.',
              f'<a class="btn btn--gold" href="/#prijzen">Bereken je prijs</a>{WA_BTN("Hoi Rayan, ik wil graag weten welke dienst bij mijn bedrijf past.")}')
 page('/diensten', 'Diensten: websites, redesigns en webshops | StrakWerk',
@@ -185,7 +185,7 @@ body = h + '\n' + f'''  <section class="c-sec" style="padding-top:0">
   </section>
 ''' + sec('Altijd inbegrepen', 'Dit zit in elke website.', f'<ul class="d-incl">{"".join(f"<li>{e(x)}</li>" for x in INCL)}</ul>') + '\n' \
     + sec('Losse opties', 'Alle opties en prijzen.', f'<div class="pt-wrap">{groups}</div>', 'Deze prijzen zijn dezelfde als in de calculator op de homepage.') + '\n' \
-    + sec('Vragen', 'Vragen over de prijs.', f'<div class="d-faq">{faq_html}</div>', 'Meer achtergrond lees je in <a href="/kennisbank/wat-kost-een-website" style="color:var(--gold)">Wat kost een website in 2026?</a>') + '\n' \
+    + sec('Vragen', 'Vragen over de prijs.', f'<div class="d-faq">{faq_html}</div>', 'Meer achtergrond lees je in <a href="/kennisbank/wat-kost-een-website" class="tl">Wat kost een website in 2026?</a>') + '\n' \
     + endbox('Zie direct je totaal.', 'In de calculator stel je je website samen en zie je je totaalprijs. Je keuze stuur je met één tik via WhatsApp, of je bewaart hem als PDF.',
              f'<a class="btn btn--gold" href="/#prijzen">Bereken je prijs</a>{WA_BTN("Hoi Rayan, ik heb een vraag over de prijzen.")}')
 page('/prijzen', 'Prijzen: websites vanaf €200, vaste prijzen | StrakWerk'.replace('€200', eur(P_START)),
@@ -222,7 +222,7 @@ body = h + '\n' + f'''  <section class="c-sec" style="padding-top:0">
     </div>
   </section>
 ''' + sec('Wat je kunt verwachten', 'Zo werk ik.', f'<div class="feat">{expect}</div>') + '\n' \
-    + sec('Werkwijze', 'Van eerste appje tot live site.', f'<div class="steps">{steps}</div><p class="note" style="margin-top:22px">Wat heb ik van jou nodig? Lees de <a href="/kennisbank/checklist-website-laten-maken" style="color:var(--gold)">checklist voor je website</a>.</p>') + '\n' \
+    + sec('Werkwijze', 'Van eerste appje tot live site.', f'<div class="steps">{steps}</div><p class="note" style="margin-top:22px">Wat heb ik van jou nodig? Lees de <a href="/kennisbank/checklist-website-laten-maken" class="tl">checklist voor je website</a>.</p>') + '\n' \
     + sec('Projecten', 'Wat ik bouwde.', f'<div class="h-cards">{projs}</div>') + '\n' \
     + endbox('Zullen we iets strak bouwen?', 'Stuur een appje met wat je zoekt. Je hoort dezelfde dag van me.',
              f'<a class="btn btn--gold" href="{SC.wa("Hoi Rayan, ik wil graag een website.")}" target="_blank" rel="noopener">App Rayan</a><a class="btn" href="/#prijzen">Bereken je prijs</a>')
@@ -245,11 +245,11 @@ form = f'''<form class="form ct" id="lead" novalidate>
         <div class="field"><label for="f-type">Waar ben je naar op zoek?</label><select id="f-type"><option>Een nieuwe website</option><option>Een webshop</option><option>Mijn huidige site vernieuwen</option><option>Een extra functie op mijn site</option><option>Iets anders</option></select></div>
         <div class="field"><label for="f-msg">Bericht</label><textarea id="f-msg" placeholder="Bijvoorbeeld: ik heb een garage en wil een site met kentekencheck."></textarea></div>
         <a class="btn btn--gold" id="f-send" href="https://wa.me/{SC.WA}" target="_blank" rel="noopener">Verstuur via WhatsApp</a>
-        <p class="note">Je bericht opent in WhatsApp, klaar om te versturen. Liever e-mail? <a id="f-mail" href="mailto:{SC.MAIL}" style="color:var(--gold)">Verstuur via e-mail</a></p>
+        <p class="note">Je bericht opent in WhatsApp, klaar om te versturen. Liever e-mail? <a id="f-mail" href="mailto:{SC.MAIL}" class="tl">Verstuur via e-mail</a></p>
       </form>'''
 where = f'''<div class="d-text">
         <p>StrakWerk is een webdesignbedrijf uit Zoetermeer. Ik werk voor ondernemers in Zoetermeer, Den Haag, Rijswijk, Delft, het Westland en de rest van Nederland, op afstand.</p>
-        <p>Projecten in de buurt: <a href="/werk/vagpro" style="color:var(--gold)">VAGPRO</a> en <a href="/werk/detak" style="color:var(--gold)">Sleepdienst De Tak</a> in Den Haag, en <a href="/werk/cartronic" style="color:var(--gold)">CarTronic</a> in Rijswijk.</p>
+        <p>Projecten in de buurt: <a href="/werk/vagpro" class="tl">VAGPRO</a> en <a href="/werk/detak" class="tl">Sleepdienst De Tak</a> in Den Haag, en <a href="/werk/cartronic" class="tl">CarTronic</a> in Rijswijk.</p>
       </div>'''
 nexts = ''.join(f'<article class="f"><small style="font:600 .74rem var(--f-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--gold)">{e(k)}</small><h3>{e(t)}</h3><p>{e(d)}</p></article>' for k, t, d in [
     ('Dezelfde dag', 'Je bericht', 'Je stuurt een appje, belt of mailt. Je hoort dezelfde dag van me.'),

@@ -312,3 +312,6 @@ a.h-card:hover{transform:translateY(-3px)}
 .c-grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
 @media (max-width:440px){ .c-grid2{grid-template-columns:1fr} }
 .form .btn{width:100%; margin-top:4px; justify-self:stretch}
+/* Links in lopende tekst: onderstreept, zodat ze niet alleen aan de kleur te herkennen zijn */
+.tl{color:var(--gold); text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px}
+.tl:hover{color:var(--gold-hi)}

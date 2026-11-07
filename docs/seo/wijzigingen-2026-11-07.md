@@ -126,6 +126,18 @@ Let op:
 - Dit zijn **labcijfers**. Velddata van echte bezoekers was niet beschikbaar (de PageSpeed-API gaf een quotumfout). Of de Core Web Vitals in het veld goed zijn, is dus niet bekend.
 - Het gesimuleerde mobiele LCP blijft rond de 3 s. Dat komt doordat de decoratieve wand veel kleine afbeeldingen tegelijk ophaalt. De wand pas na het laden tonen zou dat verbeteren, maar verandert de eerste indruk. Dat is bewust niet gedaan.
 
+### Live gemeten na publicatie
+
+Lighthouse tegen https://www.strakwerkk.nl (Vercel-CDN), 7 november 2026. Ook dit is labdata.
+
+| Pagina | Prestaties | LCP | TBT |
+|---|---|---|---|
+| Homepage mobiel (3 runs) | 93 (96, 93, 92) | 2,6 s | 148 ms |
+| Homepage desktop | 100 | 0,7 s | 16 ms |
+| /prijzen, /diensten, /contact, /werk/vagpro mobiel | 97–100 | 1,4–1,8 s | 34–118 ms |
+
+Toegankelijkheid, best practices en SEO zijn 100. De enige uitzondering is de 404-pagina, die bewust `noindex` heeft. Links in lopende tekst op de nieuwe pagina's en de privacyverklaring zijn nu onderstreept. Ze waren alleen aan hun kleur te herkennen, waardoor de toegankelijkheid op 94–95 uitkwam.
+
 ## 7. Meting
 
 - **Eventnamen geven nu aan dat het om een klik gaat:**
