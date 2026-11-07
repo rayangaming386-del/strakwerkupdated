@@ -2,13 +2,40 @@
 (() => {
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  // Meten: WhatsApp- en calculatorklikken op subpagina's (anoniem)
+  // Meten (anoniem, zonder cookies of persoonsgegevens). Let op: een event is een klik die WhatsApp of e-mail opent,
+  // geen ontvangen aanvraag. Of het bericht echt verstuurd is, zie je alleen in WhatsApp of je mailbox.
+  const page = location.pathname.replace(/\.html$/, "") || "/";
+  const track = (name, data) => { try { window.va && window.va("event", { name, data }); } catch (x) {} };
   document.addEventListener("click", e => {
-    const l = e.target.closest("a[href]"); if (!l || !window.va) return;
-    const page = location.pathname.replace(/\.html$/, "");
-    if (/wa\.me\//.test(l.href)) window.va("event", { name: "WhatsApp", data: { plek: page } });
-    else if (/#prijzen$/.test(l.getAttribute("href"))) window.va("event", { name: "Naar calculator", data: { plek: page } });
+    const l = e.target.closest("a[href]"); if (!l) return;
+    const href = l.getAttribute("href");
+    if (l.id === "f-send") track("Formulier naar WhatsApp", { soort: document.getElementById("f-type")?.value || "", plek: page });
+    else if (l.id === "f-mail") track("Formulier naar e-mail", { soort: document.getElementById("f-type")?.value || "", plek: page });
+    else if (/wa\.me\//.test(l.href)) track("WhatsApp", { plek: page });
+    else if (/^tel:/.test(href)) track("Bellen", { plek: page });
+    else if (/^mailto:/.test(href)) track("E-mail", { plek: page });
+    else if (/#prijzen$/.test(href)) track("Naar calculator", { plek: page });
   }, { capture: true });
+
+  // Uitklapmenu op kleine schermen: sluiten bij een klik ernaast of met Escape
+  const sm = document.querySelector(".smenu");
+  if (sm){
+    document.addEventListener("click", e => { if (sm.open && !sm.contains(e.target)) sm.open = false; });
+    addEventListener("keydown", e => { if (e.key === "Escape" && sm.open){ sm.open = false; sm.querySelector("summary").focus(); } });
+  }
+
+  // Contactformulier: bouwt een kant-en-klaar bericht voor WhatsApp of e-mail (er wordt niets opgeslagen)
+  const lead = document.getElementById("lead"), fsend = document.getElementById("f-send"), fmail = document.getElementById("f-mail");
+  if (lead && fsend){
+    const v = id => (document.getElementById(id)?.value || "").trim();
+    const text = () => `Hoi StrakWerk!\n\nNaam: ${v("f-naam") || "-"}\nBedrijf: ${v("f-bedrijf") || "-"}\nIk zoek: ${v("f-type")}\n\n${v("f-msg")}`;
+    const sync = () => {
+      fsend.href = "https://wa.me/31623462397?text=" + encodeURIComponent(text());
+      if (fmail){ const b = v("f-bedrijf"); fmail.href = "mailto:strakwerkk@gmail.com?subject=" + encodeURIComponent("Websiteaanvraag" + (b ? " van " + b : "")) + "&body=" + encodeURIComponent(text()); }
+    };
+    lead.addEventListener("input", sync); lead.addEventListener("change", sync); sync();
+    lead.addEventListener("submit", e => { e.preventDefault(); fsend.click(); });
+  }
 
   // Aftelling in de actiebalk (de balk zelf verdwijnt na de einddatum)
   const strip = document.querySelector(".promo-strip"), cd = strip && strip.querySelector("[data-cd]");

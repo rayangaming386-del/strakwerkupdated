@@ -192,7 +192,7 @@ td select{padding:6px 8px; border-radius:8px; border:1px solid var(--line-2); ba
 
 /* Mobiel */
 @media (max-width:1000px){ .dtop .back{display:none} }
-@media (max-width:900px) and (min-width:761px){ .dtop .seg small{display:none} .dtop{gap:10px} }
+@media (max-width:900px) and (min-width:761px){ .dtop .seg small{display:none} .dtop{gap:10px} .dtop h1 .pl{display:none} }
 @media (max-width:1100px){
   .shell{grid-template-columns:200px minmax(0,1fr)}
   .prev{position:fixed; inset:0; z-index:40; transform:translateY(100%); transition:transform .35s cubic-bezier(.2,.8,.2,1); border:0}
@@ -232,7 +232,7 @@ td select{padding:6px 8px; border-radius:8px; border:1px solid var(--line-2); ba
 <body>
 <header class="dtop">
   <a class="brand" href="/" aria-label="StrakWerk, naar de homepage"><span class="strak">STRAK</span><span>WERK</span></a>
-  <span class="pill">Demo</span>
+  <h1 class="pill" style="margin:0">Demo<span class="pl"> beheerpaneel</span></h1>
   <div class="seg" role="group" aria-label="Niveau van het beheerpaneel">
     <button type="button" data-level="basis" aria-pressed="true">Basis <small>+€50</small></button>
     <button type="button" data-level="pro" aria-pressed="false">Geavanceerd <small>+€75</small></button>

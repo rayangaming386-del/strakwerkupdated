@@ -3,53 +3,54 @@
   "trailingSlash": false,
   "redirects": [
     {
-      "source": "/service-starter",
-      "destination": "/#prijzen",
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "strakwerkk.nl"
+        }
+      ],
+      "destination": "https://www.strakwerkk.nl/:path*",
       "permanent": true
     },
     {
-      "source": "/service-starter.html",
-      "destination": "/#prijzen",
+      "source": "/service-starter",
+      "destination": "/prijzen",
       "permanent": true
     },
     {
       "source": "/service-pro",
-      "destination": "/#prijzen",
-      "permanent": true
-    },
-    {
-      "source": "/service-pro.html",
-      "destination": "/#prijzen",
-      "permanent": true
-    },
-    {
-      "source": "/service-ecom",
-      "destination": "/#prijzen",
-      "permanent": true
-    },
-    {
-      "source": "/service-ecom.html",
-      "destination": "/#prijzen",
+      "destination": "/prijzen",
       "permanent": true
     },
     {
       "source": "/service-onderhoud",
-      "destination": "/#prijzen",
+      "destination": "/prijzen",
       "permanent": true
     },
     {
-      "source": "/service-onderhoud.html",
-      "destination": "/#prijzen",
+      "source": "/service-ecom",
+      "destination": "/diensten/webshop-laten-maken",
       "permanent": true
     },
     {
       "source": "/service-boost",
-      "destination": "/#features",
+      "destination": "/diensten",
       "permanent": true
     },
     {
-      "source": "/service-boost.html",
-      "destination": "/#features",
+      "source": "/diensten/website-laten-maken-zoetermeer",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/diensten/website-laten-maken-delft",
+      "destination": "/diensten/website-laten-maken",
+      "permanent": true
+    },
+    {
+      "source": "/diensten/website-laten-maken-westland",
+      "destination": "/diensten/website-laten-maken",
       "permanent": true
     }
   ]
