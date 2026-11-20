@@ -81,7 +81,7 @@ if (hasGsap){
     gsap.to(".hero-light", { yPercent: 18, ease: "none", scrollTrigger: heroST });
 
     /* Statement: woorden lichten op */
-    gsap.fromTo("#statement-text .w", { opacity: .14 }, { opacity: 1, stagger: .1, ease: "none", scrollTrigger: { trigger: "#statement", start: "top 80%", end: "bottom 58%", scrub: .5 } });
+    gsap.from("#statement-text .w", { color: "#6F6C66", stagger: .1, ease: "none", scrollTrigger: { trigger: "#statement", start: "top 80%", end: "bottom 58%", scrub: .5 } });
 
     /* Onthullingen: kleine groepen schuiven in zodra ze in beeld komen */
     const rise = (sel, trigger, opt = {}) => { const els = gsap.utils.toArray(sel); if (!els.length) return;

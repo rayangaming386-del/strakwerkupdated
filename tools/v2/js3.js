@@ -51,8 +51,9 @@ function syncKiezer(){
 }
 kzTypes.forEach(b => b.addEventListener("click", () => {
   const t = b.dataset.kzType;
-  if (t === "redesign") setBase("redesign");
-  else { if (baseKey === "redesign") setBase("nieuw"); state.webshop = t === "shop" ? 1 : 0; enforce(); }
+  if (t === "redesign"){ setBase("redesign"); state.webshop = 0; }
+  else { if (baseKey === "redesign") setBase("nieuw"); state.webshop = t === "shop" ? 1 : 0; }
+  enforce();
   selTouched = true; clearPresets(); render(); track("Dienstenkiezer", { keuze: t });
 }));
 kzNeeds.addEventListener("click", e => {

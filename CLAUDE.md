@@ -3,13 +3,15 @@
 Site van StrakWerk, webdesignbedrijf uit **Zoetermeer** (websites voor ondernemers, vanaf €200). Alle communicatie met de eigenaar is in het Nederlands.
 
 ## Structuur
-- `index.html`: de homepage in één bestand (HTML, CSS en JS). De bibliotheken laden met `defer` en het hoofdscript draait in een `DOMContentLoaded`-callback: functies zijn dus niet globaal (testscripts kunnen `totals()` e.d. niet meer direct aanroepen).
+- `index.html`: de homepage in één bestand (HTML, CSS en JS). Sinds de redesign van november 2026 eenmalig samengesteld met `tools/v2/build.py` (bronnen in `tools/v2/`; de calculator kwam uit `tools/v2/old-index.html`). Bewerk vanaf nu `index.html` zelf; het bouwscript opnieuw draaien overschrijft die wijzigingen. De bibliotheken (GSAP, ScrollTrigger, SplitText, DrawSVG) laden met `defer` en het hoofdscript draait in een `DOMContentLoaded`-callback: functies zijn niet globaal.
+- Homepage-opbouw: hero met projectpresentatie (`#stage`: scherm, tweede scherm en telefoon met echte projecten, wisselt via `STAGE_SETS`, kantelt met de muis op desktop) → dienstenband → portfolio (`#werk`, vier projecten; op desktop één vastgezet scrollmoment met `.show.is-pin`, op mobiel swipekaarten) → statement → dienstenkiezer (`#kiezer`, wensen in `KIEZER.needs`, zelfde `state` als de calculator, gaat mee naar WhatsApp en het formulier) → functies → stijlpreview (`#stijl`, vier stijlen in `STYLES` en CSS `[data-style]`, keuze gaat mee als "Stijlvoorkeur" in offerte en formulier) → prijzen/calculator → redesign + snelheidscheck (`#nieuw`) → waarom → over mij → werkwijze → kennisbank → vragen → contact → footer.
+- Projecten op de homepage komen uit `tools/v2/projects.json` (bij het bouwen); voeg je een project toe, pas dan ook `STAGE_SETS`/`PROJECTS` in het script en `PROJECTS`/`PROJECT_ORDER` in `tools/site_common.py` aan.
 - Overzichtspagina's in de root (cleanUrls): `diensten.html` (`/diensten`), `werk.html` (`/werk`), `prijzen.html` (`/prijzen`, alle prijzen uit `CONFIG`), `over-mij.html` (`/over-mij`) en `contact.html` (`/contact`, met formulier naar WhatsApp of e-mail via `assets/case.js`).
 - Menu: overal dezelfde vijf links met echte URL's (Werk, Diensten, Prijzen, Over mij, Contact). Op de homepage hebben ze `data-sec` en scrollen ze naar de sectie (`#werk`, `#features`, `#prijzen`, `#over`, `#contact`); actieve menu-items via `buildNav()`. Subpagina's: pil-menu `.snav`, op mobiel uitklapmenu `.smenu` (`<details>`), uitgebreide footer `.sfoot`, kruimelpad met tussenlaag (StrakWerk / Diensten / ..., StrakWerk / Werk / ...).
 - Generators staan in `tools/` (niet gepubliceerd): `site_common.py` (menu, footer, kruimelpad, projectkaarten, leest `CONFIG` uit `index.html`), `gen_cases.py` (werk/), `gen_diensten.py` (diensten/), `gen_kennis.py` (kennisbank), `gen_hubs.py` (de vijf overzichtspagina's) en `gen_sitemap.py`. Pas teksten aan in de generator, draai hem (`python3 tools/gen_hubs.py` enz.) en daarna `python3 tools/gen_sitemap.py`. `privacy.html`, `404.html` en `demo.html` zijn met de hand gemaakt (menu/footer daar met de hand bijwerken).
 - `werk/vagpro.html`, `werk/detak.html`, `werk/cartronic.html`: projectpagina's (stijl in `assets/case.css`, gedrag in `assets/case.js`). Bereikbaar als `/werk/vagpro` enz. (Vercel cleanUrls). Links naar `/?preset=<project>#prijzen` vullen de configurator vooraf in.
 - Bibliotheken staan lokaal in `assets/js/` (GSAP 3.13 + ScrollTrigger, SplitText, DrawSVGPlugin, Lenis 1.3.4), geen CDN.
-- Effecten: vloeiend scrollen (Lenis, `window.__lenis`), koppen per regel (SplitText), hero-laptop zoomt in bij scrollen (alleen desktop, `.zoomer`), dienstenband die reageert op scrollsnelheid (`.marquee`), levende tegels (kenteken typt zichzelf, Google #9 naar #1, WhatsApp "typt..."), prijzen in tabs met vliegend kaartje naar de offerte, werkwijze-iconen tekenen zichzelf (DrawSVG), sectie "Voor wie" (`#branches`, presets per branche in `CONFIG.presets`), footer met grote CTA en klok.
+- Effecten: gewoon scrollen van de browser (geen Lenis meer, ook niet op subpagina's), koppen per regel (SplitText), korte CSS-entree in de hero (inhoud staat er ook zonder scripts), dienstenband die reageert op scrollsnelheid (`.band`), vastgezet portfolio met overgang per project, levende tegels (kenteken typt zichzelf, kentekenscan, WhatsApp "typt..."), vliegend kaartje naar de offerte, werkwijze-iconen tekenen zichzelf (DrawSVG), cursorlabel en magnetische knoppen alleen met muis, branche-presets in de kiezer (`#branches`), footer met grote CTA en klok. Zware effecten alleen op desktop; bij "minder beweging" niets vastgezet.
 - Prijzen en opties van de configurator staan onderaan in het script in het blok `CONFIG`:
   - `bases` = de pakketten: `nieuw` (Starter €200), `premium` (€350), `pro` (€500), `redesign` (€175). `incl` per pakket = opties die erin zitten (aantallen bij qty-opties, bijv. `pagina:2`). Inbegrepen opties staan vergrendeld op "Inbegrepen"; opties die botsen met iets inbegrepens (`excl`) zijn uitgeschakeld. Logica: `inclOf()`, `enforce()`, `setBase()`.
   - Opties per groep (`nieuw:true` toont een Nieuw-label), presets (`base:"redesign"` kiest de redesign-basis).
@@ -49,13 +51,13 @@ Site van StrakWerk, webdesignbedrijf uit **Zoetermeer** (websites voor onderneme
 - Elke push naar `main` gaat automatisch live via Vercel.
 
 ## Stijlafspraken (belangrijk)
-- Donker + goud, met accenten in blauw, koper, indigo en teal. Origineel STRAK/WERK-logo.
+- Diepzwart (`#070708`), antraciet en donker metallic goud (`--metal`, `--gold #B9975B`, `--gold-hi #E2CA97`). Rood (`--red`) alleen voor de actie. **Geen groen.** Hoekig (`--r:2px`), grote typografie met omlijnd (`.ol`) tegenover massief, gouden hoekmarkeringen (`.marks`) als beeldmerk. Origineel STRAK/WERK-logo. Let op: geen losse klasse `.show` stijlen (die botst met `.wa-fab.show`/`.mbar.show`).
 - **Geen** nummering (01, 02…) bij secties of stappen. Secties krijgen een klein gouden label (`.kicker`).
 - **Geen** browserbolletjes (rood/geel/groen) op mock-ups.
 - **Geen** decoratieve liggende streepjes of lijntjes.
 - Screenshots zonder statusbalk en adresbalk.
 - Veel beweging, maar respecteer `prefers-reduced-motion` (rustige versie zonder animaties).
-- **Nooit** `scroll-behavior:smooth` in CSS: dat breekt de metingen van ScrollTrigger (animaties verspringen na terugscrollen). Lenis doet het vloeiende scrollen.
+- **Nooit** `scroll-behavior:smooth` in CSS: dat breekt de metingen van ScrollTrigger. Scrollen naar een sectie gebeurt via `goTo()` (window.scrollTo).
 - Vastgezette secties (hero, werk) alleen op desktop. Hero-zoom start op scrollpositie 0. Elementen binnen een vastgezette sectie niet als eigen trigger gebruiken. Geen 3D-draai/schaal-animaties in de horizontale projectenstrook (die overlappen elkaar).
 - Test na wijzigingen: herberekenen (`ScrollTrigger.refresh()`) halverwege de pagina mag geen startposities veranderen.
 - Altijd testen op desktop én mobiel: geen console-fouten, niets dat horizontaal buiten beeld schuift.
@@ -69,7 +71,7 @@ Site van StrakWerk, webdesignbedrijf uit **Zoetermeer** (websites voor onderneme
 - Nog geen reviews: geen review-sectie of beoordelingen tonen tot Rayan echte reviews aanlevert.
 
 ## Portfolio
-- VAGPRO (kentekencheck), De Tak (aanvraag via WhatsApp, meertalig, regiopagina's), CarTronic (webshop + geavanceerd beheerpaneel). CarTronic staat live op https://cartronic.nl (`CONFIG.cartronicUrl`, ook in `werk/cartronic.html`).
+- Glow & Laser For You (beautysalon Zoetermeer, https://www.glowenlaserforyou.nl: afspraak aanvragen in stappen, doorzoekbare prijslijst, pagina per behandeling; schermafbeeldingen `assets/work/glow*.webp`, gemaakt met `tools/v2/glowshots.js`), VAGPRO (kentekencheck), De Tak (aanvraag via WhatsApp, meertalig, regiopagina's), CarTronic (webshop + geavanceerd beheerpaneel). Elk project heeft een eigen pagina `/werk/<slug>` (generator `tools/gen_cases.py`). CarTronic staat live op https://cartronic.nl (`CONFIG.cartronicUrl`, ook in `werk/cartronic.html`).
 - Teller staat op "20+ sites live".
 
 ## Openstaande punten (input van eigenaar nodig)

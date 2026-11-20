@@ -69,11 +69,7 @@
   gsap.registerPlugin(ScrollTrigger, ...[window.SplitText].filter(Boolean));
   gsap.config({ nullTargetWarn: false });
 
-  if (window.Lenis){
-    const lenis = new Lenis({ lerp: .1 }); window.__lenis = lenis;
-    lenis.on("scroll", ScrollTrigger.update);
-    gsap.ticker.add(t => lenis.raf(t * 1000)); gsap.ticker.lagSmoothing(0);
-  }
+  // Gewoon scrollen van de browser (geen Lenis): voelt overal hetzelfde en werkt met elk apparaat
 
   const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
   if (window.SplitText){

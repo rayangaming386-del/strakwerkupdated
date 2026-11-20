@@ -189,7 +189,6 @@ for i,p in enumerate(P):
 <script src="../assets/js/gsap.min.js"></script>
 <script src="../assets/js/ScrollTrigger.min.js"></script>
 <script src="../assets/js/SplitText.min.js"></script>
-<script src="../assets/js/lenis.min.js"></script>
 <script src="../assets/case.js"></script>
 </body>
 </html>

@@ -227,7 +227,7 @@ h1,h2,h3{margin:0; font-family:var(--f); font-weight:650; letter-spacing:-.035em
 .mq-row{display:flex; align-items:center; gap:clamp(22px, 3vw, 44px); padding-right:clamp(22px, 3vw, 44px); flex:none}
 .mq-row span{font:650 clamp(2.4rem, 6.4vw, 5.8rem)/1 var(--f); letter-spacing:-.05em; white-space:nowrap; color:var(--text)}
 .mq-row span.o{color:var(--ink-3)}
-@supports (-webkit-text-stroke:1px #000){ .mq-row span.o{color:transparent; -webkit-text-stroke:1.2px rgba(242,239,233,.34)} }
+@supports (-webkit-text-stroke:1px #000){ .mq-row span.o{color:transparent; -webkit-text-stroke:1.2px rgba(242,239,233,.55)} }
 .mq-row i{width:clamp(8px, 1vw, 13px); aspect-ratio:1; background:var(--gold); flex:none}
 @media (prefers-reduced-motion: no-preference){ html:not(.gs) .mq-track{animation:mq 46s linear infinite} @keyframes mq{ to{ transform:translateX(-50%) } } }
 
