@@ -232,6 +232,8 @@ h1,h2,h3{margin:0; font-family:var(--f); font-weight:650; letter-spacing:-.035em
   .hero-side{grid-column:1; grid-row:2; padding-top:clamp(28px, 4vw, 56px)}
   .facts{grid-column:1; grid-row:3; padding-top:clamp(28px, 4vh, 48px); align-self:end}
   .stage-wrap{grid-column:2; grid-row:2 / span 2; margin-top:clamp(-96px, -5.2vw, -40px); align-self:end}
+  .stage-bar{margin-top:clamp(44px, 4.4vw, 72px); padding-left:26%}
+  .dv-main .dv-tag{left:auto; right:10px}
 }
 @media (max-width:999px){
   .stage{aspect-ratio:100/70}
@@ -242,15 +244,18 @@ h1,h2,h3{margin:0; font-family:var(--f); font-weight:650; letter-spacing:-.035em
   .stage-marks{left:0; right:6%; top:11%}
   .stage-marks::before{right:auto; left:-8px; border-left:1px solid var(--gold); border-right:0}
   .stage-marks::after{right:auto; left:-8px; border-left:1px solid var(--gold); border-right:0}
-  .stage-bar{padding-left:0}
+  .stage-bar{padding-left:0; margin-top:20px}
 }
 @media (max-width:600px){ .hero-cta .btn{flex:1 1 auto} .stage-cap{display:none} .stage-bar{justify-content:center} .dv-tag{font-size:.58rem; padding:5px 7px; left:6px; bottom:6px} }
 
 /* Korte entree, alleen met CSS: de inhoud staat er altijd, ook zonder scripts */
 @media (prefers-reduced-motion: no-preference){
-  .dv-main, .dv-back, .dv-phone{animation:devin 1s var(--ease) both}
+  /* Alleen het hoofdscherm schuift in; telefoon en tweede scherm faden (GSAP beweegt die bij het scrollen) */
+  .dv-main{animation:devin 1s var(--ease) both}
+  .dv-back, .dv-phone{animation:devfade .9s var(--ease) both}
   .dv-back{animation-delay:.12s} .dv-phone{animation-delay:.22s}
   @keyframes devin{ from{ opacity:0; translate:0 46px } }
+  @keyframes devfade{ from{ opacity:0 } }
   .stage-bar{animation:fadeup .8s .45s var(--ease) both}
   @keyframes fadeup{ from{ opacity:0; translate:0 14px } }
 }
@@ -273,7 +278,7 @@ h1,h2,h3{margin:0; font-family:var(--f); font-weight:650; letter-spacing:-.035em
 @media (prefers-reduced-motion: no-preference){ html:not(.gs) .mq-track{animation:mq 46s linear infinite} @keyframes mq{ to{ transform:translateX(-50%) } } }
 
 /* Portfolio: het ene grote scrollmoment (desktop), swipekaarten op mobiel */
-.show{padding-bottom:clamp(60px, 8vw, 120px)}
+.sec.show{padding-bottom:clamp(60px, 8vw, 120px)}
 .show-stage{position:relative}
 .show-nav, .show-ghost, .show-hint{display:none}
 .show-track{display:grid; gap:clamp(72px, 10vw, 150px); max-width:var(--max); margin-inline:auto; padding-inline:var(--gutter)}
@@ -315,6 +320,9 @@ h1,h2,h3{margin:0; font-family:var(--f); font-weight:650; letter-spacing:-.035em
 .show.is-pin .show-ghost{display:block; position:absolute; left:0; bottom:-3vh; z-index:0; white-space:nowrap; pointer-events:none; font:700 clamp(9rem, 19vw, 19rem)/1 var(--f); letter-spacing:-.06em; color:rgba(255,255,255,.025)}
 @supports (-webkit-text-stroke:1px #000){ .show.is-pin .show-ghost{color:transparent; -webkit-text-stroke:1px rgba(255,255,255,.07)} }
 .show.is-pin .pj-media{z-index:1}
+.show.is-pin .pj-tabs{transition:opacity .3s}
+.show.is-pin .pj:not(.cur) .pj-tabs, .show.is-pin .pj:not(.cur) .pj-phone{opacity:0}
+.show.is-pin .pj-phone{transition:opacity .35s}
 .show-dots{display:none}
 
 @media (max-width:900px){
@@ -340,6 +348,7 @@ h1,h2,h3{margin:0; font-family:var(--f); font-weight:650; letter-spacing:-.035em
 .stmt{padding-block:clamp(72px, 11vw, 170px)}
 .stmt p{font:600 clamp(1.7rem, 4.4vw, 4.1rem)/1.1 var(--f); letter-spacing:-.048em; max-width:21em; text-wrap:balance}
 .stmt .g{color:var(--gold-hi)}
+@media (max-width:374px){ .top .menu-btn{font-size:0; gap:0; padding:0 13px} .top .menu-btn i{font-size:1rem} .brand{font-size:17px; gap:5px} .top .btn{padding:0 12px; font-size:.84rem} }
 /* Dienstenkiezer */
 .kz-grid{display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:clamp(28px, 4.6vw, 80px); align-items:start}
 .kz-grid > *{min-width:0}
