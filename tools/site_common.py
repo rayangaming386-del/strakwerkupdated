@@ -103,7 +103,7 @@ def footer():
       <p class="sf-c"><a href="{wa("Hoi Rayan, ik heb een vraag over een website.")}" target="_blank" rel="noopener">WhatsApp</a><a href="tel:{TEL}">{TEL_TXT}</a><a href="mailto:{MAIL}?subject={quote("Vraag over een website")}">{MAIL}</a></p>
     </div>
     <nav aria-label="Diensten"><b>Diensten</b><a href="/diensten">Alle diensten</a>{serv}</nav>
-    <nav aria-label="Regio en projecten"><b>Werk</b><a href="/werk">Alle projecten</a><a href="/werk/vagpro">VAGPRO</a><a href="/werk/detak">Sleepdienst De Tak</a><a href="/werk/cartronic">CarTronic</a><b class="sf-b2">Regio</b>{steden}</nav>
+    <nav aria-label="Regio en projecten"><b>Werk</b><a href="/werk">Alle projecten</a><a href="/werk/vagpro">VAGPRO</a><a href="/werk/detak">Sleepdienst De Tak</a><a href="/werk/cartronic">CarTronic</a><a href="/werk/glow">Glow &amp; Laser For You</a><b class="sf-b2">Regio</b>{steden}</nav>
     <nav aria-label="StrakWerk"><b>StrakWerk</b><a href="/prijzen">Prijzen</a><a href="/#prijzen">Prijscalculator</a><a href="/over-mij">Over mij</a><a href="/contact">Contact</a><a href="/kennisbank">Kennisbank</a><a href="/demo">Demo beheerpaneel</a></nav>
   </div>
   <div class="wrap sf-bot"><span>© 2026 StrakWerk · Webdesign uit {CITY}</span><a href="/privacy">Privacy</a></div>
@@ -168,7 +168,11 @@ PROJECTS = {
     'cartronic': dict(name='CarTronic', kind='Retrofit & webshop', place='Rijswijk', img='cartronic', live='https://cartronic.nl', preset='cartronic',
                       short='Een webshop voor originele fabrieksopties, met een voertuigzoeker per merk en model en een beheerpaneel waarin de eigenaar alles zelf aanpast.',
                       tags=['Webshop met iDEAL', 'Voertuigzoeker', 'Geavanceerd beheerpaneel']),
+    'glow': dict(name='Glow & Laser For You', kind='Beautysalon', place='Zoetermeer', img='glow', live='https://www.glowenlaserforyou.nl', preset='glow',
+                 short='Een rustige salon voor laserontharing, HIFU, gezichtsbehandelingen en wimpers. Bezoekers zien vooraf wat elke behandeling kost en vragen online een afspraak aan.',
+                 tags=['Afspraak aanvragen in stappen', 'Prijslijst met zoeken', 'Pagina per behandeling']),
 }
+PROJECT_ORDER = ['glow', 'vagpro', 'detak', 'cartronic']
 
 
 def project_card(slug, eager=False, heading='h3'):

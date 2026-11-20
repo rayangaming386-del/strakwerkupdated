@@ -89,7 +89,7 @@ main3 = ''.join([
 branches = ''.join([
     card('/diensten/website-garage', 'Garages & autobedrijven', 'Website voor garages', 'Kentekencheck via de RDW, aanvragen via WhatsApp en een pagina per dienst. Zoals bij VAGPRO en CarTronic.'),
     card('/diensten/website-sleepdienst', 'Sleep- en transportbedrijven', 'Website voor sleepdiensten', 'Pech melden in een paar tikken, met kenteken, locatie en meerdere talen. Zoals bij Sleepdienst De Tak.'),
-    card('/diensten/website-kapper', 'Kappers & beauty', 'Website voor kappers en salons', 'Klanten plannen zelf hun afspraak, met reviews, routekaart en Google Bedrijfsprofiel.'),
+    card('/diensten/website-kapper', 'Kappers & beauty', 'Website voor kappers en salons', 'Klanten zien vooraf wat een behandeling kost en vragen online een afspraak aan. Zoals bij Glow & Laser For You.'),
     card('/diensten/website-horeca', 'Restaurants & horeca', 'Website voor horeca', 'Menukaart, sfeerbeelden, reviews en een routekaart, ook in de taal van je toeristen.'),
     card('/diensten/website-bouwbedrijf', 'Bouw & installatie', 'Website voor bouw en installatie', "Laat je projecten zien en ontvang offerte-aanvragen, met pagina's voor de plaatsen waar je werkt."),
 ])
@@ -111,23 +111,23 @@ page('/diensten', 'Diensten: websites, redesigns en webshops | StrakWerk',
 
 # ---------------------------------------------------------------- /werk
 h, cld = hero([('StrakWerk', '/'), ('Werk', None)], 'Werk', 'Websites die ik bouwde.',
-              'Een selectie van mijn projecten. Per site zie je voor wie hij is, waar het bedrijf zit en welke functies erin zitten. Alle drie staan live.')
-cards = ''.join(SC.project_card(s, eager=(i == 0), heading='h2') for i, s in enumerate(['vagpro', 'detak', 'cartronic']))
-links = ''.join(f'<a href="/diensten/{s}">{e(n)}</a>' for s, n in [('website-garage', 'Website voor garages'), ('website-sleepdienst', 'Website voor sleepdiensten'),
+              'Een selectie van mijn projecten. Per site zie je voor wie hij is, waar het bedrijf zit en welke functies erin zitten. Ze staan allemaal live.')
+cards = ''.join(SC.project_card(s, eager=(i == 0), heading='h2') for i, s in enumerate(SC.PROJECT_ORDER))
+links = ''.join(f'<a href="/diensten/{s}">{e(n)}</a>' for s, n in [('website-kapper', 'Website voor kappers & beauty'), ('website-garage', 'Website voor garages'), ('website-sleepdienst', 'Website voor sleepdiensten'),
                                                                    ('webshop-laten-maken', 'Webshop laten maken'), ('website-laten-maken-den-haag', 'Website laten maken in Den Haag'),
                                                                    ('website-laten-maken-rijswijk', 'Website laten maken in Rijswijk')])
 body = h + '\n' + f'''  <section class="c-sec" style="padding-top:0">
-    <div class="wrap"><div class="h-cards">{cards}</div></div>
+    <div class="wrap"><div class="h-cards two">{cards}</div></div>
   </section>
 ''' + sec('Diensten', 'Ook zoiets voor jouw bedrijf?', f'<nav class="d-more" aria-label="Diensten bij deze projecten">{links}<a href="/diensten">Alle diensten</a></nav>',
           'Deze projecten laten zien wat er kan. Op de dienstpagina\'s lees je hoe het voor jouw soort bedrijf werkt.') + '\n' \
     + endbox("Wat kost zo'n site?", 'In de calculator kies je dezelfde functies als in deze projecten en zie je direct je prijs.',
              f'<a class="btn btn--gold" href="/#prijzen">Bereken je prijs</a>{WA_BTN("Hoi Rayan, ik zag je projecten en wil graag een website.")}')
 page('/werk', 'Werk: websites gebouwd door StrakWerk',
-     'Bekijk websites die StrakWerk bouwde: VAGPRO met kentekencheck, Sleepdienst De Tak met aanvragen via WhatsApp in drie talen, en de webshop van CarTronic.',
+     'Websites die StrakWerk bouwde: Glow & Laser For You met online afspraken, VAGPRO met kentekencheck, Sleepdienst De Tak in drie talen en de webshop van CarTronic.',
      body, active='/werk', ld=[crumb_ld(cld, '/werk'),
                               {"@context": "https://schema.org", "@type": "CollectionPage", "name": "Werk van StrakWerk", "url": SC.SITE + '/werk',
-                               "hasPart": [{"@type": "WebPage", "name": SC.PROJECTS[s]['name'], "url": f"{SC.SITE}/werk/{s}"} for s in ['vagpro', 'detak', 'cartronic']]}],
+                               "hasPart": [{"@type": "WebPage", "name": SC.PROJECTS[s]['name'], "url": f"{SC.SITE}/werk/{s}"} for s in SC.PROJECT_ORDER]}],
      tint='rgba(120,110,255,.14)')
 
 # ---------------------------------------------------------------- /prijzen
@@ -215,7 +215,7 @@ steps = ''.join(f'<article class="f"><small style="font:600 .74rem var(--f-mono)
     ('Jij geeft feedback', 'Ontwerp', 'Je krijgt een eerste versie die je op je eigen telefoon bekijkt. Niet goed? Dan pas ik het aan tot het klopt.'),
     ('Op maat gebouwd', 'Development', 'Snel, mobiel-first en vindbaar in Google. Functies zoals de kentekencheck of het beheerpaneel bouw ik erin.'),
     ('Binnen 7 dagen', 'Live & support', 'Je site gaat online op je eigen domein. Daarna help ik met updates, of pas je het zelf aan.')])
-projs = ''.join(SC.project_card(s) for s in ['vagpro', 'detak', 'cartronic'])
+projs = ''.join(SC.project_card(s) for s in SC.PROJECT_ORDER)
 body = h + '\n' + f'''  <section class="c-sec" style="padding-top:0">
     <div class="wrap">
       {story}
@@ -249,7 +249,7 @@ form = f'''<form class="form ct" id="lead" novalidate>
       </form>'''
 where = f'''<div class="d-text">
         <p>StrakWerk is een webdesignbedrijf uit Zoetermeer. Ik werk voor ondernemers in Zoetermeer, Den Haag, Rijswijk, Delft, het Westland en de rest van Nederland, op afstand.</p>
-        <p>Projecten in de buurt: <a href="/werk/vagpro" class="tl">VAGPRO</a> en <a href="/werk/detak" class="tl">Sleepdienst De Tak</a> in Den Haag, en <a href="/werk/cartronic" class="tl">CarTronic</a> in Rijswijk.</p>
+        <p>Projecten in de buurt: <a href="/werk/glow" class="tl">Glow &amp; Laser For You</a> in Zoetermeer, <a href="/werk/vagpro" class="tl">VAGPRO</a> en <a href="/werk/detak" class="tl">Sleepdienst De Tak</a> in Den Haag, en <a href="/werk/cartronic" class="tl">CarTronic</a> in Rijswijk.</p>
       </div>'''
 nexts = ''.join(f'<article class="f"><small style="font:600 .74rem var(--f-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--gold)">{e(k)}</small><h3>{e(t)}</h3><p>{e(d)}</p></article>' for k, t, d in [
     ('Dezelfde dag', 'Je bericht', 'Je stuurt een appje, belt of mailt. Je hoort dezelfde dag van me.'),
