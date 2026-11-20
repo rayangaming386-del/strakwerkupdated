@@ -22,11 +22,22 @@ export async function mount(root, ctx) {
 
   async function refresh() {
     try {
-      const d = await api("overview");
+      const [d, st] = await Promise.all([api("overview"), api("studio/overview").catch(() => null)]);
       const m = d.metrics, c = d.crm;
+      // Eén lijst met wat jouw aandacht nodig heeft: goedkeuringen en contentacties.
+      const todo = [];
+      if (d.approvalsOpen) todo.push(h("li", {}, h("a", { href: "/hq/goedkeuringen", "data-nav": "" }, `${d.approvalsOpen} goedkeuring(en) wachten op je beslissing`)));
+      for (const p of (st?.pieces || []).filter(x => x.column === "actie_nodig" || x.column === "klaar_voor_review").slice(0, 6)) {
+        const a = p.actions.find(x => x.action !== "wachten") || p.actions[0];
+        todo.push(h("li", {}, h("a", { href: `/hq/studio?piece=${p.id}`, "data-nav": "" }, p.title), a ? ` · ${a.text}` : ""));
+      }
+      const attention = h("section", { class: "stack attention", "aria-labelledby": "s-att" },
+        h("div", { class: "section-h" }, h("h2", { id: "s-att" }, "Aandacht nodig")),
+        todo.length ? h("ul", { class: "acts big" }, todo) : h("p", { class: "muted" }, "Niets dat nu op jou wacht."));
       const dbOk = d.sources.find(s => s.id === "eigen")?.state !== "niet_gekoppeld";
       const crm = (v) => dbOk ? ok(v) : { state: "niet_gekoppeld" };
       body.replaceChildren(
+        attention,
         h("section", { class: "stack", "aria-labelledby": "s-bez" },
           h("div", { class: "section-h" }, h("h2", { id: "s-bez" }, "Bezoekers")),
           h("div", { class: "grid g4" },

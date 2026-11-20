@@ -2,7 +2,7 @@
 // via waitUntil, of via /api/worker door cron) en houdt zich aan een tijdsbudget.
 import { randomUUID, createHash } from "node:crypto";
 import { q, one, getPool } from "./db.js";
-import { claimNext, finish, sweepStale, readControl, enqueue, event, ControlStop, LimitError } from "./queue.js";
+import { claimNext, finish, sweepStale, readControl, enqueue, event, ControlStop, LimitError, agentFilter } from "./queue.js";
 import { EXECUTORS, connection } from "./agents/registry.js";
 import { LlmError } from "./agents/llm.js";
 import { FetchError } from "./agents/fetcher.js";
@@ -61,9 +61,10 @@ async function runOne(claim, workerId) {
     const out = await exec.run({ task, lead, ctx });
     clearTimeout(timer);
     await finish(task, runId, workerId, {
-      status: out.status, result: out.result, costUsd: cost, usage, steps,
-      message: out.status === "wacht_op_goedkeuring" ? "Resultaat klaar; wacht op goedkeuring." : "Afgerond.",
+      status: out.status, result: out.result, costUsd: cost, usage, steps, deferS: out.deferS || 0,
+      message: out.message || (out.status === "wacht_op_goedkeuring" ? "Resultaat klaar; wacht op goedkeuring." : "Afgerond."),
       after: async (db) => {
+        if (out.afterTx) await out.afterTx(db);
         for (const n of out.next || []) {
           await enqueue(db, { agent: n.agent, kind: n.kind, title: n.title, input: n.input, leadId: task.lead_id, chainId: task.chain_id, parentId: task.id, createdBy: task.created_by, idempotencyKey: `${task.id}:${n.agent}` });
         }
@@ -91,23 +92,28 @@ async function runOne(claim, workerId) {
       (e instanceof FetchError ? ["timeout", "net", "ECONNRESET", "ETIMEDOUT"].includes(e.code) : e instanceof LlmError ? /Limiet|niet bereikbaar|API-fout 5/.test(e.message) : e.retryable === true);
     const retry = retryable && task.attempts < task.max_attempts;
     const msg = String(e.message || e).slice(0, 500);
-    await finish(task, runId, workerId, { status: "mislukt", error: msg, costUsd: cost, usage, steps, retry, message: retry ? `Mislukt: ${msg} Opnieuw ingepland.` : `Mislukt: ${msg}` });
+    await finish(task, runId, workerId, { status: "mislukt", error: msg, costUsd: cost, usage, steps, retry, message: retry ? `Mislukt: ${msg} Opnieuw ingepland.` : `Mislukt: ${msg}`,
+      after: async (db) => { if (exec?.onFailure) await exec.onFailure(db, task, { message: msg, retry }); } });
   }
 }
 
 let lastKick = 0;
 /** Verwerkt taken tot de wachtrij leeg is of het tijdsbudget op is. */
-export async function runWorker({ budgetMs = 50_000, source = "onbekend" } = {}) {
+// De serverloze worker pakt nooit video-taken op: die vragen ffmpeg/Chromium (render-worker).
+export const SERVERLESS_FILTER = { exclude: ["video"] };
+
+export async function runWorker({ budgetMs = 50_000, source = "onbekend", filter = SERVERLESS_FILTER } = {}) {
   const workerId = `${source}:${randomUUID().slice(0, 8)}`;
   const started = Date.now();
   let processed = 0, reason = "leeg";
   await sweepStale();
   while (Date.now() - started < budgetMs) {
     const remaining = budgetMs - (Date.now() - started);
-    const peek = await one("select timeout_s from hq.tasks where status='in_wachtrij' and control is null and run_after<=now() order by created_at limit 1");
+    const f = agentFilter(filter);
+    const peek = await one(`select timeout_s from hq.tasks where status='in_wachtrij' and control is null and run_after<=now() ${f.sql} order by run_after, created_at limit 1`, f.vals);
     if (!peek) { reason = "leeg"; break; }
     if (peek.timeout_s * 1000 > remaining) { reason = "tijdsbudget"; break; }
-    const claim = await claimNext(workerId);
+    const claim = await claimNext(workerId, filter);
     if (!claim.task) { reason = claim.reason; break; }
     await runOne(claim, workerId);
     processed++;
@@ -118,7 +124,7 @@ export async function runWorker({ budgetMs = 50_000, source = "onbekend" } = {})
 /** Licht "aanstoten" vanuit een HQ-poll: alleen als er werk ligt, hooguit eens per 10 s per instantie. */
 export async function kickIfNeeded(waitUntil) {
   if (Date.now() - lastKick < 10_000) return false;
-  const pending = await one("select 1 from hq.tasks where (status='in_wachtrij' and run_after<=now() and control is null) or (status='bezig' and lease_until < now()) limit 1");
+  const pending = await one("select 1 from hq.tasks where agent_key<>'video' and ((status='in_wachtrij' and run_after<=now() and control is null) or (status='bezig' and lease_until < now())) limit 1");
   if (!pending) return false;
   lastKick = Date.now();
   waitUntil(runWorker({ source: "poll", budgetMs: 50_000 }).catch(e => console.error(`[worker] ${e.message}`)));

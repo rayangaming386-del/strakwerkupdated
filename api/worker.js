@@ -5,6 +5,7 @@ import { env } from "./_lib/env.js";
 import { json, errorResponse } from "./_lib/http.js";
 import { runWorker } from "./_lib/worker.js";
 import { runRetention } from "./_lib/retention.js";
+import { contentCron } from "./_lib/content/cron.js";
 import { timingSafeEqual } from "node:crypto";
 
 function authorized(request) {
@@ -19,8 +20,9 @@ export async function handle(request) {
   try {
     if (!authorized(request)) return json({ error: "geen_toegang" }, 401);
     const retention = await runRetention();
-    const worker = await runWorker({ source: "cron", budgetMs: 50_000 });
-    return json({ ok: true, retention, worker });
+    const content = await contentCron().catch(e => ({ fout: e.message }));
+    const worker = await runWorker({ source: "cron", budgetMs: 40_000 });
+    return json({ ok: true, retention, content, worker });
   } catch (e) {
     return errorResponse(e);
   }

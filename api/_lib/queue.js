@@ -30,13 +30,13 @@ export async function event(db, taskId, type, { from = null, to = null, fromAgen
     [taskId, type, from, to, fromAgent, toAgent, message, data]);
 }
 
-export async function enqueue(db, { agent, kind, title, input = {}, leadId = null, chainId = null, parentId = null, createdBy = null, idempotencyKey = null }) {
+export async function enqueue(db, { agent, kind, title, input = {}, leadId = null, chainId = null, parentId = null, createdBy = null, idempotencyKey = null, pieceId = null, timeoutS = null, runAfter = null, maxAttempts = null }) {
   const limits = await getLimits(db);
   const id = randomUUID();
   const ins = await db.query(
-    `insert into hq.tasks (id, agent_key, kind, title, input, lead_id, chain_id, parent_task_id, created_by, idempotency_key, max_attempts, timeout_s)
-     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) on conflict (idempotency_key) do nothing returning id`,
-    [id, agent, kind, title, input, leadId, chainId || id, parentId, createdBy, idempotencyKey, limits.max_attempts, limits.task_timeout_s]);
+    `insert into hq.tasks (id, agent_key, kind, title, input, lead_id, chain_id, parent_task_id, created_by, idempotency_key, max_attempts, timeout_s, piece_id, run_after)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,coalesce($14::timestamptz, now())) on conflict (idempotency_key) do nothing returning id`,
+    [id, agent, kind, title, input, leadId, chainId || id, parentId, createdBy, idempotencyKey, maxAttempts || limits.max_attempts, timeoutS || limits.task_timeout_s, pieceId, runAfter]);
   if (!ins.rowCount) {
     // Zelfde verzoek nogmaals (dubbelklik, herhaald verzoek): bestaande taak teruggeven.
     return { id: (await db.query("select id from hq.tasks where idempotency_key=$1", [idempotencyKey])).rows[0].id, duplicate: true };
@@ -74,16 +74,26 @@ export async function spentTodayUsd(db = getPool()) {
   return r.s;
 }
 
-export async function claimNext(workerId) {
+// Welke agents een uitvoerder mag oppakken: de serverloze worker doet alles behalve video
+// (renderen vraagt ffmpeg en Chromium); de render-worker doet alleen video.
+export function agentFilter({ only = null, exclude = null } = {}, startAt = 1) {
+  if (only?.length) return { sql: `and agent_key = any($${startAt}::text[])`, vals: [only] };
+  if (exclude?.length) return { sql: `and agent_key <> all($${startAt}::text[])`, vals: [exclude] };
+  return { sql: "", vals: [] };
+}
+
+export async function claimNext(workerId, filter = {}) {
   return tx(async (db) => {
     await db.query("select pg_advisory_xact_lock(hashtext('hq_task_claim'))");
     const limits = await getLimits(db);
-    const running = (await db.query("select count(*)::int n from hq.tasks where status='bezig' and lease_until > now()")).rows[0].n;
+    const f = agentFilter(filter);
+    // Renders tellen apart: ze draaien op een eigen machine en houden serverloze taken niet op.
+    const running = (await db.query(`select count(*)::int n from hq.tasks where status='bezig' and lease_until > now() ${f.sql}`, f.vals)).rows[0].n;
     if (running >= limits.max_concurrent) return { reason: "gelijktijdigheid" };
     if ((await spentTodayUsd(db)) >= limits.daily_budget_usd) return { reason: "dagbudget" };
     const t = (await db.query(
-      `select * from hq.tasks where status='in_wachtrij' and control is null and run_after <= now()
-       order by created_at limit 1 for update skip locked`)).rows[0];
+      `select * from hq.tasks where status='in_wachtrij' and control is null and run_after <= now() ${f.sql}
+       order by run_after, created_at limit 1 for update skip locked`, f.vals)).rows[0];
     if (!t) return { reason: "leeg" };
     const upd = (await db.query(
       `update hq.tasks set status='bezig', attempts=attempts+1, lease_owner=$2, lease_until=now() + make_interval(secs => timeout_s + 15),
@@ -106,7 +116,17 @@ export async function finish(task, runId, workerId, outcome) {
   return tx(async (db) => {
     const cur = (await db.query("select status, lease_owner, control from hq.tasks where id=$1 for update", [task.id])).rows[0];
     if (!cur || cur.status !== "bezig" || cur.lease_owner !== workerId) return false; // lease kwijt: resultaat niet opslaan
-    const { status, result = null, error = null, costUsd = 0, usage = null, steps = 0, retry = false, message = "", after } = outcome;
+    const { status, result = null, error = null, costUsd = 0, usage = null, steps = 0, retry = false, message = "", after, deferS = 0 } = outcome;
+    // deferS: de taak wacht op iets buiten HQ (bijv. verwerking bij Instagram). Opnieuw
+    // inplannen zonder dat het als mislukte poging telt.
+    if (deferS > 0) {
+      await db.query(`update hq.tasks set status='in_wachtrij', result=coalesce($2, result), cost_usd=cost_usd+$3, steps=steps+$4, max_attempts=max_attempts+1,
+          lease_owner=null, lease_until=null, run_after=now() + make_interval(secs => $5), updated_at=now() where id=$1`, [task.id, result, costUsd || 0, steps, deferS]);
+      await db.query("update hq.task_runs set finished_at=now(), outcome='opnieuw', cost_usd=$2 where id=$1", [runId, costUsd || 0]);
+      await event(db, task.id, "status", { from: "bezig", to: "in_wachtrij", toAgent: task.agent_key, message: message || `Wacht ${deferS} s op een externe verwerking.` });
+      if (after) await after(db);
+      return true;
+    }
     const finalStatus = retry ? "in_wachtrij" : status;
     await db.query(
       `update hq.tasks set status=$2, result=coalesce($3, result), error=$4, cost_usd=cost_usd+$5, input_tokens=input_tokens+$6, output_tokens=output_tokens+$7,
@@ -165,4 +185,10 @@ export async function requestControl(taskId, action, actor) {
     }
     throw new HttpError(409, "ongeldige_overgang", `Actie "${action}" kan niet bij status "${STATUS_LABEL[t.status] || t.status}".`);
   });
+}
+
+/** Lease verlengen tijdens een lange uitvoering (render). Geeft false als de lease kwijt is. */
+export async function heartbeat(taskId, workerId, seconds) {
+  const r = await q("update hq.tasks set lease_until=now() + make_interval(secs => $3), updated_at=now() where id=$1 and status='bezig' and lease_owner=$2", [taskId, workerId, seconds]);
+  return r.rowCount === 1;
 }

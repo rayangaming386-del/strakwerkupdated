@@ -105,6 +105,24 @@ De wijzigingen staan op een aparte branch. Mergen naar `main` zet ze live (Verce
 3. Vercel Cron draait `/api/worker` dagelijks (04:17 UTC). Op het Hobby-plan kan Cron maximaal
    dagelijks; taken worden daarnaast direct na het starten en bij elke HQ-poll opgepakt.
 
+## 6. Contentstudio (optioneel, na stap 1–5)
+
+Zie `docs/hq/contentstudio.md` voor de werking. Instellingen:
+
+1. **Video-opslag**: niets extra; met `SUPABASE_SECRET_KEY` maakt HQ zelf de privé-bucket `hq-media` aan.
+2. **Render-worker in GitHub Actions**: repository › Settings › Secrets and variables › Actions:
+   `HQ_DATABASE_URL`, `HQ_SUPABASE_URL`, `HQ_SUPABASE_SECRET_KEY`. Optioneel in Vercel `GITHUB_RENDER_TOKEN`
+   (fijnmazig token, alleen "Actions: read and write" op deze repository) en `GITHUB_RENDER_REPO`
+   (`eigenaar/naam`) om direct te starten. Alternatief: `npm run render-worker -- --watch` op je eigen computer.
+3. **Op tijd publiceren**: laat `/api/worker` elke 5 minuten aanroepen met `Authorization: Bearer <CRON_SECRET>`
+   (Vercel Pro-cron of bijv. cron-job.org).
+4. **Instagram** (professioneel account): maak op developers.facebook.com een app met het product
+   "Instagram API with Instagram Login", voeg redirect-URL `https://www.strakwerkk.nl/api/hq/integrations/instagram/callback`
+   toe, en zet in Vercel `IG_APP_ID`, `IG_APP_SECRET` en `HQ_ENCRYPTION_KEY` (`openssl rand -hex 32`). Koppel daarna in
+   HQ › Contentstudio › Automatisering › "Instagram koppelen". Zolang de app in ontwikkelmodus staat, moet je Instagram-account
+   als tester aan de app zijn toegevoegd.
+5. **TikTok**: export; een publicatiedienst pas na jouw akkoord (opties en prijzen in contentstudio.md).
+
 ## Lokaal ontwikkelen en testen
 
 ```
