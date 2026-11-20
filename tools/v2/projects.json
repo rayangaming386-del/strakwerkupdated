@@ -1,0 +1,185 @@
+[
+ {
+  "slug": "glow",
+  "name": "Glow & Laser For You",
+  "kind": [
+   "Beautysalon",
+   "Zoetermeer"
+  ],
+  "live": "https://www.glowenlaserforyou.nl",
+  "livetxt": "glowenlaserforyou.nl",
+  "preset": "glow",
+  "mob": "glow-mobiel",
+  "mh": 1265,
+  "text": "Een rustige salon voor laserontharing, HIFU, gezichtsbehandelingen en wimpers. Bezoekers zien vooraf wat hun behandeling kost en vragen in een paar stappen online een afspraak aan.",
+  "made": [
+   "Afspraak aanvragen in stappen",
+   "Prijslijst met zoeken",
+   "Pagina per behandeling",
+   "Live openingsstatus"
+  ],
+  "shots": [
+   [
+    "glow",
+    "Home",
+    "Homepage van Glow & Laser For You"
+   ],
+   [
+    "glow-behandelingen",
+    "Behandelingen",
+    "Behandelingen van Glow & Laser For You"
+   ],
+   [
+    "glow-prijzen",
+    "Prijzen",
+    "Prijslijst van Glow & Laser For You met zoekfunctie"
+   ],
+   [
+    "glow-boeken",
+    "Afspraak",
+    "Afspraak aanvragen bij Glow & Laser For You"
+   ],
+   [
+    "glow-contact",
+    "Contact",
+    "Contactpagina van Glow & Laser For You met openingstijden"
+   ]
+  ]
+ },
+ {
+  "slug": "vagpro",
+  "name": "VAGPRO",
+  "kind": [
+   "Autospecialist",
+   "Den Haag"
+  ],
+  "live": "https://vagpro.nl",
+  "livetxt": "vagpro.nl",
+  "preset": "vagpro",
+  "mob": "vagpro-mobiel",
+  "mh": 1266,
+  "text": "Onafhankelijk VAG-specialist voor achteruitrijcamera's, CarPlay, codering en storingsdiagnose. Bezoekers checken hun kenteken en sturen direct een WhatsApp.",
+  "made": [
+   "Kentekencheck (RDW)",
+   "Aanvraag via WhatsApp",
+   "Pagina per dienst",
+   "Zakelijke pagina"
+  ],
+  "shots": [
+   [
+    "vagpro",
+    "Home",
+    "Homepage van VAGPRO op desktop"
+   ],
+   [
+    "vagpro-over",
+    "Over",
+    "Over VAGPRO-pagina op desktop"
+   ],
+   [
+    "vagpro-zakelijk",
+    "Zakelijk",
+    "Samenwerken-pagina van VAGPRO op desktop"
+   ],
+   [
+    "vagpro-contact",
+    "Contact",
+    "Contactpagina van VAGPRO met kentekenformulier"
+   ]
+  ]
+ },
+ {
+  "slug": "detak",
+  "name": "Sleepdienst De Tak",
+  "kind": [
+   "Sleep- en bergingsdienst",
+   "Den Haag"
+  ],
+  "live": "https://sleepdienstdetak.nl",
+  "livetxt": "sleepdienstdetak.nl",
+  "preset": "detak",
+  "mob": "detak-mobiel",
+  "mh": 1263,
+  "text": "Het aanvraagformulier vult merk en model in via het kenteken en stuurt alles kant-en-klaar door naar WhatsApp. In drie talen, met pagina's per regio.",
+  "made": [
+   "Kentekencheck en herkenning",
+   "Locatie delen",
+   "Nederlands, Engels en Duits",
+   "Regiopagina's"
+  ],
+  "shots": [
+   [
+    "detak",
+    "NL",
+    "Homepage van Sleepdienst De Tak, Nederlands"
+   ],
+   [
+    "detak-de",
+    "DE",
+    "Homepage van Sleepdienst De Tak, Duits"
+   ],
+   [
+    "detak-aanvraag",
+    "Aanvraag",
+    "Aanvraagformulier van Sleepdienst De Tak met kentekencheck"
+   ],
+   [
+    "detak-werkgebied",
+    "Werkgebied",
+    "Werkgebied van Sleepdienst De Tak met kaart"
+   ],
+   [
+    "detak-onderweg",
+    "Onderweg",
+    "Fotosectie van Sleepdienst De Tak"
+   ]
+  ]
+ },
+ {
+  "slug": "cartronic",
+  "name": "CarTronic",
+  "kind": [
+   "Retrofit & webshop",
+   "Rijswijk"
+  ],
+  "live": "https://cartronic.nl",
+  "livetxt": "cartronic.nl",
+  "preset": "cartronic",
+  "mob": "cartronic-mobiel",
+  "mh": 1265,
+  "text": "Retrofit-specialist voor VW, Audi, SEAT en Škoda. Met webshop, voertuigzoeker en een eigen beheerpaneel waarin de eigenaar zelf producten en teksten aanpast.",
+  "made": [
+   "Webshop met iDEAL",
+   "Voertuigzoeker",
+   "Geavanceerd beheerpaneel",
+   "Pagina's per merk"
+  ],
+  "shots": [
+   [
+    "cartronic",
+    "Home",
+    "Homepage van CarTronic op desktop"
+   ],
+   [
+    "cartronic-merken",
+    "Merken",
+    "Merkenpagina van CarTronic"
+   ],
+   [
+    "cartronic-videos",
+    "Video's",
+    "Video's van CarTronic"
+   ],
+   [
+    "cartronic-contact",
+    "Contact",
+    "Contactpagina van CarTronic"
+   ],
+   [
+    "cartronic-dashboard",
+    "Beheer",
+    "Dashboard van het CarTronic-beheerpaneel"
+   ]
+  ]
+ }
+]
