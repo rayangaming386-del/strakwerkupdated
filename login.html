@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Inloggen | StrakWerk HQ</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="same-origin">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
+<link rel="stylesheet" href="/assets/hq-login/login.css">
+<link rel="stylesheet" href="/assets/office/office.css">
+</head>
+<body>
+<main class="login">
+  <section class="panel" aria-labelledby="t">
+    <a class="brand" href="/" aria-label="StrakWerk, naar de website"><span class="strak">STRAK</span><span>WERK</span></a>
+    <div class="head">
+      <span class="kicker">HQ</span>
+      <h1 id="t">Inloggen</h1>
+      <p class="muted" id="sub">Alleen voor uitgenodigde accounts.</p>
+    </div>
+
+    <div class="alert" id="alert" role="alert" hidden></div>
+    <p class="note" id="info" role="status" hidden></p>
+
+    <form id="f-login" class="form" novalidate hidden>
+      <label for="email">E-mailadres</label>
+      <input id="email" name="email" type="email" autocomplete="username" required inputmode="email" spellcheck="false">
+      <label for="password">Wachtwoord</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+      <button class="btn btn--gold" type="submit">Inloggen</button>
+      <button class="link" type="button" id="to-forgot">Wachtwoord vergeten?</button>
+    </form>
+
+    <form id="f-forgot" class="form" novalidate hidden>
+      <p class="muted">Vul je e-mailadres in. Is het bekend, dan ontvang je een link om een nieuw wachtwoord in te stellen.</p>
+      <label for="email2">E-mailadres</label>
+      <input id="email2" type="email" autocomplete="username" required spellcheck="false">
+      <button class="btn btn--gold" type="submit">Stuur herstellink</button>
+      <button class="link" type="button" data-back>Terug naar inloggen</button>
+    </form>
+
+    <form id="f-newpw" class="form" novalidate hidden>
+      <p class="muted" id="newpw-intro">Kies een nieuw wachtwoord.</p>
+      <label for="pw1">Nieuw wachtwoord</label>
+      <input id="pw1" type="password" autocomplete="new-password" minlength="12" required aria-describedby="pwhelp">
+      <p class="help" id="pwhelp">Minimaal 12 tekens. Gebruik bij voorkeur een wachtwoordbeheerder.</p>
+      <label for="pw2">Herhaal wachtwoord</label>
+      <input id="pw2" type="password" autocomplete="new-password" minlength="12" required>
+      <button class="btn btn--gold" type="submit">Wachtwoord opslaan</button>
+    </form>
+
+    <form id="f-mfa" class="form" novalidate hidden>
+      <p class="muted">Vul de 6-cijferige code uit je authenticator-app in.</p>
+      <label for="code">Verificatiecode</label>
+      <input id="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required>
+      <button class="btn btn--gold" type="submit">Bevestigen</button>
+    </form>
+
+    <form id="f-enroll" class="form" novalidate hidden>
+      <p class="muted">Voor eigenaars is tweestapsverificatie verplicht. Scan de QR-code met een authenticator-app (bijvoorbeeld 1Password, Bitwarden of Google Authenticator) en vul de code in.</p>
+      <div class="qr"><img id="qr" alt="QR-code voor je authenticator-app" width="180" height="180"></div>
+      <details class="secret"><summary>Kan niet scannen? Toon de sleutel</summary><code id="secret"></code></details>
+      <label for="code2">Verificatiecode</label>
+      <input id="code2" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required>
+      <button class="btn btn--gold" type="submit">Activeren en inloggen</button>
+    </form>
+
+    <div class="busy" id="busy" hidden><span class="spinner" aria-hidden="true"></span><span id="busy-t">Bezig…</span></div>
+
+    <p class="foot muted">Problemen met inloggen? Vraag de eigenaar om een nieuwe uitnodiging. <a href="/privacy">Privacy</a></p>
+  </section>
+
+  <aside class="preview" aria-label="Illustratie van het digitale kantoor">
+    <div class="preview-inner">
+      <span class="badge">Illustratie, geen echte gegevens</span>
+      <div class="office" id="office"><svg aria-hidden="true"></svg></div>
+      <p class="muted">Het digitale kantoor van StrakWerk: elke agent heeft een eigen werkplek. In HQ zie je alleen echte taken en statussen.</p>
+    </div>
+  </aside>
+</main>
+<script src="/assets/hq-login/supabase.js" defer></script>
+<script type="module" src="/assets/hq-login/login.js"></script>
+</body>
+</html>

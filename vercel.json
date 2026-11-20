@@ -52,6 +52,138 @@
       "source": "/diensten/website-laten-maken-westland",
       "destination": "/diensten/website-laten-maken",
       "permanent": true
+    },
+    {
+      "source": "/(package\\.json|package-lock\\.json|middleware\\.js)",
+      "destination": "/",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/hq/:path*",
+      "destination": "/api/hq?p=:path*"
+    },
+    {
+      "source": "/api/auth/:path*",
+      "destination": "/api/auth?p=:path*"
+    },
+    {
+      "source": "/hq",
+      "destination": "/hq/index.html"
+    },
+    {
+      "source": "/hq/:path((?!assets/).*)",
+      "destination": "/hq/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/hq",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        }
+      ]
+    },
+    {
+      "source": "/hq/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        }
+      ]
+    },
+    {
+      "source": "/login",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    }
+  ],
+  "functions": {
+    "api/*.js": {
+      "maxDuration": 60
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/worker",
+      "schedule": "17 4 * * *"
     }
   ]
 }
