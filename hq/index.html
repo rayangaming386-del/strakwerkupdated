@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>StrakWerk HQ</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="same-origin">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
+<link rel="stylesheet" href="/hq/assets/app.css">
+<link rel="stylesheet" href="/assets/office/office.css">
+</head>
+<body>
+<a class="skip" href="#main">Naar de inhoud</a>
+<div class="shell" id="shell">
+  <aside class="side" id="side" aria-label="Hoofdmenu">
+    <div class="side-head">
+      <a class="brand" href="/hq" data-nav aria-label="StrakWerk HQ, overzicht"><span class="strak">STRAK</span><span>WERK</span></a>
+      <span class="hq-tag">HQ</span>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-foot">
+      <a href="/" class="side-link">Naar de website ↗</a>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim" hidden></div>
+  <div class="main-col">
+    <header class="top">
+      <button class="icon-btn menu-btn" id="menu-btn" type="button" aria-controls="side" aria-expanded="false" aria-label="Menu openen">
+        <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+      <div class="top-title"><h1 id="page-title">Overzicht</h1><p class="fresh" id="fresh" aria-live="polite"></p></div>
+      <div class="user" id="user"></div>
+    </header>
+    <main id="main" class="work" tabindex="-1">
+      <div class="loading-page"><span class="spinner" aria-hidden="true"></span> HQ laden…</div>
+    </main>
+  </div>
+</div>
+<div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
+<script type="module" src="/hq/assets/app.js"></script>
+</body>
+</html>

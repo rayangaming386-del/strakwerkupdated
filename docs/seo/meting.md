@@ -15,6 +15,14 @@ Vercel Analytics telt anoniem, zonder cookies en zonder persoonsgegevens. Een ev
 | Offerte gekopieerd, Offerte-link gekopieerd, Offerte PDF | Offerte bewaard of gedeeld |
 | Snelheidscheck, Demo geopend, Demo bekeken, Demo: ik wil dit | Overige acties |
 
+## Eigen meting in StrakWerk HQ
+
+Naast Vercel meet `assets/sw-metrics.js` dezelfde soort klikken (zonder cookies) en toont HQ ze onder
+Bezoekers: `quote_whatsapp_click`, `contact_whatsapp_click`, `email_click`, `phone_click`,
+`calculator_start`, `package_select`, `portfolio_open`, `demo_open` en `page_view`. Ook daar geldt:
+een klik is geen aanvraag. Registreer echte aanvragen in HQ › Leads met bron "Aanvraag via …";
+alleen die tellen als bevestigde aanvraag.
+
 ## Echte aanvragen tellen
 
 Echte aanvragen tel je in WhatsApp en in je mailbox. Elke knop opent WhatsApp met een eigen begintekst, zodat je in WhatsApp ziet waar een bericht vandaan komt:

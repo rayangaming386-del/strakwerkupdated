@@ -48,7 +48,18 @@ Site van StrakWerk, webdesignbedrijf uit **Zoetermeer** (websites voor onderneme
   - Koppen worden pas in regels gesplitst (SplitText) als ze binnen 700px van het scherm komen.
   - De kleurvlekken in de hero bewegen via CSS-animaties (`.hero-bg.anim`), niet via GSAP.
   - Lettertype-declaraties staan inline in de `<head>` van de homepage (subpagina's laden `assets/fonts/fonts.css`).
+- Eigen meting naast Vercel: `assets/sw-metrics.js` (op alle pagina's, ook via de generators in `tools/`) stuurt zonder cookies `page_view`, `calculator_start`, `package_select`, `portfolio_open`, `quote_whatsapp_click`, `contact_whatsapp_click`, `email_click`, `phone_click`, `demo_open` naar `/api/collect`. Testverkeer: `?sw_test=1`. Uitzetten op `/privacy`. Bevestigde aanvragen (`lead_received`) en gewonnen opdrachten komen alleen uit het CRM in HQ, nooit uit klikken.
 - Elke push naar `main` gaat automatisch live via Vercel.
+
+## StrakWerk HQ (afgeschermde beheeromgeving)
+- Installatie, eerste eigenaar, kosten: `docs/hq/installatie.md`. Privacy-afweging: `docs/hq/privacy.md`.
+- `/login` (`login.html`, `assets/hq-login/`) en `/hq` (`hq/index.html`, `hq/assets/`, vanilla ES-modules, geen bundler). `middleware.js` schermt `/hq` af; `api/hq.js` (één router-functie), `api/auth.js`, `api/collect.js`, `api/worker.js` (cron). Gedeelde servercode in `api/_lib/` (underscore = geen functie, niet publiek).
+- Auth: Supabase Auth (uitnodiging, geen registratie, MFA verplicht voor eigenaar). Rollen `eigenaar`, `medewerker`, `alleen_lezen` in `hq.members`; rechten in `api/_lib/auth.js`. Nooit eigen wachtwoordopslag bouwen.
+- Database: Postgres (Supabase), schema `hq`, migraties in `db/migrations/` (`npm run migrate`). Nieuwe migratie = nieuw genummerd bestand, bestaande nooit wijzigen.
+- Agents: alleen Scout, Auditor en Sales zijn aangesloten (`api/_lib/agents/`). Andere rollen tonen "Niet gekoppeld" tot hun uitvoering echt bestaat. Externe webinhoud is data, nooit instructie; agents hebben geen tools in het taalmodel. Geen nepresultaten, geen gesimuleerde voortgang in het kantoor.
+- Pakketprijzen in `hq.packages` moeten gelijk blijven aan `CONFIG.bases`; agents mogen ze niet wijzigen.
+- `package.json` heeft `"type":"module"`: losse Node-scripts met `require` krijgen de extensie `.cjs` (zoals `tools/v2/glowshots.cjs`).
+- Controles: `npm run check` en `npm test` (lokale Postgres nodig, zie installatie). `/demo` blijft volledig los van HQ en echte data.
 
 ## Stijlafspraken (belangrijk)
 - Diepzwart (`#070708`), antraciet en donker metallic goud (`--metal`, `--gold #B9975B`, `--gold-hi #E2CA97`). Rood (`--red`) alleen voor de actie. **Geen groen.** Hoekig (`--r:2px`), grote typografie met omlijnd (`.ol`) tegenover massief, gouden hoekmarkeringen (`.marks`) als beeldmerk. Origineel STRAK/WERK-logo. Let op: geen losse klasse `.show` stijlen (die botst met `.wa-fab.show`/`.mbar.show`).
@@ -71,7 +82,7 @@ Site van StrakWerk, webdesignbedrijf uit **Zoetermeer** (websites voor onderneme
 - Nog geen reviews: geen review-sectie of beoordelingen tonen tot Rayan echte reviews aanlevert.
 
 ## Portfolio
-- Glow & Laser For You (beautysalon Zoetermeer, https://www.glowenlaserforyou.nl: afspraak aanvragen in stappen, doorzoekbare prijslijst, pagina per behandeling; schermafbeeldingen `assets/work/glow*.webp`, gemaakt met `tools/v2/glowshots.js`), VAGPRO (kentekencheck), De Tak (aanvraag via WhatsApp, meertalig, regiopagina's), CarTronic (webshop + geavanceerd beheerpaneel). Elk project heeft een eigen pagina `/werk/<slug>` (generator `tools/gen_cases.py`). CarTronic staat live op https://cartronic.nl (`CONFIG.cartronicUrl`, ook in `werk/cartronic.html`).
+- Glow & Laser For You (beautysalon Zoetermeer, https://www.glowenlaserforyou.nl: afspraak aanvragen in stappen, doorzoekbare prijslijst, pagina per behandeling; schermafbeeldingen `assets/work/glow*.webp`, gemaakt met `tools/v2/glowshots.cjs`), VAGPRO (kentekencheck), De Tak (aanvraag via WhatsApp, meertalig, regiopagina's), CarTronic (webshop + geavanceerd beheerpaneel). Elk project heeft een eigen pagina `/werk/<slug>` (generator `tools/gen_cases.py`). CarTronic staat live op https://cartronic.nl (`CONFIG.cartronicUrl`, ook in `werk/cartronic.html`).
 - Teller staat op "20+ sites live".
 
 ## Openstaande punten (input van eigenaar nodig)

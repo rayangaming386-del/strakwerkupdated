@@ -1,0 +1,35 @@
+/* Stijl van het isometrische kantoor (gedeeld door /login en /hq). */
+.office svg{width:100%; height:auto; display:block}
+.office .zone-label{font:700 10px/1 var(--f-mono, ui-monospace, monospace); letter-spacing:.18em; opacity:.85}
+.office .avatar-ini{font:800 9px/1 var(--f-body, system-ui); fill:#0B0E13; text-anchor:middle}
+.office .tag-bg{fill:rgba(11,14,19,.86); stroke:rgba(255,255,255,.14)}
+.office .tag-text{font:500 11px/1 var(--f-body, system-ui); fill:#E8EDF3}
+.office .tag-sub{fill:#98A2B0; font-weight:500}
+.office .tag-dot{fill:#98A2B0}
+.office .desk{cursor:default; outline:none}
+.office .desk[role="button"]{cursor:pointer}
+.office .desk[role="button"]:hover .tag-bg{stroke:rgba(207,174,105,.6)}
+.office .desk:focus-visible .tag-bg, .office .desk.selected .tag-bg{stroke:#CFAE69; stroke-width:1.6}
+.office .desk.selected .avatar ellipse:first-child{fill:rgba(207,174,105,.35)}
+
+.office .st-beschikbaar .tag-dot{fill:#5BD39A}
+.office .st-afgerond .tag-dot{fill:#5BD39A}
+.office .st-in_wachtrij .tag-dot{fill:#7FA7F5}
+.office .st-bezig .tag-dot{fill:#CFAE69}
+.office .st-wacht_op_goedkeuring .tag-dot{fill:#EAD39C}
+.office .st-gepauzeerd .tag-dot{fill:#98A2B0}
+.office .st-mislukt .tag-dot{fill:#F87171}
+.office .st-niet_gekoppeld .tag-dot{fill:none; stroke:#98A2B0; stroke-dasharray:2 2}
+.office .st-niet_gekoppeld .tag-text{opacity:.65}
+.office .st-niet_gekoppeld .screen{fill-opacity:0}
+
+/* Beweging alleen bij een echte, lopende uitvoering */
+.office .st-bezig .screen{animation:sw-screen 1.6s ease-in-out infinite}
+.office .st-bezig .avatar-body{animation:sw-bob 1.2s ease-in-out infinite}
+.office .st-wacht_op_goedkeuring .tag-bg{stroke:rgba(234,211,156,.7)}
+@keyframes sw-screen{50%{fill-opacity:.45}}
+@keyframes sw-bob{50%{transform:translateY(-1.5px)}}
+@media (prefers-reduced-motion: reduce){
+  .office .st-bezig .screen, .office .st-bezig .avatar-body{animation:none}
+  .office .st-bezig .screen{fill-opacity:.4}
+}
