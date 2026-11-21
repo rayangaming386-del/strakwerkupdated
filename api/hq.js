@@ -1,6 +1,6 @@
 // /api/hq/* — alle gegevens van StrakWerk HQ. Elke route controleert sessie, lidmaatschap,
 // MFA (voor eigenaars) en de rechten van de rol aan de serverkant.
-import { waitUntil as vercelWaitUntil } from "@vercel/functions";
+import { waitUntil, isWorkers } from "./_lib/runtime.js";
 import { q, one, tx, audit } from "./_lib/db.js";
 import { env, missingCore } from "./_lib/env.js";
 import { json, errorResponse, readJson, assertSameOrigin, route, HttpError, assertUuid, str } from "./_lib/http.js";
@@ -20,8 +20,8 @@ import { dispatchRenderWorker, dispatchConfigured } from "./_lib/content/dispatc
 import { driver as storageDriver } from "./_lib/content/storage.js";
 import { missingIg } from "./_lib/content/instagram.js";
 
-const waitUntil = (p) => { try { vercelWaitUntil(p); } catch {} return p; };
-const startWorker = () => waitUntil(runWorker({ source: "api", budgetMs: 50_000 }).catch(e => console.error(`[worker] ${e.message}`)));
+// Cloudflare: werk na het antwoord mag max. 30 s duren; daarna pakt de cron (elke minuut) het op.
+const startWorker = () => waitUntil(runWorker({ source: "api", budgetMs: isWorkers ? 25_000 : 50_000 }));
 
 // ── Agentwereld ──────────────────────────────────────────────────────────
 async function world() {

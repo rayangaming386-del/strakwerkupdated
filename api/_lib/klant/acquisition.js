@@ -168,3 +168,36 @@ async function afterSent(o, lead, messageId, test) {
   }
 }
 export { mailConfigured };
+
+/**
+ * Testmail naar de eigenaar zelf (echte verzending, ook als "live" uit staat): bewijst dat
+ * versturen, antwoord koppelen en opvolging stoppen werken. Alleen naar het e-mailadres van
+ * de ingelogde eigenaar; de testklant is gemarkeerd als testgegevens.
+ */
+export async function sendSelfTest(auth) {
+  const { sendMail, mailConfigured: mc, mailRoute, replyTo } = await import("./mail.js");
+  if (!mc()) throw new HttpError(409, "niet_gekoppeld", "E-mail is nog niet gekoppeld.", { missing: ["GMAIL_CLIENT_ID", "GMAIL_CLIENT_SECRET", "GMAIL_REFRESH_TOKEN"] });
+  const to = String(auth?.email || "").toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(to)) throw new HttpError(400, "ongeldig", "Je account heeft geen geldig e-mailadres.");
+  const stamp = new Date().toISOString().slice(0, 16).replace("T", " ");
+  const { lead, o } = await tx(async (db) => {
+    let lead = (await db.query("select * from hq.leads where lower(contact_email)=$1 and is_test and company like 'Mailtest%' order by created_at desc limit 1", [to])).rows[0];
+    if (!lead) lead = (await db.query(`insert into hq.leads (company, company_key, source, contact_name, contact_email, status, is_test, notes) values ('Mailtest StrakWerk HQ','mailtest-strakwerk-hq','handmatig','Rayan',$1,'benaderd',true,'Testklant voor de e-mailkoppeling (eigen adres).') returning *`, [to])).rows[0];
+    await db.query("update hq.outreach set status='geannuleerd', cancel_reason='Nieuwe mailtest' where lead_id=$1 and status in ('gepland','concept')", [lead.id]);
+    const has = (await db.query("select 1 from hq.consents where lead_id=$1 and channel='email' and revoked_at is null", [lead.id])).rows[0];
+    if (!has) await db.query("insert into hq.consents (lead_id, channel, basis, source, scope, evidence, recorded_by) values ($1,'email','toestemming','Eigen adres van de eigenaar','Testberichten van HQ','Eigenaar start zelf de mailtest vanuit HQ.',$2)", [lead.id, auth.userId]);
+    const o = (await db.query(`insert into hq.outreach (lead_id, channel, kind, status, subject, body, to_address, idempotency_key, is_test) values ($1,'email','eerste_contact','verzenden',$2,$3,$4,$5,true) returning *`,
+      [lead.id, `Mailtest StrakWerk HQ (${stamp})`, `Hoi Rayan,\n\nDit is een test van de e-mailkoppeling van HQ. Antwoord met een korte tekst (bijv. "Wat kost dat?"): dat antwoord hoort op de klantkaart "Mailtest StrakWerk HQ" te verschijnen, en de geplande opvolging hoort dan vanzelf te stoppen.\n\nGroet,\nHQ`, to, `mailtest:${lead.id}:${Date.now()}`])).rows[0];
+    return { lead, o };
+  });
+  try {
+    const r = await sendMail({ outreachId: o.id, leadId: lead.id, to, subject: o.subject, text: o.body });
+    await q("update hq.outreach set status='verzonden', sent_at=now(), provider_id=$2, updated_at=now() where id=$1", [o.id, r.messageId]);
+    await afterSent(o, lead, r.messageId, false);
+    await audit(null, { actor: auth.userId, label: auth.email, action: "mailtest.verstuurd", entity: "lead", entityId: lead.id, details: { route: mailRoute() } });
+    return { ok: true, lead_id: lead.id, outreach_id: o.id, message_id: r.messageId, route: mailRoute(), reply_to: replyTo(), followup: "gepland (stopt als je antwoordt)" };
+  } catch (e) {
+    await q("update hq.outreach set status=$2, last_error=$3, updated_at=now() where id=$1", [o.id, e.ambiguous ? "onzeker" : "mislukt", String(e.message).slice(0, 300)]);
+    throw new HttpError(502, "mail", e.message);
+  }
+}

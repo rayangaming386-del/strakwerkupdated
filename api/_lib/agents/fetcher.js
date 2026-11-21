@@ -24,7 +24,7 @@ function isPrivateIp(ip) {
 // Werkt uitsluitend met HQ_TEST_MODE=1 en nooit op Vercel.
 let testNet = null;
 export function __setTestNetwork(v) {
-  if (process.env.HQ_TEST_MODE !== "1" || process.env.VERCEL) throw new Error("Testnetwerk is alleen in tests beschikbaar.");
+  if (process.env.HQ_TEST_MODE !== "1" || process.env.VERCEL || (typeof navigator !== "undefined" && navigator.userAgent === "Cloudflare-Workers")) throw new Error("Testnetwerk is alleen in tests beschikbaar.");
   testNet = v;
 }
 
@@ -82,11 +82,44 @@ function once(u, { timeoutMs, maxBytes, method = "GET", userAgent = null }) {
   });
 }
 
+// Cloudflare Workers: geen node:http met eigen DNS-controle. Daar gaat het verzoek via fetch().
+// Workers kunnen geen privé-netwerken of andere Workers op hetzelfde account bereiken, en
+// IP-adressen en afwijkende poorten worden al door normalizeUrl() geweigerd.
+const IS_WORKERS = typeof navigator !== "undefined" && navigator.userAgent === "Cloudflare-Workers";
+async function onceFetch(u, { timeoutMs, maxBytes, userAgent = null }) {
+  const started = Date.now();
+  let res;
+  try {
+    res = await fetch(u.toString(), { redirect: "manual", signal: AbortSignal.timeout(timeoutMs),
+      headers: { "user-agent": userAgent || USER_AGENT, accept: "text/html,application/xhtml+xml,text/plain;q=0.8,*/*;q=0.5", "accept-language": "nl,en;q=0.5" } });
+  } catch (e) {
+    if (e?.name === "TimeoutError" || e?.name === "AbortError") throw new FetchError("Time-out bij ophalen.", "timeout");
+    throw new FetchError(/dns|resolve|not found/i.test(String(e?.message)) ? "Domein bestaat niet of is niet bereikbaar." : `Verbinding mislukt (${String(e?.message || e).slice(0, 80)}).`, "net");
+  }
+  const ttfb = Date.now() - started;
+  const headers = Object.fromEntries(res.headers);
+  const chunks = []; let size = 0, truncated = false;
+  if (res.body) {
+    const reader = res.body.getReader();
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > maxBytes) { truncated = true; await reader.cancel().catch(() => {}); break; }
+      chunks.push(value);
+    }
+  }
+  const body = new TextDecoder("utf-8", { fatal: false }).decode(chunks.length === 1 ? chunks[0] : new Uint8Array(chunks.reduce((a, c) => { const n = new Uint8Array(a.length + c.length); n.set(a); n.set(c, a.length); return n; }, new Uint8Array())));
+  return { status: res.status, headers, body, truncated, bytes: size, ttfbMs: ttfb, totalMs: Date.now() - started };
+}
+
 export async function fetchPublic(input, { timeoutMs = 10_000, maxBytes = 1_500_000, maxRedirects = 3, userAgent = null } = {}) {
   let u = normalizeUrl(input);
   const chain = [];
+  // Workers: kortere wachttijd en kleinere pagina's (max. 30 s per taak, beperkte rekentijd).
+  if (IS_WORKERS) { timeoutMs = Math.min(timeoutMs, 6000); maxBytes = Math.min(maxBytes, 400_000); }
   for (let i = 0; i <= maxRedirects; i++) {
-    const r = await once(u, { timeoutMs, maxBytes, userAgent });
+    const r = await (IS_WORKERS ? onceFetch : once)(u, { timeoutMs, maxBytes, userAgent });
     chain.push({ url: u.toString(), status: r.status });
     if (r.status >= 300 && r.status < 400 && r.headers.location) {
       u = normalizeUrl(new URL(r.headers.location, u).toString());

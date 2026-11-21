@@ -133,6 +133,7 @@ export async function handleKlant({ m, path, url, body, auth, startWorker }) {
   // ── Kantoor ──
   if (m === "GET" && path === "kantoor") return json(await kantoor(env));
   if (m === "POST" && path === "kantoor/overleg") { assertPerm(auth, "tasks.start"); return json(await plan.runMeeting({ env, force: true })); }
+  if (m === "POST" && path === "kantoor/mailtest") { assertPerm(auth, "settings.write"); return json(await acq.sendSelfTest(auth)); }
   if (m === "PUT" && path === "kantoor/routes") { assertPerm(auth, "settings.write"); return json({ routes: await contact.putRoutes(body, auth) }); }
   if (m === "PUT" && path === "kantoor/pauze") {
     assertPerm(auth, "tasks.control");

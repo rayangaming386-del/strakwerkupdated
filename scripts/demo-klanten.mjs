@@ -55,8 +55,9 @@ export async function demoKlanten({ log = console.log } = {}) {
     { type: "node", id: 9001, tags: { name: "Kapsalon Anna (demo)", shop: "hairdresser", "addr:city": "Den Haag", phone: "070 000 0001", opening_hours: "Tu-Sa 09:00-17:00" } },
     { type: "node", id: 9002, tags: { name: "Haarstudio Bea (demo)", shop: "hairdresser", "addr:city": "Den Haag", "contact:instagram": "https://instagram.com/voorbeeld" } },
   ];
-  const a = await discover({ segment: "salons", city: "Den Haag", limit: 5, isTest: true });
-  for (const n of a.new) log(`Scout: ${n.company} → ${n.website_status} · prioriteit ${n.priority}`);
+  await discover({ segment: "salons", city: "Den Haag", limit: 5, isTest: true });
+  await drain();
+  for (const n of (await q("select company, website_status, priority from hq.leads where osm_id in ('node/9001','node/9002') order by osm_id")).rows) log(`Scout: ${n.company} → ${n.website_status} · prioriteit ${n.priority}`);
   const anna = await one("select * from hq.leads where osm_id='node/9001'");
   log(`Controles: ${anna.website_checks.map(c => `${c.controle}: ${c.uitkomst}`).join(" | ")}`);
   const ap = await acq.prepareApproach(anna.id, owner);

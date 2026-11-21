@@ -200,11 +200,13 @@ export function classify(text) {
  * Binnenkomende reactie: koppelen aan het juiste gesprek, geplande standaardopvolging
  * stoppen, status bijwerken en de eerstvolgende actie klaarzetten.
  */
-export async function registerReply({ lead_id, text, channel = "email", external_id = null, subject = null, in_reply_to = null, from = null, is_test = false }, actor = null) {
+export async function registerReply({ lead_id, text, channel = "email", external_id = null, subject = null, in_reply_to = null, references = [], from = null, is_test = false }, actor = null) {
   return tx(async (db) => {
     let lead = lead_id ? (await db.query("select * from hq.leads where id=$1 for update", [lead_id])).rows[0] : null;
     let outreach = null;
-    if (in_reply_to) outreach = (await db.query("select * from hq.outreach where provider_id=$1", [in_reply_to])).rows[0] || null;
+    // Koppelen via In-Reply-To of References (de Message-ID's van onze eigen berichten).
+    const ids = [in_reply_to, ...(Array.isArray(references) ? references : [])].filter(Boolean).map(String).slice(0, 20);
+    if (ids.length) outreach = (await db.query("select * from hq.outreach where provider_id = any($1::text[]) order by sent_at desc nulls last limit 1", [ids])).rows[0] || null;
     if (!lead && outreach) lead = (await db.query("select * from hq.leads where id=$1 for update", [outreach.lead_id])).rows[0];
     if (!lead && from) lead = (await db.query("select * from hq.leads where lower(contact_email)=$1 order by updated_at desc limit 1 for update", [normEmail(from)])).rows[0];
     if (!lead) throw new HttpError(404, "niet_gevonden", "Geen klantkaart gevonden voor deze reactie.");

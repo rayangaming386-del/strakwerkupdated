@@ -1,0 +1,44 @@
+# Cloudflare Worker voor www.strakwerkk.nl + StrakWerk HQ (gratis Workers-plan).
+# Geheimen (DATABASE_URL, SUPABASE_*, CRON_SECRET, GMAIL_*, ...) NOOIT hier: zet ze met
+# `npx wrangler secret put NAAM` of in het dashboard (Workers › strakwerk › Settings).
+name = "strakwerk"
+main = "worker/index.js"
+compatibility_date = "2025-09-15"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+preview_urls = true
+
+[build]
+command = "node scripts/build-cf.mjs"
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+html_handling = "auto-trailing-slash"
+not_found_handling = "404-page"
+# Alleen deze paden komen langs de Worker (beveiliging en API); de rest is statisch.
+run_worker_first = ["/api/*", "/hq", "/hq/*", "/intake"]
+
+# Elke minuut; de Worker kiest per minuut welke onderdelen draaien (worker/index.js).
+[triggers]
+crons = ["* * * * *"]
+
+# Eigen service-binding: elk cron-onderdeel krijgt een eigen aanroep (eigen limieten).
+[[services]]
+binding = "SELF"
+service = "strakwerk"
+
+[vars]
+HQ_SITE_URL = "https://www.strakwerkk.nl"
+HQ_STORAGE = "supabase"
+MAIL_FROM = "strakwerkk@gmail.com"
+
+[observability]
+enabled = true
+
+# Optioneel (gratis): Hyperdrive bundelt databaseverbindingen voor Workers.
+# Maak hem met `npx wrangler hyperdrive create strakwerk-db --connection-string="..."`
+# en zet de id hieronder (zonder Hyperdrive gebruikt de Worker DATABASE_URL).
+# [[hyperdrive]]
+# binding = "HYPERDRIVE"
+# id = "..."

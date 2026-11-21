@@ -7,7 +7,8 @@ import { createHash, timingSafeEqual } from "node:crypto";
 import { q, one, tx } from "./_lib/db.js";
 import { env } from "./_lib/env.js";
 import { json, errorResponse, readJson, clientIp, HttpError, str } from "./_lib/http.js";
-import { intakeRequest, registerReply } from "./_lib/klant/sales.js";
+import { intakeRequest } from "./_lib/klant/sales.js";
+import { processInbound } from "./_lib/klant/inbound.js";
 import { suppress } from "./_lib/klant/contact.js";
 import { checkUnsubscribeToken } from "./_lib/klant/mail.js";
 import { intakeView, saveIntake } from "./_lib/klant/project.js";
@@ -77,8 +78,7 @@ async function handle(request) {
     if (path === "inbound" && m === "POST") {
       if (!secretOk(request.headers.get("x-hq-inbound-secret"))) throw new HttpError(401, "geheim", "Niet toegestaan.");
       const b = await readJson(request, 256 * 1024);
-      const r = await registerReply({ text: str(b.text, 8000) || "", subject: str(b.subject, 300), from: str(b.from, 254), in_reply_to: str(b.in_reply_to, 300), external_id: str(b.message_id, 300), channel: "email" })
-        .catch(e => (e.status === 404 ? { unmatched: true } : Promise.reject(e)));
+      const r = await processInbound({ from: str(b.from, 254), subject: str(b.subject, 300), text: str(b.text, 8000) || "", inReplyTo: str(b.in_reply_to, 300), references: Array.isArray(b.references) ? b.references.map(x => str(x, 300)) : str(b.references, 2000), messageId: str(b.message_id, 300) });
       return json({ ok: true, ...r });
     }
 

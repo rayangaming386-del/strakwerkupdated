@@ -19,17 +19,23 @@
     "demo:glow": "node scripts/demo-glow.mjs",
     "brand-assets": "node scripts/brand-assets.mjs",
     "demo:strakwerk": "node scripts/demo-strakwerk.mjs",
-    "demo:klanten": "node scripts/demo-klanten.mjs"
+    "demo:klanten": "node scripts/demo-klanten.mjs",
+    "build:cf": "node scripts/build-cf.mjs",
+    "cf:dev": "wrangler dev",
+    "cf:deploy": "wrangler deploy",
+    "cf:preview": "wrangler versions upload"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.9.0",
     "@vercel/functions": "^3.11.3",
     "jose": "^6.2.17",
     "nodemailer": "^6.9.16",
-    "pg": "^8.23.1"
+    "pg": "^8.23.1",
+    "postal-mime": "4.2.0"
   },
   "devDependencies": {
     "@supabase/supabase-js": "^2.119.0",
-    "playwright-core": "1.63.0"
+    "playwright-core": "1.63.0",
+    "wrangler": "4.158.0"
   }
 }
