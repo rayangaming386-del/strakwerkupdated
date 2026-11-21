@@ -61,7 +61,8 @@ export async function kantoor(env = "productie") {
   for (const e of experiments.rows) exps.push(await plan.experimentResults(e.id));
   return { briefings: briefings.rows, scorecards: scores, routes, errors: errors.rows, experiments: exps, prompts: prompts.rows, segments: segments.rows, partners, proposals: proposals.rows,
     settings: { kantoor: settings[0], sales: settings[1], availability: settings[2], scout: settings[3] }, capacity: await sales.capacity(), ai: await budgetOverview(), mail: mailConfigured(),
-    results: await proj.results({ env }), consent_bases: contact.BASIS_LABEL };
+    results: await proj.results({ env }), consent_bases: contact.BASIS_LABEL,
+    cron: (await q("select key, updated_at from hq.settings where key like 'cron:%' order by key")).rows.map(r => ({ part: r.key.slice(5), at: r.updated_at })) };
 }
 
 async function listKlanten(url) {

@@ -15,7 +15,7 @@ export const store = () => als.getStore() || null;
 export const bindings = () => store()?.env || {};
 
 /** Maximale looptijd van één taak in deze runtime (Workers: werk na het antwoord max. 30 s). */
-export const maxTaskMs = () => (isWorkers ? 25_000 : Infinity);
+export const maxTaskMs = () => (isWorkers ? 24_000 : Infinity); // net onder het budget van 25 s per aanroep
 
 /**
  * Voert fn uit binnen een eigen verzoekcontext. Na afloop (ook van alle waitUntil-werk)
