@@ -98,9 +98,9 @@ StrakWerk · ${SITE.brand.site}`;
 }
 
 // ── Capaciteit ───────────────────────────────────────────────────────────────
-export async function capacity(db) {
+export async function capacity(db, { test = false } = {}) {
   const s = await salesSettings(db);
-  const active = (await (db || { query: q }).query("select count(*)::int n from hq.projects where status in ('akkoord','intake','in_aanbouw','websitecontrole') and not is_test")).rows[0].n;
+  const active = (await (db || { query: q }).query("select count(*)::int n from hq.projects where status in ('akkoord','intake','in_aanbouw','websitecontrole') and is_test=$1", [test])).rows[0].n;
   const free = Math.max(0, s.capacity.max_projects - active);
   const earliest = new Date(Date.now() + (free > 0 ? 2 : (active - s.capacity.max_projects + 1) * s.capacity.days_per_project) * 864e5);
   return { max: s.capacity.max_projects, active, free, earliest_start: earliest.toISOString().slice(0, 10), days_per_project: s.capacity.days_per_project };
@@ -233,6 +233,15 @@ export async function registerReply({ lead_id, text, channel = "email", external
       // Interesse of vraag: de klant wacht op ons; krijgt voorrang op nieuw koud onderzoek.
       await db.query("update hq.leads set awaiting_reply_since=coalesce(awaiting_reply_since, now()), last_inbound_at=now(), priority='hoog', priority_reason='Klant reageerde en wacht op antwoord', status=case when status in ('benaderd','nieuw','onderzocht','goedgekeurd') then 'gesprek' else status end, updated_at=now() where id=$1", [lead.id]);
       if (quote?.id && cls === "interesse") await db.query("update hq.quotes set interest=true where id=$1", [quote.id]);
+      // Antwoordconcept klaarzetten (Rayan controleert en verstuurt). Prijzen uit de actuele prijslijst.
+      const opp = (await db.query("select service_text from hq.opportunities where lead_id=$1 and strength='concreet' and verified<>'klopt_niet' order by created_at desc limit 1", [lead.id])).rows[0];
+      const a = analyzeNeed({ message: text, company: lead.company });
+      const cap = await capacity(db, { test: lead.is_test });
+      const priceQ = /kost|prijs|tarie|budget|wat betaal/i.test(String(text));
+      const line = opp ? `Voor jouw situatie zou ik dit voorstellen: ${opp.service_text}.` : `Mijn voorstel: pakket ${BASE[a.package].name} (${eur(BASE[a.package].price_eur)}).`;
+      const body = `${lead.contact_name ? `Hoi ${lead.contact_name.split(" ")[0]},` : "Hoi,"}\n\nDank voor je reactie! ${priceQ ? line : `Leuk dat je interesse hebt. ${line}`} Alle prijzen staan ook op ${SITE.brand.site}/prijzen.\n\nZal ik een korte offerte voor je klaarzetten, of bel je liever even? Ik kan starten vanaf ${new Date(cap.earliest_start).toLocaleDateString("nl-NL", { day: "numeric", month: "long" })}.\n\nGroet,\nRayan\nStrakWerk`;
+      await db.query(`insert into hq.outreach (lead_id, quote_id, channel, kind, status, subject, body, to_address, idempotency_key, is_test) values ($1,$2,$3,'antwoord','concept',$4,$5,$6,$7,$8) on conflict (idempotency_key) do nothing`,
+        [lead.id, quote?.id || null, channel === "email" && lead.contact_email ? "email" : lead.contact_phone ? "whatsapp" : "email", subject ? (/^re:/i.test(subject) ? subject : `Re: ${subject}`) : "Re: je reactie", body, channel === "email" ? lead.contact_email : (lead.contact_phone || lead.contact_email), `antwoord:${external_id || `${lead.id}:${Date.now()}`}`, lead.is_test]);
     }
     await audit(db, { actor: actor?.userId || null, label: actor?.email || "systeem", action: "reactie.ontvangen", entity: "lead", entityId: lead.id, details: { classificatie: cls, opvolging_gestopt: cancelled } });
     return out;
@@ -441,7 +450,8 @@ export async function customerCard(leadId) {
     (await import("./contact.js")).suppressedFor(lead),
     q("select * from hq.actions where lead_id=$1 and status in ('open','opgepakt') order by day desc, rank", [leadId]),
   ]);
-  const email = await contactCheck(lead, "email", { kind: "eerste_contact" });
+  // Klant zocht zelf contact of reageerde: dan gaat het om antwoorden, niet om koud benaderen.
+  const email = await contactCheck(lead, "email", { kind: lead.last_inbound_at ? "antwoord" : "eerste_contact" });
   return { lead, timeline: timeline.rows, consents: consents.rows, outreach: outreach.rows, quotes: quotes.rows, appointments: appts.rows, project, opportunities: opps.rows, payments: payments.rows,
     suppressed: sup, actions: actions.rows, contact: { email }, capacity: await capacity(),
     wa_link: lead.contact_phone ? `https://wa.me/${String(lead.contact_phone).replace(/\D/g, "")}` : null };

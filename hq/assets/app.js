@@ -3,6 +3,9 @@ import { me, logout, api } from "./api.js";
 
 const ROUTES = [
   { path: "/hq", key: "overzicht", title: "Overzicht", load: () => import("./views/overview.js") },
+  { path: "/hq/vandaag", key: "vandaag", title: "Vandaag", load: () => import("./views/vandaag.js") },
+  { path: "/hq/klanten", key: "klanten", title: "Klanten", load: () => import("./views/klanten.js") },
+  { path: "/hq/kantoor", key: "kantoor", title: "Kantoor", load: () => import("./views/kantoor.js") },
   { path: "/hq/bezoekers", key: "bezoekers", title: "Bezoekers", load: () => import("./views/visitors.js") },
   { path: "/hq/studio", key: "studio", title: "Contentstudio", load: () => import("./views/studio.js") },
   { path: "/hq/agentwereld", key: "agentwereld", title: "Agentwereld", load: () => import("./views/world.js") },

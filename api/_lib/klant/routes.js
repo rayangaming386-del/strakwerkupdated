@@ -41,7 +41,7 @@ export async function today(env = "productie") {
   ]);
   const k = await plan.kantoorSettings();
   return { env, requests: requests.rows, quotes: quotes.rows, projects: projects.rows, decisions: decisions.rows, briefing, actions: actions.rows, manual: manual.rows,
-    capacity: await sales.capacity(), paused: Boolean(k.paused), routes: await contact.getRoutes(), mail: mailConfigured() };
+    capacity: await sales.capacity(null, { test: T }), paused: Boolean(k.paused), routes: await contact.getRoutes(), mail: mailConfigured() };
 }
 
 export async function kantoor(env = "productie") {

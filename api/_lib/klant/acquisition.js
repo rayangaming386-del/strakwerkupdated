@@ -80,7 +80,7 @@ export async function enqueueDueOutreach() {
   let n = 0;
   for (const o of due) {
     await tx(async (db) => {
-      const t = await enqueue(db, { agent: "acquisitie", kind: "send_outreach", title: "Bericht versturen", input: { outreach_id: o.id }, leadId: o.lead_id, idempotencyKey: `send:${o.id}`, timeoutS: 40, maxAttempts: 2 });
+      const t = await enqueue(db, { agent: "acquisitie", kind: "send_outreach", title: "Bericht versturen", input: { outreach_id: o.id }, leadId: o.lead_id, idempotencyKey: `send:${o.id}`, timeoutS: 30, maxAttempts: 2 });
       await db.query("update hq.outreach set task_id=$2 where id=$1 and task_id is null", [o.id, t.id]);
       n++;
     });

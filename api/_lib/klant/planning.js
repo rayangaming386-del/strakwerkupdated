@@ -48,16 +48,16 @@ export async function facts({ env = "productie", now = new Date() } = {}) {
   for (const s of stuckIntake) blockers.push({ waar: `Intake ${s.name}`, bewijs: `sinds ${new Date(s.updated_at).toLocaleDateString("nl-NL")} niet compleet` });
   const openQuotes = (await q(`select id, lead_id, price_cents, interest, sent_at from hq.quotes where status='verstuurd' and ${W()} order by sent_at`)).rows;
   return { env, gisteren, wachtend: waiting, vastgelopen: blockers, open_offertes: { aantal: openQuotes.length, waarde_cents: openQuotes.reduce((s, x) => s + x.price_cents, 0), met_belangstelling: openQuotes.filter(x => x.interest).length },
-    capaciteit: await capacity(), marketing_input: await marketingInsights(60, { test: T }) };
+    capaciteit: await capacity(null, { test: T }), marketing_input: await marketingInsights(60, { test: T }) };
 }
 
 /** Kandidaat-acties met een prioriteit (hoger = belangrijker). Warme aanvragen gaan voor. */
-async function candidates(env) {
+async function candidates(env, now = new Date()) {
   const T = env === "test";
   const out = [];
   const add = (a) => out.push(a);
   for (const l of (await q(`select id, company, awaiting_reply_since from hq.leads where awaiting_reply_since is not null and status not in ('afgemeld','verloren') and is_test=${T} order by awaiting_reply_since limit 10`)).rows) {
-    const h = Math.round((Date.now() - new Date(l.awaiting_reply_since)) / 3600e3);
+    const h = Math.max(0, Math.round((now - new Date(l.awaiting_reply_since)) / 3600e3));
     add({ score: 100 + Math.min(h, 48), department: "sales", title: `Beantwoord ${l.company}`, reason: `Klant wacht al ${h} uur op antwoord`, expected: "Warme aanvraag: grootste kans op een opdracht", next_step: "Open de klantkaart, controleer het klaargezette antwoord en verstuur", lead_id: l.id, key: `antwoord:${l.id}` });
   }
   for (const qu of (await q(`select q.id, q.lead_id, q.interest, q.sent_at, l.company from hq.quotes q join hq.leads l on l.id=q.lead_id where q.status='concept' and q.is_test=${T}`)).rows)
@@ -71,7 +71,7 @@ async function candidates(env) {
     add({ score: 55, department: "auditor", title: `Oplevercontrole ${p.name}`, reason: "Project staat op websitecontrole", expected: "Oplevering zonder verrassingen", next_step: "Controleresultaat bekijken en punten afvinken", lead_id: p.lead_id, key: `controle:${p.id}` });
   for (const o of (await q(`select o.id, o.lead_id, l.company from hq.outreach o join hq.leads l on l.id=o.lead_id where o.status='klaar_handmatig' and o.is_test=${T} limit 5`)).rows)
     add({ score: 45, department: "acquisitie", title: `Bericht aan ${o.company} versturen`, reason: "Benadering staat klaar (toegestaan, handmatig kanaal)", expected: "Nieuw gesprek", next_step: "Kopieer het bericht en verstuur via het juiste kanaal", lead_id: o.lead_id, key: `handmatig:${o.id}` });
-  for (const l of (await q(`select id, company from hq.leads where priority='hoog' and status='nieuw' and is_test=${T} and not exists (select 1 from hq.outreach o where o.lead_id=hq.leads.id) limit 3`)).rows)
+  for (const l of (await q(`select id, company from hq.leads where priority='hoog' and status='nieuw' and is_test=${T} and (contact_email is not null or exists (select 1 from hq.consents c where c.lead_id=hq.leads.id and c.revoked_at is null)) and not exists (select 1 from hq.outreach o where o.lead_id=hq.leads.id) limit 3`)).rows)
     add({ score: 35, department: "acquisitie", title: `Benadering voorbereiden: ${l.company}`, reason: "Kansrijk bedrijf zonder benadering", expected: "Concrete contactmogelijkheid", next_step: "Contactgrond controleren, bericht klaarzetten", lead_id: l.id, key: `benaderen:${l.id}` });
   {
     const mi = await marketingInsights(60, { test: T });
@@ -94,7 +94,7 @@ export async function runMeeting({ env = "productie", now = new Date(), force = 
   const s = await kantoorSettings();
   const F = await facts({ env, now });
   const cap = F.capaciteit;
-  let cands = await candidates(env);
+  let cands = await candidates(env, now);
   // Capaciteit vol: geen nieuwe acquisitie of marketing; eerst lopend werk afronden.
   if (cap.free <= 0) cands = cands.map(c => ["acquisitie", "marketing", "scout"].includes(c.department) ? { ...c, score: c.score - 50, reason: `${c.reason} (capaciteit vol: ${cap.active}/${cap.max} projecten)` } : c);
   // Bewezen aanpak krijgt voorrang bij gelijke stand (bonus uit de scorekaart).

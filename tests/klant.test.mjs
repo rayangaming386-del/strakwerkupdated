@@ -188,6 +188,8 @@ test("scenario B: concreet mobiel probleem, toegestane route, testmail, reactie 
   assert.equal((await one("select status from hq.outreach where id=$1", [fu.id])).status, "geannuleerd", "geplande opvolging gestopt");
   const l2 = await one("select * from hq.leads where id=$1", [leadB]);
   assert.equal(l2.priority, "hoog"); assert.ok(l2.awaiting_reply_since, "klant wacht op ons");
+  const draft = await one("select * from hq.outreach where lead_id=$1 and kind='antwoord' and status='concept'", [leadB]);
+  assert.ok(draft, "Sales zet een antwoordconcept klaar"); assert.match(draft.body, /Afspraken plannen \(\+€\d+\)/, "prijs uit de prijslijst");
   // Vlak voor verzenden opnieuw controleren: een opvolging die toch nog gepland stond, gaat niet uit.
   await mods.db.q("insert into hq.outreach (lead_id, channel, kind, sequence, status, body, to_address, scheduled_at, idempotency_key, is_test) values ($1,'email','opvolging',2,'gepland','x','info@barbershop-bravo.nl',now(),'test-late',true)", [leadB]);
   await mods.acq.enqueueDueOutreach(); await drain();

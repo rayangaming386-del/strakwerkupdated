@@ -18,7 +18,8 @@
     "sync-site-data": "node scripts/sync-site-data.mjs",
     "demo:glow": "node scripts/demo-glow.mjs",
     "brand-assets": "node scripts/brand-assets.mjs",
-    "demo:strakwerk": "node scripts/demo-strakwerk.mjs"
+    "demo:strakwerk": "node scripts/demo-strakwerk.mjs",
+    "demo:klanten": "node scripts/demo-klanten.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.9.0",
