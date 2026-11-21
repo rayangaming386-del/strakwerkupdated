@@ -64,7 +64,7 @@ async function fileFor(pathname) {
   for (const c of cands) {
     const f = path.join(root, c);
     if (!f.startsWith(root)) continue;
-    if (/[\\/](node_modules|\.git|db|scripts|tests|tools|docs)[\\/]|[\\/]\.env|[\\/]api[\\/]/.test(f.slice(root.length))) continue;
+    if (/[\\/](node_modules|\.git|db|scripts|tests|tools|docs|brand)[\\/]|[\\/]\.env|[\\/]api[\\/]/.test(f.slice(root.length))) continue;
     try { if ((await stat(f)).isFile()) return f; } catch {}
   }
   return null;

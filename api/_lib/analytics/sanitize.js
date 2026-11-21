@@ -9,7 +9,7 @@ export const EVENT_NAMES = [
 // uit het CRM (handmatig of een geautoriseerde integratie).
 
 const PACKAGES = ["nieuw", "premium", "pro", "redesign"];
-const PROJECTS = ["vagpro", "detak", "cartronic"];
+const PROJECTS = ["glow", "vagpro", "detak", "cartronic"];
 const PLEK = /^[a-z0-9-]{1,30}$/;
 
 const PROP_RULES = {

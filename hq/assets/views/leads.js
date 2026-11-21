@@ -30,6 +30,22 @@ function newLead(refresh) {
     } }]);
 }
 
+// Herkomst: aan welke video (campagne) is deze aanvraag te danken? Via campagnelink,
+// WhatsApp-zoekwoord of handmatig. Alleen gekoppelde leads tellen als aanvraag uit content.
+function campaignSection(l, can, reload) {
+  const box = h("section", { class: "stack" }, h("h3", {}, "Campagne (herkomst)"));
+  api("studio/campaigns").then(({ campaigns }) => {
+    const cur = campaigns.find(c => c.id === l.campaign_piece_id);
+    const sel = h("select", { disabled: !can, "aria-label": "Campagne" }, h("option", { value: "" }, "Geen campagne"), campaigns.map(c => h("option", { value: c.id, selected: c.id === l.campaign_piece_id }, `${c.title} (${c.keyword})`)));
+    const via = h("select", { disabled: !can, "aria-label": "Via" }, [["whatsapp_woord", "WhatsApp-zoekwoord"], ["link", "Campagnelink"], ["handmatig", "Handmatig"]].map(([k, v]) => h("option", { value: k, selected: l.campaign_via === k }, v)));
+    box.append(...[h("p", { class: "faint" }, cur ? `Gekoppeld aan ${cur.title} (${l.campaign_via || "handmatig"}).` : "Niet gekoppeld aan een video."),
+      can ? h("div", { class: "row" }, sel, via, h("button", { class: "btn btn-sm", type: "button", onclick: async () => {
+        try { await api(`leads/${l.id}/campaign`, { method: "POST", body: { piece_id: sel.value || null, via: via.value } }); toast("Herkomst opgeslagen.", "ok"); reload(); } catch (e) { toast(e.message, "bad"); }
+      } }, "Opslaan")) : null].filter(Boolean));
+  }).catch(() => box.append(h("p", { class: "faint" }, "Campagnes konden niet worden geladen.")));
+  return box;
+}
+
 export function openLead(id, ctx, refresh) {
   const body = h("div", {}, h("span", { class: "spinner" }), " Laden…");
   const m = modal("Lead", body, []);
@@ -60,6 +76,7 @@ export function openLead(id, ctx, refresh) {
           can ? h("button", { class: "btn btn-sm", type: "button", onclick: () => editLead(l) }, "Bewerken") : null,
           ctx.can("tasks.start") ? h("button", { class: "btn btn-sm btn-gold", type: "button", disabled: !l.website, onclick: () => startChainDialog(ctx, l.id, () => { load(); refresh(); }) }, "Onderzoek starten (Scout → Auditor → Sales)") : null,
           ctx.can("data.delete") ? h("button", { class: "btn btn-sm btn-bad", type: "button", onclick: () => del(l) }, "Verwijderen") : null),
+        campaignSection(l, can, load),
         h("section", { class: "stack" }, h("h3", {}, "Agenttaken en resultaten"),
           d.tasks.length ? h("div", { class: "tbl-wrap" }, h("table", {}, h("tbody", {}, d.tasks.map(t => h("tr", { class: "click", tabindex: "0", onclick: () => openTask(t.id, ctx, load) },
             h("td", {}, t.title), h("td", {}, badge(TASK, t.status)), h("td", { class: "num faint" }, fmt.dt(t.created_at))))))) : h("p", { class: "faint" }, "Nog geen taken.")),

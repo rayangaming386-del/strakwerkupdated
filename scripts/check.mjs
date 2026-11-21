@@ -64,6 +64,13 @@ for (const f of all.filter(f => /[\\/](hq|assets)[\\/].*\.(js|html|css)$/.test(f
 }
 console.log("✓ geen serverconfiguratie in browsercode");
 
+// site-data.json (prijzen, actie en projecten voor HQ) moet gelijk zijn aan de bronnen van de site.
+try {
+  const { build, serialize, OUT } = await import("./sync-site-data.mjs");
+  if (readFileSync(OUT, "utf8") !== serialize(build())) fail("api/_lib/content/site-data.json is verouderd: draai npm run sync-site-data");
+  else console.log("✓ site-data.json gelijk aan index.html en projects.json");
+} catch (e) { fail(`site-data: ${e.message}`); }
+
 if (errors) { console.error(`\n${errors} probleem/problemen gevonden.`); process.exit(1); }
 console.log("\nAlles in orde.");
 process.exit(0);

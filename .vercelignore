@@ -3,6 +3,9 @@ docs
 tools
 assets/work/LEESMIJ.txt
 db
+brand
 scripts
 tests
 .env*
+.data
+.github

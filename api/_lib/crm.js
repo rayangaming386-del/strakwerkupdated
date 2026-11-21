@@ -1,5 +1,6 @@
 import { q, one, tx, audit } from "./db.js";
 import { HttpError, str, assertUuid } from "./http.js";
+import { projectFromQuote } from "./content/studio.js";
 
 export const LEAD_STATUS = ["nieuw", "onderzocht", "goedgekeurd", "benaderd", "gesprek", "offerte", "gewonnen", "verloren"];
 export const LEAD_STATUS_LABEL = { nieuw: "Nieuw", onderzocht: "Onderzocht", goedgekeurd: "Goedgekeurd voor benadering", benaderd: "Benaderd", gesprek: "Gesprek", offerte: "Offerte", gewonnen: "Gewonnen", verloren: "Verloren" };
@@ -160,6 +161,8 @@ export async function setQuoteStatus(quoteId, status, auth) {
     if (status === "geaccepteerd") {
       const l = (await db.query("update hq.leads set status='gewonnen', updated_at=now() where id=$1 and status<>'gewonnen' returning id", [qu.lead_id])).rows[0];
       if (l) await db.query("insert into hq.lead_history (lead_id, actor, actor_label, to_status, note) values ($1,$2,$3,'gewonnen','Offerte geaccepteerd')", [qu.lead_id, auth.userId, auth.email]);
+      // Akkoord: het klantproject start (intake → websitecontrole → oplevering → content → nazorg).
+      await projectFromQuote(db, qu.lead_id, auth);
     }
     await audit(db, { actor: auth.userId, label: auth.email, action: `offerte.${status}`, entity: "quote", entityId: quoteId });
     return { ok: true };
