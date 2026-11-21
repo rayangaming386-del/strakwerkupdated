@@ -69,12 +69,20 @@
       "destination": "/api/auth?p=:path*"
     },
     {
+      "source": "/api/public/:path*",
+      "destination": "/api/public?p=:path*"
+    },
+    {
       "source": "/hq",
       "destination": "/hq/index.html"
     },
     {
       "source": "/hq/:path((?!assets/).*)",
       "destination": "/hq/index.html"
+    },
+    {
+      "source": "/intake",
+      "destination": "/intake.html"
     }
   ],
   "headers": [
@@ -171,6 +179,35 @@
         {
           "key": "X-Robots-Tag",
           "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
+      "source": "/intake",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
         }
       ]
     }

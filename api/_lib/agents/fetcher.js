@@ -30,6 +30,7 @@ export function __setTestNetwork(v) {
 
 function safeLookup(hostname, opts, cb) {
   if (testNet?.hosts?.[hostname]) { const a = testNet.hosts[hostname]; return opts && opts.all ? cb(null, [{ address: a, family: 4 }]) : cb(null, a, 4); }
+  if (testNet?.strict) return cb(Object.assign(new Error(`getaddrinfo ENOTFOUND ${hostname}`), { code: "ENOTFOUND" }));
   dns.lookup(hostname, { all: true }, (err, addrs) => {
     if (err) return cb(err);
     const ok = addrs.filter(a => !isPrivateIp(a.address));
@@ -57,13 +58,13 @@ export function normalizeUrl(input) {
   return u;
 }
 
-function once(u, { timeoutMs, maxBytes, method = "GET" }) {
+function once(u, { timeoutMs, maxBytes, method = "GET", userAgent = null }) {
   return new Promise((resolve, reject) => {
     const lib = u.protocol === "https:" ? https : http;
     const started = Date.now();
     const req = lib.request(u, {
       method, lookup: safeLookup, timeout: timeoutMs,
-      headers: { "user-agent": USER_AGENT, accept: "text/html,application/xhtml+xml,text/plain;q=0.8,*/*;q=0.5", "accept-language": "nl,en;q=0.5" },
+      headers: { "user-agent": userAgent || USER_AGENT, accept: "text/html,application/xhtml+xml,text/plain;q=0.8,*/*;q=0.5", "accept-language": "nl,en;q=0.5" },
     }, (res) => {
       const ttfb = Date.now() - started;
       const chunks = []; let size = 0;
@@ -81,11 +82,11 @@ function once(u, { timeoutMs, maxBytes, method = "GET" }) {
   });
 }
 
-export async function fetchPublic(input, { timeoutMs = 10_000, maxBytes = 1_500_000, maxRedirects = 3 } = {}) {
+export async function fetchPublic(input, { timeoutMs = 10_000, maxBytes = 1_500_000, maxRedirects = 3, userAgent = null } = {}) {
   let u = normalizeUrl(input);
   const chain = [];
   for (let i = 0; i <= maxRedirects; i++) {
-    const r = await once(u, { timeoutMs, maxBytes });
+    const r = await once(u, { timeoutMs, maxBytes, userAgent });
     chain.push({ url: u.toString(), status: r.status });
     if (r.status >= 300 && r.status < 400 && r.headers.location) {
       u = normalizeUrl(new URL(r.headers.location, u).toString());

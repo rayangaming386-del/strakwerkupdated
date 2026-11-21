@@ -7,18 +7,24 @@ import * as auditor from "./auditor.js";
 import * as sales from "./sales.js";
 import * as content from "./content.js";
 import * as publisher from "./publisher.js";
+import * as acquisitie from "../klant/acquisition.js";
+import { runDiscover, runSalesCheck } from "../klant/agents.js";
 import { missingIg } from "../content/instagram.js";
 
 // "video" heeft hier bewust geen uitvoerder: renders draaien in de render-worker
 // (scripts/render-worker.mjs) met ffmpeg en Chromium, niet in een Vercel-functie.
-export const EXECUTORS = { scout, auditor, sales, content, publisher };
+// Scout en Auditor kiezen per taaksoort: ontdekken (OpenStreetMap) en verkoopkans (mobiele klantroute).
+const scoutX = { run: (a) => (a.task.kind === "ontdekken" ? runDiscover(a) : scout.run(a)) };
+const auditorX = { run: (a) => (a.task.kind === "verkoopkans" ? runSalesCheck(a) : auditor.run(a)) };
+export const EXECUTORS = { scout: scoutX, auditor: auditorX, sales, content, publisher, acquisitie };
 
 export const TOOLS = {
-  scout:   ["web.get (alleen publieke homepage + robots.txt)", "crm.lezen (lead)"],
+  scout:   ["OpenStreetMap (Overpass API, open data)", "web.get (alleen publieke homepage + robots.txt)", "crm.lezen (lead)"],
   auditor: ["web.get (publieke pagina's, geen scans)", "pagespeed.api (Google, optioneel)", "taalmodel (optioneel, zonder tools)"],
   sales:   ["taalmodel (optioneel, zonder tools)", "crm.lezen (goedgekeurd onderzoek)"],
   content: ["projectgegevens + vrijgegeven beelden (lezen)", "pakketprijzen (hq.packages) en actie uit CONFIG", "taalmodel (optioneel, zonder tools)"],
   video:   ["Chromium (scènes tekenen)", "ffmpeg (montage)", "opslag (Supabase Storage of lokaal)"],
+  acquisitie: ["contactregels (toestemming, afmeldingen, frequentie)", "e-mail via SMTP vanaf het StrakWerk-adres (alleen als jij de route activeert)"],
   publisher: ["Instagram API (officieel, professioneel account)", "opslag (tijdelijke link voor Instagram)"],
 };
 
@@ -29,7 +35,7 @@ export function connection(key) {
     case "scout":
       return { connected: true, partial: !llm, missing: llm ? [] : ["ANTHROPIC_API_KEY"],
         note: llm ? "Controleert ingevoerde leads via hun eigen website en beoordeelt relevantie met Claude."
-                  : "Controleert ingevoerde leads via hun eigen website. Zonder ANTHROPIC_API_KEY geen inhoudelijke relevantiebeoordeling. Zelf bedrijven zoeken is niet gekoppeld (geen zoekbron)." };
+                  : "Controleert ingevoerde leads via hun eigen website. Zonder ANTHROPIC_API_KEY geen inhoudelijke relevantiebeoordeling. Bedrijven zoeken gaat via OpenStreetMap (gratis, open data)." };
     case "auditor":
       return { connected: true, partial: !llm, missing: llm ? [] : ["ANTHROPIC_API_KEY"],
         note: llm ? "Meet de website en laat Claude de metingen interpreteren (gescheiden van de feiten)."
@@ -50,6 +56,13 @@ export function connection(key) {
       return { connected: true, partial: m.length > 0, missing: m,
         note: m.length ? "Instagram-koppeling niet ingesteld: publicaties worden als export (MP4, cover, caption) klaargezet. TikTok: altijd export." : "Plaatst op Instagram via de officiële API; TikTok via export." };
     }
+    case "acquisitie": {
+      const smtp = Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+      return { connected: true, partial: !smtp, missing: smtp ? [] : ["SMTP_HOST", "SMTP_USER", "SMTP_PASS"],
+        note: smtp ? "Verstuurt alleen toegestane berichten via SMTP als jij de e-mailroute live zet; anders proefstand." : "Zonder SMTP: berichten klaarzetten met kopieerknop (proefstand). Contactregels gelden altijd." };
+    }
+    case "teamleider": case "groei":
+      return { connected: true, partial: !llm, missing: [], note: "Ochtendoverleg en acties uit gewone code; hooguit één AI-samenvatting met bevestigd tegoed." };
     default:
       return { connected: false, missing: [], note: "Uitvoering nog niet aangesloten. Deze rol is ingericht, maar draait nog niet." };
   }

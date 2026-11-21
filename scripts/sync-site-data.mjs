@@ -49,7 +49,9 @@ export function build() {
     brand: { name: "StrakWerk", site: "strakwerkk.nl", url: "https://www.strakwerkk.nl", email, phone, whatsapp: wa, place: "Zoetermeer" },
     // Eigen beeldmateriaal (scripts/brand-assets.mjs): schermopname en schermafbeeldingen van de echte site.
     brand_assets: brandAssets,
-    bases: Object.fromEntries(Object.entries(cfg.bases).map(([k, b]) => [k, { name: b.name, price_eur: b.price, pitch: b.pitch || "" }])),
+    bases: Object.fromEntries(Object.entries(cfg.bases).map(([k, b]) => [k, { name: b.name, price_eur: b.price, pitch: b.pitch || "", incl: b.incl || {} }])),
+    // Opties uit de configurator (prijs eenmalig tenzij "per" is ingevuld), voor offertes in HQ.
+    options: (cfg.groups || []).flatMap(g => g.items.map(i => ({ id: i.id, group: g.title, name: i.name, price_eur: i.price, qty: Boolean(i.qty), per: i.monthly ? "maand" : null, unit: i.unit || null, desc: i.desc || "" }))),
     promo: cfg.promo ? { until: cfg.promo.until, label: cfg.promo.label || "", free: Object.keys(cfg.promo.free || {}) } : null,
     projects: projects.map(p => {
       const shots = (p.shots || []).map(([file, label, alt]) => ({ path: `/assets/work/${file}.webp`, label, alt, kind: "desktop" }));
@@ -70,7 +72,7 @@ export function build() {
 
 export const serialize = (d) => JSON.stringify(d, null, 2) + "\n";
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   writeFileSync(OUT, serialize(build()));
   console.log(`✓ ${path.relative(root, OUT)} bijgewerkt`);
 }

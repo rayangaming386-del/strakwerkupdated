@@ -48,24 +48,312 @@
     "nieuw": {
       "name": "Starter",
       "price_eur": 200,
-      "pitch": "Complete website tot 3 pagina's"
+      "pitch": "Complete website tot 3 pagina's",
+      "incl": {}
     },
     "premium": {
       "name": "Premium",
       "price_eur": 350,
-      "pitch": "Zelf aanpassen, aanvragen via WhatsApp en vindbaar in Google"
+      "pitch": "Zelf aanpassen, aanvragen via WhatsApp en vindbaar in Google",
+      "incl": {
+        "beheer": 1,
+        "aanvraag": 1,
+        "reviews": 1,
+        "gbp": 1,
+        "pagina": 2,
+        "teksten": 1,
+        "avg": 1,
+        "anim": 1
+      }
     },
     "pro": {
       "name": "Pro",
       "price_eur": 500,
-      "pitch": "Geavanceerd beheer, extra taal, blog, logo en regiopagina's"
+      "pitch": "Geavanceerd beheer, extra taal, blog, logo en regiopagina's",
+      "incl": {
+        "beheerpro": 1,
+        "aanvraag": 1,
+        "reviews": 1,
+        "gbp": 1,
+        "pagina": 4,
+        "teksten": 1,
+        "avg": 1,
+        "anim": 1,
+        "taal": 1,
+        "blog": 1,
+        "logo": 1,
+        "regio": 1
+      }
     },
     "redesign": {
       "name": "Redesign",
       "price_eur": 175,
-      "pitch": "Je bestaande site strak vernieuwd"
+      "pitch": "Je bestaande site strak vernieuwd",
+      "incl": {}
     }
   },
+  "options": [
+    {
+      "id": "beheer",
+      "group": "Functies",
+      "name": "Beheerpaneel basis",
+      "price_eur": 50,
+      "qty": false,
+      "per": null,
+      "unit": null,
+      "desc": "Zelf teksten, foto's en bedrijfsgegevens aanpassen, zonder code."
+    },
+    {
+      "id": "beheerpro",
+      "group": "Functies",
+      "name": "Beheerpaneel geavanceerd",
+      "price_eur": 75,
+      "qty": false,
+      "per": null,
+      "unit": null,
+      "desc": "Letterlijk alles zelf aanpassen: producten, merken, diensten, SEO en webshop."
+    },
+    {
+      "id": "kenteken",
+      "group": "Functies",
+      "name": "Kentekencheck (RDW)",
+      "price_eur": 25,
+      "qty": false,
+      "per": null,
+      "unit": null,
+      "desc": "Klant typt een kenteken, merk en model verschijnen direct."
+    },
+    {
+      "id": "kentekenfoto",
+      "group": "Functies",
+      "name": "Kentekenherkenning met camera",
+      "price_eur": 35,
+      "qty": false,
+      "per": null,
+      "unit": null,
+      "desc": "Klant maakt een foto van de kentekenplaat, de site leest het kenteken zelf uit."
+    },
+    {
+      "id": "aanvraag",
+      "group": "Functies",
+      "name": "Aanvraag via WhatsApp",
+      "price_eur": 15,
+      "qty": false,
+      "per": null,
+      "unit": null,
+      "desc": "Formulier dat aanvragen kant-en-klaar naar je WhatsApp stuurt."
+    },
+    {
+      "id": "locatie",
+      "group": "Functies",
+      "name": "Locatie delen",
+      "price_eur": 10,
+      "qty": false,
+      "per": null,
+      "unit": null,
+      "desc": "Met één tik deelt de klant zijn locatie in de aanvraag."
+    },
+    {
+      "id": "booking",
+      "group": "Functies",
+      "name": "Afspraken plannen",
+      "price_eur": 35,
+      "qty": false,
+      "per": null,
+      "unit": null,
+      "desc": "Klanten kiezen zelf een datum en tijd."
+    },
+    {
+      "id": "calculator",
+      "group": "Functies",
+      "name": "Prijscalculator",
+      "price_eur": 35,
+      "qty": false,
+      "per": null,
+      "unit": null,
+      "desc": "Klanten stellen zelf hun prijs samen, zoals op deze site."
+    },
+    {
+      "id": "chat",
+      "group": "Functies",
+      "name": "Chatassistent",
+      "price_eur": 45,
+      "qty": false,
+      "per": null,
+      "unit": null,
+      "desc": "Beantwoordt dag en nacht de meest gestelde vragen en stuurt door naar WhatsApp."
+    },
+    {
+      "id": "webshop",
+      "group": "Functies",
+      "name": "Webshop",
+      "price_eur": 95,
+      "qty": false,
+      "per": null,
+      "unit": null,
+      "desc": "Producten, winkelwagen en online betalen met iDEAL."
+    },
+    {
+      "id": "pagina",
+      "group": "Uitbreiden",
+      "name": "Extra pagina",
+      "price_eur": 15,
+      "qty": true,
+      "per": null,
+      "unit": "pagina",
+      "desc": "Bijvoorbeeld een pagina per dienst."
+    },
+    {
+      "id": "taal",
+      "group": "Uitbreiden",
+      "name": "Extra taal",
+      "price_eur": 25,
+      "qty": true,
+      "per": null,
+      "unit": "taal",
+      "desc": "Je site ook in het Engels, Duits of een andere taal."
+    },
+    {
+      "id": "regio",
+      "group": "Uitbreiden",
+      "name": "Regiopagina's",
+      "price_eur": 25,
+      "qty": false,
+      "per": null,
+      "unit": null,
+      "desc": "Beter gevonden in Google in de plaatsen om je heen."
+    },
+    {
+      "id": "reviews",
+      "group": "Uitbreiden",
+      "name": "Google reviews & kaart",
+      "price_eur": 10,
+      "qty": false,
+      "per": null,
+      "unit": null,
+      "desc": "Je beste reviews en een routekaart op je site."
+    },
+    {
+      "id": "blog",
+      "group": "Uitbreiden",
+      "name": "Blog of kennisbank",
+      "price_eur": 25,
+      "qty": false,
+      "per": null,
+      "unit": null,
+      "desc": "Artikelen en antwoorden op vragen, goed voor Google."
+    },
+    {
+      "id": "portfolio",
+      "group": "Uitbreiden",
+      "name": "Portfolio & video's",
+      "price_eur": 15,
+      "qty": false,
+      "per": null,
+      "unit": null,
+      "desc": "Laat je werk zien met projecten, foto's en video's."
+    },
+    {
+      "id": "vacatures",
+      "group": "Uitbreiden",
+      "name": "Vacaturepagina",
+      "price_eur": 10,
+      "qty": false,
+      "per": null,
+      "unit": null,
+      "desc": "Vacatures plaatsen en sollicitaties via WhatsApp of mail."
+    },
+    {
+      "id": "nieuwsbrief",
+      "group": "Uitbreiden",
+      "name": "Nieuwsbrief-aanmelding",
+      "price_eur": 10,
+      "qty": false,
+      "per": null,
+      "unit": null,
+      "desc": "Bezoekers schrijven zich in voor je nieuwsbrief."
+    },
+    {
+      "id": "anim",
+      "group": "Extra",
+      "name": "Premium animaties",
+      "price_eur": 25,
+      "qty": false,
+      "per": null,
+      "unit": null,
+      "desc": "Vloeiende scroll-animaties, zoals op deze site."
+    },
+    {
+      "id": "logo",
+      "group": "Extra",
+      "name": "Logo-ontwerp",
+      "price_eur": 25,
+      "qty": false,
+      "per": null,
+      "unit": null,
+      "desc": "Een strak logo in een paar varianten."
+    },
+    {
+      "id": "teksten",
+      "group": "Extra",
+      "name": "Teksten laten schrijven",
+      "price_eur": 20,
+      "qty": false,
+      "per": null,
+      "unit": null,
+      "desc": "Ik schrijf de teksten voor je, gericht op Google."
+    },
+    {
+      "id": "gbp",
+      "group": "Extra",
+      "name": "Google Bedrijfsprofiel",
+      "price_eur": 20,
+      "qty": false,
+      "per": null,
+      "unit": null,
+      "desc": "Ik zet je profiel op of maak het compleet, met foto's en openingstijden."
+    },
+    {
+      "id": "avg",
+      "group": "Extra",
+      "name": "Cookiebanner & privacy",
+      "price_eur": 10,
+      "qty": false,
+      "per": null,
+      "unit": null,
+      "desc": "Cookiemelding en privacyverklaring volgens de AVG."
+    },
+    {
+      "id": "spoed",
+      "group": "Extra",
+      "name": "Spoedlevering",
+      "price_eur": 65,
+      "qty": false,
+      "per": null,
+      "unit": null,
+      "desc": "Je basissite binnen 3 werkdagen online."
+    },
+    {
+      "id": "onderhoud",
+      "group": "Extra",
+      "name": "Hosting & onderhoud",
+      "price_eur": 15,
+      "qty": false,
+      "per": "maand",
+      "unit": null,
+      "desc": "Updates, back-ups en kleine aanpassingen."
+    },
+    {
+      "id": "onderhoudplus",
+      "group": "Extra",
+      "name": "Onderhoud Plus",
+      "price_eur": 29,
+      "qty": false,
+      "per": "maand",
+      "unit": null,
+      "desc": "Hosting, updates en elke maand een uur aanpassingen."
+    }
+  ],
   "promo": {
     "until": "2026-12-01T00:00:00+01:00",
     "label": "Actie t/m 30 november",
