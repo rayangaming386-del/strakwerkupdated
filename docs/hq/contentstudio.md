@@ -178,3 +178,38 @@ Het externe post-ID en de permalink worden opgeslagen. Getest met een Instagram 
 - Echte login en MFA via Supabase worden in de tests niet getest (zoals bij HQ zelf).
 - Muziek zit er bewust niet in (licenties). Er is een stil audiospoor; voeg in de app eventueel een geluid uit hun eigen bibliotheek toe.
 - Alleen portfolio-screenshots uit de repository zijn als beeld te gebruiken. Uploaden van nieuwe beelden staat in de backlog.
+
+## Zelfstandig kantoor (november 2026)
+
+StrakWerk is altijd de afzender. Een opgeleverd klantproject is optioneel portfoliomateriaal.
+
+**Hoe het werkt**
+- **Instellen, één keer:** in Contentstudio › Kantoor kies je doelgroep, doelen, kanalen, publicatiedagen en weeklimiet. De startinstelling is 3 video's per week (ma/wo/vr, 18:30).
+- **Per kanaal kies je:**
+  - *eerst beoordelen* of *automatisch publiceren*;
+  - één publicatieroute: export, Buffer Free of Instagram API.
+- **Onderwerpen voor StrakWerk zelf** (`BRAND_TOPICS`):
+  - Wat kost een website laten maken?
+  - Je websiteprijs in één minuut
+  - Welk websitepakket past bij jou?
+
+  Elk onderwerp heeft drie hoeken. Het materiaal is eigen: de schermopname van de echte configurator en schermafbeeldingen van pakketten en offerte (`brand/`, opnieuw opnemen met `npm run brand-assets`). De prijzen komen uit `CONFIG.bases`.
+- **Taakverdeling:** AI schrijft alleen de teksten (onderwerpen, scripts, captions), binnen het centrale AI-budget. Gewone code doet:
+  - planning;
+  - montage (FFmpeg);
+  - ondertitels (SRT uit het script);
+  - opslag;
+  - publicatie;
+  - rapportage.
+
+  Zonder bevestigd tegoed gebruikt HQ vaste voorbeeldteksten.
+- **Tijd wijzigen:** een andere publicatietijd geeft geen nieuwe AI-aanroep en geen nieuwe render.
+
+**Proef en bewijs**
+- **Live publiceren staat standaard uit** (proefstand). HQ zet alles klaar ("Proef: klaar, niet live") en plaatst niets.
+- **Bewijs:** `docs/hq/demo/`:
+  - `strakwerk-wat-kost-een-website.mp4`, met cover, SRT en JSON;
+  - `strakwerk-publicatiepreview.png`.
+
+  Reproduceren met `npm run demo:strakwerk`.
+- **Meer informatie:** kosten, gratis limieten en wat HQ doet bij een limiet staan in `docs/hq/kosten-en-limieten.md`.

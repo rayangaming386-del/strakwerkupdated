@@ -114,14 +114,28 @@ Zie `docs/hq/contentstudio.md` voor de werking. Instellingen:
    `HQ_DATABASE_URL`, `HQ_SUPABASE_URL`, `HQ_SUPABASE_SECRET_KEY`. Optioneel in Vercel `GITHUB_RENDER_TOKEN`
    (fijnmazig token, alleen "Actions: read and write" op deze repository) en `GITHUB_RENDER_REPO`
    (`eigenaar/naam`) om direct te starten. Alternatief: `npm run render-worker -- --watch` op je eigen computer.
-3. **Op tijd publiceren**: laat `/api/worker` elke 5 minuten aanroepen met `Authorization: Bearer <CRON_SECRET>`
-   (Vercel Pro-cron of bijv. cron-job.org).
+3. **Elke 5 minuten de planner (gratis, via Supabase zelf)**: in Supabase › Database › Extensions `pg_cron` en `pg_net`
+   aanzetten, je `CRON_SECRET` in Supabase › Vault opslaan als `hq_cron_secret`, en in de SQL-editor:
+   ```sql
+   select cron.schedule('hq-worker', '*/5 * * * *', $$
+     select net.http_post(url := 'https://www.strakwerkk.nl/api/worker',
+       headers := jsonb_build_object('Authorization', 'Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name = 'hq_cron_secret')),
+       timeout_milliseconds := 55000) $$);
+   ```
+   Dit houdt ook het gratis Supabase-project actief (geen pauze na 7 dagen). Alternatief: cron-job.org (gratis).
+   Het kantoor, AI-hervatten, renderstart en publiceren draaien daarna zonder je laptop.
 4. **Instagram** (professioneel account): maak op developers.facebook.com een app met het product
    "Instagram API with Instagram Login", voeg redirect-URL `https://www.strakwerkk.nl/api/hq/integrations/instagram/callback`
    toe, en zet in Vercel `IG_APP_ID`, `IG_APP_SECRET` en `HQ_ENCRYPTION_KEY` (`openssl rand -hex 32`). Koppel daarna in
    HQ › Contentstudio › Automatisering › "Instagram koppelen". Zolang de app in ontwikkelmodus staat, moet je Instagram-account
    als tester aan de app zijn toegevoegd.
-5. **TikTok**: export; een publicatiedienst pas na jouw akkoord (opties en prijzen in contentstudio.md).
+5. **Buffer Free (TikTok en Instagram)**: verbind beide accounts in Buffer, maak een API-sleutel (Buffer › Settings › API)
+   en zet die als `BUFFER_API_KEY` in Vercel. In HQ › Contentstudio › Kantoor: "Kanalen ophalen uit Buffer", per kanaal
+   route "Buffer" kiezen. Gratis plan: 10 geplande posts per kanaal; HQ houdt daar rekening mee.
+6. **AI (Claude Max API-tegoed)**: koppel in claude.ai je Console-organisatie aan het API-tegoed, maak daar een API-sleutel
+   (`ANTHROPIC_API_KEY` in Vercel). Vul in HQ › Contentstudio › Kantoor › AI-budget de periode, het toegekende tegoed en je
+   HQ-limiet in, vink "tegoed gezien" aan en zet AI aan. Zonder deze stappen werkt alles met vaste voorbeeldteksten.
+7. **Live publiceren** pas aanzetten als 5 (of de Instagram-koppeling) werkt. Zie ook `docs/hq/kosten-en-limieten.md`.
 
 ## Lokaal ontwikkelen en testen
 

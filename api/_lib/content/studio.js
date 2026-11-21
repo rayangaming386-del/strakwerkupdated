@@ -6,15 +6,16 @@ import { createHash, randomUUID } from "node:crypto";
 import { q, one, tx, audit } from "../db.js";
 import { HttpError, assertUuid, str } from "../http.js";
 import { enqueue, event } from "../queue.js";
-import { AUDIENCES, GOALS, contentGuard } from "./planner.js";
+import { AUDIENCES, GOALS, BRAND_TOPICS, contentGuard } from "./planner.js";
 import { instagramState } from "./instagram.js";
+import { routeFor, getPlan } from "./plan.js";
 
 export const SITE = JSON.parse(readFileSync(new URL("./site-data.json", import.meta.url), "utf8"));
 
 export const PROJECT_STATUS = ["akkoord", "intake", "in_aanbouw", "websitecontrole", "opgeleverd", "nazorg", "gestopt"];
 export const PROJECT_STATUS_LABEL = { akkoord: "Akkoord", intake: "Intake", in_aanbouw: "In aanbouw", websitecontrole: "Websitecontrole", opgeleverd: "Opgeleverd", nazorg: "Nazorg", gestopt: "Gestopt" };
 export const CHANNELS = { instagram: "Instagram", tiktok: "TikTok" };
-export const PUB_LABEL = { ingepland: "Ingepland", bezig: "Wordt geplaatst", gepubliceerd: "Gepubliceerd", mislukt: "Mislukt", onzeker: "Onzeker: wordt gecontroleerd", export_klaar: "Klaar om zelf te plaatsen", handmatig_geplaatst: "Zelf geplaatst", geannuleerd: "Geannuleerd" };
+export const PUB_LABEL = { ingepland: "Ingepland", bezig: "Wordt geplaatst", bij_dienst: "Ligt bij Buffer", wachtrij_vol: "Wachtrij vol: HQ probeert later", gepubliceerd: "Gepubliceerd", mislukt: "Mislukt", onzeker: "Onzeker: wordt gecontroleerd", export_klaar: "Klaar om zelf te plaatsen", handmatig_geplaatst: "Zelf geplaatst", geannuleerd: "Geannuleerd", concept_klaar: "Proef: klaar, niet live" };
 export const COLUMNS = { actie_nodig: "Actie nodig", concept: "Concept", render_bezig: "Render bezig", klaar_voor_review: "Klaar voor review", ingepland: "Ingepland", gepubliceerd: "Gepubliceerd" };
 
 // Wat ik bij het controleren van de bestaande portfoliobeelden zag. Feiten over het beeld,
@@ -60,15 +61,42 @@ export async function ensurePortfolio() {
       }
     }
   });
+  // Eigen materiaal van StrakWerk (geen klantproject): van Rayan zelf, dus vrij voor social media.
+  await tx(async (db) => {
+    for (const a of SITE.brand_assets || []) {
+      await db.query(`insert into hq.project_assets (project_id, path, kind, label, alt, width, height, duration_s, social_ok, released_at, notes)
+        values (null,$1,$2,$3,$4,$5,$6,$7,true,now(),$8) on conflict (path) where project_id is null do update set width=excluded.width, height=excluded.height, duration_s=excluded.duration_s, label=excluded.label`,
+        [a.path, a.kind, a.label, a.alt || "", a.width || null, a.height || null, a.duration_s || null, "Eigen schermopname/schermafbeelding van strakwerkk.nl (opgenomen met een datum na de actie)."]);
+    }
+  });
   seeded = true;
 }
+
+/** Afzender van alle campagnes: StrakWerk. Vaste gegevens uit de site, accounts uit HQ. */
+export async function getBrand(db) {
+  const r = (await (db || { query: q }).query("select value from hq.settings where key='brand'")).rows[0]?.value || {};
+  return { ...SITE.brand, socials: { instagram: "", tiktok: "", ...(r.socials || {}) }, buffer_channels: { instagram: "", tiktok: "", ...(r.buffer_channels || {}) } };
+}
+export async function putBrand(body, auth) {
+  const clean = (v) => String(v || "").trim().replace(/^@/, "").slice(0, 60);
+  const cur = await getBrand();
+  const next = { socials: { instagram: clean(body.socials?.instagram ?? cur.socials.instagram), tiktok: clean(body.socials?.tiktok ?? cur.socials.tiktok) },
+    buffer_channels: { instagram: clean(body.buffer_channels?.instagram ?? cur.buffer_channels.instagram), tiktok: clean(body.buffer_channels?.tiktok ?? cur.buffer_channels.tiktok) } };
+  for (const v of [...Object.values(next.socials), ...Object.values(next.buffer_channels)]) if (v && !/^[A-Za-z0-9._-]+$/.test(v)) throw new HttpError(400, "ongeldig", "Gebruik alleen letters, cijfers, punt, streepje of underscore.");
+  await q("insert into hq.settings (key, value, updated_by, updated_at) values ('brand',$1,$2,now()) on conflict (key) do update set value=excluded.value, updated_by=excluded.updated_by, updated_at=now()", [next, auth.userId]);
+  await audit(null, { actor: auth.userId, label: auth.email, action: "merk.accounts", details: next.socials });
+  return getBrand();
+}
+export const brandMoments = (path) => (SITE.brand_assets || []).find(a => a.path === path)?.moments || null;
 
 // ── Prijzen: uit hq.packages (gelijk aan CONFIG.bases, gecontroleerd in tests) ──
 export async function prices(db) {
   const r = (await (db || { query: q }).query("select key, price_cents from hq.packages where active order by sort")).rows;
   const nieuw = r.find(x => x.key === "nieuw") || r.filter(x => x.key !== "redesign").sort((a, b) => a.price_cents - b.price_cents)[0];
   const from = nieuw ? Math.round(nieuw.price_cents / 100) : SITE.bases.nieuw.price_eur;
-  return { from_eur: from, site_from_eur: SITE.bases.nieuw.price_eur, mismatch: from !== SITE.bases.nieuw.price_eur };
+  // Afwijking tussen HQ (hq.packages) en de website (CONFIG.bases) = actie nodig, nooit stil kiezen.
+  const mismatch = Object.entries(SITE.bases).filter(([k, b]) => { const x = r.find(y => y.key === k); return x && Math.round(x.price_cents / 100) !== b.price_eur; }).map(([k]) => k);
+  return { from_eur: from, site_from_eur: SITE.bases.nieuw.price_eur, all: [...new Set([...r.map(x => Math.round(x.price_cents / 100)), ...Object.values(SITE.bases).map(b => b.price_eur)])], mismatch };
 }
 
 export async function contentSettings(db) {
@@ -211,31 +239,41 @@ export async function patchAsset(id, body, auth) {
 }
 
 // ── Contentopdrachten ─────────────────────────────────────────────────────
-async function createPieceTx(db, { project, audience, goal, assetIds, origin, originKey = null, automationId = null, format = "project_reel", planAfter = null }, actor) {
+export async function createPieceTx(db, { project = null, topic = null, audience, goal, assetIds, origin, originKey = null, automationId = null, format = null, planAfter = null, slotAt = null }, actor) {
   if (!AUDIENCES[audience]) throw new HttpError(400, "ongeldig", "Onbekende doelgroep.");
   if (!GOALS[goal]) throw new HttpError(400, "ongeldig", "Onbekend doel.");
-  // Per project één aanmaak tegelijk: gelijktijdige triggers wachten op elkaar.
-  await db.query("select 1 from hq.projects where id=$1 for update", [project.id]);
+  if (!project && !BRAND_TOPICS[topic]) throw new HttpError(400, "ongeldig", "Kies een onderwerp of een project.");
+  // Eén aanmaak tegelijk per project (of voor StrakWerk zelf): gelijktijdige triggers wachten op elkaar.
+  if (project) await db.query("select 1 from hq.projects where id=$1 for update", [project.id]);
+  else await db.query("select pg_advisory_xact_lock(hashtext('hq_brand_piece'))");
   if (originKey) {
     const ex = (await db.query("select id from hq.content_pieces where origin_key=$1", [originKey])).rows[0];
     if (ex) return { id: ex.id, duplicate: true };
   }
-  const n = (await db.query("select count(*)::int n from hq.content_pieces where project_id=$1", [project.id])).rows[0].n + 1;
-  const code = `${project.slug}-${audience}-${n}`.slice(0, 60);
+  const n = (await db.query(project ? "select count(*)::int n from hq.content_pieces where project_id=$1" : "select count(*)::int n from hq.content_pieces where project_id is null and topic_key=$1", [project ? project.id : topic])).rows[0].n + 1;
+  const code = (project ? `${project.slug}-${audience}-${n}` : `strakwerk-${topic}-${n}`).slice(0, 60);
+  const keyword = project ? AUDIENCES[audience].keyword : BRAND_TOPICS[topic].keyword;
+  const title = project ? `${project.name} voor ${AUDIENCES[audience].label.toLowerCase()}` : `StrakWerk: ${BRAND_TOPICS[topic].title}`;
   const id = randomUUID();
   const ins = await db.query(
-    `insert into hq.content_pieces (id, project_id, format_key, audience, goal, asset_ids, origin, origin_key, campaign_code, keyword, automation_id, title, created_by)
-     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) on conflict (origin_key) do nothing returning id`,
-    [id, project.id, format, audience, goal, assetIds, origin, originKey, code, AUDIENCES[audience].keyword, automationId,
-     `${project.name} voor ${AUDIENCES[audience].label.toLowerCase()}`, actor?.userId || null]);
+    `insert into hq.content_pieces (id, project_id, format_key, audience, goal, asset_ids, origin, origin_key, campaign_code, keyword, automation_id, title, created_by, kind, topic_key, slot_at)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) on conflict (origin_key) do nothing returning id`,
+    [id, project?.id || null, format || (project ? "project_reel" : "merk_reel"), audience, goal, assetIds, origin, originKey, code, keyword, automationId,
+     title, actor?.userId || null, project ? "portfolio" : "merk", project ? null : topic, slotAt]);
   if (!ins.rowCount) return { id: (await db.query("select id from hq.content_pieces where origin_key=$1", [originKey])).rows[0].id, duplicate: true };
-  const t = await enqueue(db, { agent: "content", kind: "content_plan", title: `Contentplan: ${project.name} (${AUDIENCES[audience].label.toLowerCase()})`, input: { piece_id: id }, pieceId: id, leadId: project.lead_id, createdBy: actor?.userId || null, idempotencyKey: `plan:${id}:1`, runAfter: planAfter });
+  const t = await enqueue(db, { agent: "content", kind: "content_plan", title: `Contentplan: ${title}`, input: { piece_id: id }, pieceId: id, leadId: project?.lead_id || null, createdBy: actor?.userId || null, idempotencyKey: `plan:${id}:1`, runAfter: planAfter });
   await db.query("update hq.content_pieces set plan_task_id=$2 where id=$1", [id, t.id]);
   await audit(db, { actor: actor?.userId || null, label: actor?.email || "systeem", action: "content.opdracht", entity: "piece", entityId: id, details: { origin } });
   return { id, duplicate: false, taskId: t.id };
 }
 
 export async function createPiece(body, auth, idem) {
+  // Zonder klantproject: campagne voor StrakWerk zelf met eigen beelden.
+  if (!body.project_id) {
+    await ensurePortfolio();
+    return tx(db => createPieceTx(db, { topic: String(body.topic || "prijs"), audience: String(body.audience || "ondernemers"), goal: String(body.goal || "aanvragen"), assetIds: [], origin: "handmatig",
+      originKey: idem ? `handmatig:${auth.userId}:${idem}` : null }, auth));
+  }
   const projectId = assertUuid(body.project_id, "project");
   return tx(async (db) => {
     const p = (await db.query("select * from hq.projects where id=$1", [projectId])).rows[0];
@@ -249,7 +287,7 @@ export async function createPiece(body, auth, idem) {
 }
 
 export async function pieceRow(db, id) {
-  const p = (await db.query("select c.*, pr.name as project_name, pr.slug as project_slug, pr.lead_id from hq.content_pieces c join hq.projects pr on pr.id=c.project_id where c.id=$1 for update of c", [id])).rows[0];
+  const p = (await db.query("select c.*, coalesce(pr.name, 'StrakWerk') as project_name, coalesce(pr.slug, 'strakwerk') as project_slug, pr.lead_id from hq.content_pieces c left join hq.projects pr on pr.id=c.project_id where c.id=$1 for update of c", [id])).rows[0];
   if (!p) throw new HttpError(404, "niet_gevonden", "Contentstuk niet gevonden.");
   return p;
 }
@@ -309,7 +347,7 @@ function validateSceneEdit(scene, patch, allowedAssets, priceFrom) {
     if (!patch.asset && scene.type !== "hook") throw new HttpError(400, "ongeldig", "Deze scène heeft een beeld nodig.");
     next.asset = patch.asset || undefined;
   }
-  const problems = contentGuard(`${next.kicker || ""} ${next.text} ${next.sub || ""}`, { allowedPrices: [priceFrom] });
+  const problems = contentGuard(`${next.kicker || ""} ${next.text} ${next.sub || ""}`, { allowedPrices: priceFrom });
   if (problems.length) throw new HttpError(422, "afgekeurd", `Niet toegestaan: ${problems.join(", ")}.`);
   return next;
 }
@@ -321,13 +359,13 @@ export async function editScene(id, sceneId, body, auth) {
     if (!p.script) throw new HttpError(409, "geen_script", "Kies eerst een hoek.");
     const idx = p.script.scenes.findIndex(s => s.id === sceneId);
     if (idx < 0) throw new HttpError(404, "niet_gevonden", "Scène niet gevonden.");
-    const assets = (await db.query("select path from hq.project_assets where project_id=$1 and social_ok", [p.project_id])).rows.map(r => r.path);
+    const assets = (await db.query("select path from hq.project_assets where (project_id is not distinct from $1 or project_id is null) and social_ok", [p.project_id])).rows.map(r => r.path);
     const pr = await prices(db);
     let scene;
     if (body.reset) {
       scene = p.script_original?.scenes?.find(s => s.id === sceneId);
       if (!scene) throw new HttpError(404, "niet_gevonden", "Originele scène niet gevonden.");
-    } else scene = validateSceneEdit(p.script.scenes[idx], body, assets, pr.from_eur);
+    } else scene = validateSceneEdit(p.script.scenes[idx], body, assets, pr.all);
     const scenes = p.script.scenes.slice(); scenes[idx] = scene;
     const total = scenes.reduce((s, x) => s + Number(x.seconds), 0) - 0.5 * (scenes.length - 1);
     if (total < 14 || total > 26) throw new HttpError(422, "duur", `De video zou ${total.toFixed(1)} s duren; houd het tussen 15 en 25 s.`);
@@ -350,7 +388,7 @@ export async function editCaption(id, channel, body, auth) {
     else {
       text = str(body.text, channel === "tiktok" ? 2200 : 2200);
       if (!text) throw new HttpError(400, "ongeldig", "Caption mag niet leeg zijn.");
-      const problems = contentGuard(text, { allowedPrices: [(await prices(db)).from_eur] });
+      const problems = contentGuard(text, { allowedPrices: (await prices(db)).all });
       if (problems.length) throw new HttpError(422, "afgekeurd", `Niet toegestaan: ${problems.join(", ")}.`);
       if ((text.match(/#/g) || []).length > 30) throw new HttpError(422, "afgekeurd", "Maximaal 30 hashtags.");
     }
@@ -395,34 +433,49 @@ export async function schedule(id, body, auth) {
   const loc = typeof body.at_local === "string" && body.at_local.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/);
   const at = loc ? amsToUtc(+loc[1], +loc[2], +loc[3], +loc[4], +loc[5]) : body.at ? new Date(body.at) : null;
   if (at && Number.isNaN(at.getTime())) throw new HttpError(400, "ongeldig", "Ongeldig tijdstip.");
-  const ig = channel === "instagram" ? await instagramState() : { connected: false };
-  const method = body.method === "export" || !(channel === "instagram" && ig.connected) ? "export" : "api";
+  // Eén actieve route per kanaal (instelling van het kantoor); zonder koppeling: export.
+  let route = body.method === "export" ? { method: "export", route: "export" } : await routeFor(channel);
+  if (body.method === "api" && channel === "instagram" && route.method !== "api") {
+    const ig = await instagramState();
+    if (ig.connected) route = { method: "api", route: "instagram_api" };
+  }
+  const method = route.method;
+  const plan = await getPlan();
   return tx(async (db) => {
     const p = await pieceRow(db, id);
-    if (p.status !== "goedgekeurd" || !p.approved_render_id) throw new HttpError(409, "niet_goedgekeurd", "Keur eerst de video goed.");
-    const when = at || new Date();
-    if (method === "api") {
+    // Automatisch publiceren (kanaal op "automatisch"): de render die het systeem net maakte.
+    const renderId = !auth && body.system_render_id ? body.system_render_id : p.approved_render_id;
+    if (!renderId || (auth && p.status !== "goedgekeurd")) throw new HttpError(409, "niet_goedgekeurd", "Keur eerst de video goed.");
+    if (!auth && body.system_render_id) {
+      const ok = (await db.query("select 1 from hq.renders where id=$1 and piece_id=$2 and status='klaar' and script_hash=$3", [renderId, id, scriptHash(p.script)])).rows[0];
+      if (!ok) throw new HttpError(409, "verouderd", "Deze render hoort niet (meer) bij het script.");
+    }
+    if (!at && p.slot_at) body.at = p.slot_at;
+    const when = at || (p.slot_at ? new Date(p.slot_at) : new Date());
+    if (method !== "export") {
       if (!at) throw new HttpError(400, "ongeldig", "Kies een tijdstip.");
       if (at < new Date(Date.now() + 2 * 60_000)) throw new HttpError(400, "ongeldig", "Kies een tijdstip minstens 2 minuten in de toekomst.");
     }
     // Beelden die een verlopen actie van de klant tonen, mogen niet meer geplaatst worden.
-    const render = (await db.query("select script from hq.renders where id=$1", [p.approved_render_id])).rows[0];
+    const render = (await db.query("select script from hq.renders where id=$1", [renderId])).rows[0];
     const paths = [...new Set(render.script.scenes.flatMap(s => [s.asset, s.asset2]).filter(Boolean))];
-    const expired = (await db.query("select label, valid_until from hq.project_assets where project_id=$1 and path = any($2::text[]) and (valid_until <= $3 or not social_ok)", [p.project_id, paths, when])).rows;
+    const expired = (await db.query("select label, valid_until from hq.project_assets where (project_id is not distinct from $1 or project_id is null) and path = any($2::text[]) and (valid_until <= $3 or not social_ok)", [p.project_id, paths, when])).rows;
     if (expired.length) throw new HttpError(409, "beeld_verlopen", `Niet meer bruikbaar op dat moment: ${expired.map(e => e.label).join(", ")} (vrijgave ingetrokken of geldig tot ${expired.map(e => e.valid_until ? new Date(e.valid_until).toLocaleDateString("nl-NL") : "nu").join(", ")}). Kies een ander beeld of een eerdere datum.`);
     const caption = await captionFor(db, p.script, channel, when);
     const existing = (await db.query("select id, status from hq.publications where piece_id=$1 and channel=$2 and status<>'geannuleerd'", [id, channel])).rows[0];
     if (existing) throw new HttpError(409, "dubbel", `Er staat al een publicatie voor ${CHANNELS[channel]} (${PUB_LABEL[existing.status]}). Annuleer die eerst.`, { details: { id: existing.id } });
     const pubId = randomUUID();
-    await db.query(`insert into hq.publications (id, piece_id, render_id, channel, method, status, scheduled_at, caption, caption_hash, created_by)
-      values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`, [pubId, id, p.approved_render_id, channel, method, method === "api" ? "ingepland" : "export_klaar", at, caption, sha(caption), auth?.userId || null]);
-    if (method === "api") {
+    await db.query(`insert into hq.publications (id, piece_id, render_id, channel, method, status, scheduled_at, caption, caption_hash, created_by, live)
+      values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`, [pubId, id, renderId, channel, method, method === "export" ? "export_klaar" : "ingepland", when, caption, sha(caption), auth?.userId || null, Boolean(plan.live_publishing)]);
+    if (method !== "export") {
+      // Buffer: tot 24 uur vooraf aanleveren (daarna kan de tijd nog in HQ worden gewijzigd). Instagram API: op het moment zelf.
+      const runAfter = method === "buffer" ? new Date(Math.max(Date.now(), when.getTime() - 24 * 3600e3)) : when;
       const t = await enqueue(db, { agent: "publisher", kind: "publish", title: `Plaatsen op ${CHANNELS[channel]}: ${p.project_name}`, input: { publication_id: pubId }, pieceId: id, leadId: p.lead_id,
-        createdBy: auth?.userId || null, idempotencyKey: `pub:${pubId}:1`, runAfter: at, timeoutS: 45, maxAttempts: 3 });
+        createdBy: auth?.userId || null, idempotencyKey: `pub:${pubId}:1`, runAfter, timeoutS: 45, maxAttempts: 3 });
       await db.query("update hq.publications set task_id=$2 where id=$1", [pubId, t.id]);
     }
-    await audit(db, { actor: auth?.userId || null, label: auth?.email || "systeem", action: "content.ingepland", entity: "publication", entityId: pubId, details: { kanaal: channel, methode: method, tijdstip: at } });
-    return { id: pubId, method, status: method === "api" ? "ingepland" : "export_klaar", missing: method === "export" && channel === "instagram" ? ig.missing : undefined };
+    await audit(db, { actor: auth?.userId || null, label: auth?.email || "systeem", action: "content.ingepland", entity: "publication", entityId: pubId, details: { kanaal: channel, methode: method, tijdstip: when } });
+    return { id: pubId, method, status: method === "export" ? "export_klaar" : "ingepland", reason: route.reason };
   });
 }
 
@@ -469,6 +522,8 @@ function column(p) {
   const dirty = p.script && (!r || r.script_hash !== p.current_hash);
   const act = [];
   if (p.plan_status === "mislukt") act.push({ code: "plan_mislukt", text: `Plan mislukt: ${p.plan_error || "onbekende fout"}`, action: "plan_opnieuw" });
+  if (p.plan_status === "gepauzeerd" && p.plan_pause === "budget") act.push({ code: "ai_budget", text: `Wacht op AI-budget: ${p.plan_error || "AI-taken staan op pauze"}. Pas je HQ-limiet of tegoedperiode aan.`, action: "budget" });
+  if (r?.status === "in_wachtrij" && Date.now() - new Date(r.created_at) > 45 * 60_000) act.push({ code: "render_wacht", text: "Render wacht al lang op rendercapaciteit. Start de render-worker op je computer (npm run render-worker) of wacht op GitHub Actions.", action: "render_wacht" });
   if (p.status === "kiezen") act.push({ code: "kiezen", text: "Kies een van de drie hoeken.", action: "kiezen" });
   if (r?.status === "mislukt") act.push({ code: "render_mislukt", text: `Render mislukt: ${r.error || "onbekende fout"}`, action: "render_opnieuw" });
   if (p.status === "concept" && r?.status === "klaar" && dirty) act.push({ code: "script_gewijzigd", text: "Script gewijzigd sinds de laatste video. Maak een nieuwe versie.", action: "render_opnieuw" });
@@ -482,19 +537,23 @@ function column(p) {
   if (act.some(a => !["wachten"].includes(a.action))) col = "actie_nodig";
   else if (r && ["in_wachtrij", "bezig"].includes(r.status) || p.status === "plannen") col = p.status === "plannen" ? "concept" : "render_bezig";
   else if (r?.status === "klaar" && !dirty && p.status === "concept") col = "klaar_voor_review";
-  else if (p.status === "goedgekeurd" && pubs.length && pubs.every(x => ["gepubliceerd", "handmatig_geplaatst"].includes(x.status))) col = "gepubliceerd";
-  else if (p.status === "goedgekeurd" && pubs.some(x => ["ingepland", "bezig", "onzeker"].includes(x.status))) col = "ingepland";
+  else if (pubs.length && pubs.every(x => ["gepubliceerd", "handmatig_geplaatst"].includes(x.status))) col = "gepubliceerd";
+  else if (p.status === "concept" && r?.status === "klaar" && !dirty) col = "klaar_voor_review";
+  else if (pubs.some(x => ["ingepland", "bezig", "onzeker", "bij_dienst", "wachtrij_vol", "concept_klaar"].includes(x.status))) col = "ingepland";
   else if (p.status === "goedgekeurd") { col = "klaar_voor_review"; act.push({ code: "inplannen", text: "Goedgekeurd: plan Instagram en/of TikTok in.", action: "inplannen" }); }
   else col = "concept";
-  if (col === "klaar_voor_review" && p.status === "concept") act.push({ code: "review", text: "Bekijk de video en keur hem goed.", action: "review" });
+  if (p.status === "concept" && r?.status === "klaar" && !dirty) {
+    act.push({ code: "review", text: "Bekijk de video en keur hem goed.", action: "review" });
+    if (col === "concept") col = "klaar_voor_review";
+  }
   if (col === "concept" && p.status === "plannen") act.push({ code: "plannen", text: "De planner werkt aan drie voorstellen.", action: "wachten" });
   return { column: col, actions: act, render_dirty: Boolean(dirty) };
 }
 
 async function piecesWithState(where = "c.status<>'gearchiveerd'", vals = []) {
-  const rows = (await q(`select c.*, pr.name as project_name, pr.slug as project_slug,
-      t.status as plan_status, t.error as plan_error, t.cost_usd::float as plan_cost
-    from hq.content_pieces c join hq.projects pr on pr.id=c.project_id left join hq.tasks t on t.id=c.plan_task_id
+  const rows = (await q(`select c.*, coalesce(pr.name, 'StrakWerk') as project_name, coalesce(pr.slug, 'strakwerk') as project_slug,
+      t.status as plan_status, t.error as plan_error, t.cost_usd::float as plan_cost, t.pause_reason as plan_pause
+    from hq.content_pieces c left join hq.projects pr on pr.id=c.project_id left join hq.tasks t on t.id=c.plan_task_id
     where ${where} order by c.updated_at desc limit 200`, vals)).rows;
   if (!rows.length) return [];
   const ids = rows.map(r => r.id);
@@ -503,7 +562,7 @@ async function piecesWithState(where = "c.status<>'gearchiveerd'", vals = []) {
          t.status as task_status, t.attempts, t.max_attempts
        from hq.renders r left join hq.tasks t on t.id=r.task_id where r.piece_id = any($1::uuid[]) order by piece_id, version desc`, [ids]),
     q("select id, piece_id, channel, method, status, scheduled_at, published_at, permalink, last_error, external_id, caption from hq.publications where piece_id = any($1::uuid[]) order by created_at", [ids]),
-    q(`select c.id as piece_id, a.label from hq.content_pieces c join hq.project_assets a on a.project_id=c.project_id
+    q(`select c.id as piece_id, a.label from hq.content_pieces c join hq.project_assets a on a.project_id is not distinct from c.project_id
        where c.id = any($1::uuid[]) and c.script is not null and a.path in (select jsonb_array_elements(c.script->'scenes')->>'asset' union select jsonb_array_elements(c.script->'scenes')->>'asset2')
          and (not a.social_ok or a.valid_until <= now()) and not exists (select 1 from hq.publications p where p.piece_id=c.id and p.status in ('gepubliceerd','handmatig_geplaatst'))`, [ids]),
   ]);
@@ -530,12 +589,15 @@ export async function pieceDetail(id) {
   if (!p) throw new HttpError(404, "niet_gevonden", "Contentstuk niet gevonden.");
   const [renders, assets, tasks, cost] = await Promise.all([
     q("select id, version, status, error, duration_s::float as duration_s, width, height, bytes, render_ms, created_at, finished_at, script_hash, (video_key is not null) as has_video from hq.renders where piece_id=$1 order by version desc", [id]),
-    q("select id, path, kind, label, social_ok, valid_until, notes, width, height from hq.project_assets where project_id=$1 order by kind, created_at", [p.project_id]),
+    q("select id, path, kind, label, social_ok, valid_until, notes, width, height from hq.project_assets where project_id is not distinct from $1 or project_id is null order by (project_id is null), kind, created_at", [p.project_id]),
     q("select id, agent_key, title, status, error, attempts, max_attempts, created_at, finished_at, cost_usd::float as cost_usd from hq.tasks where piece_id=$1 order by created_at desc limit 30", [id]),
     pieceCost(id),
   ]);
   const settings = await contentSettings();
-  return { piece: { ...p, script_hash: p.current_hash }, renders: renders.rows, assets: assets.rows.map(a => ({ ...a, hint: assetInfo(a.path).hint || "" })), tasks: tasks.rows, cost, settings,
+  const plan = await getPlan();
+  const routes = { instagram: await routeFor("instagram", plan), tiktok: await routeFor("tiktok", plan) };
+  return { office: { plan }, routes, routeLabels: { export: "Export (zelf plaatsen)", buffer: "Buffer (gratis plan)", instagram_api: "Instagram API", api: "Instagram API" }, brand: await getBrand(),
+    piece: { ...p, script_hash: p.current_hash }, renders: renders.rows, assets: assets.rows.map(a => ({ ...a, hint: assetInfo(a.path).hint || "" })), tasks: tasks.rows, cost, settings,
     audiences: AUDIENCES, channels: CHANNELS, pubLabels: PUB_LABEL, instagram: await instagramState(), links: campaignLinks(p) };
 }
 

@@ -8,10 +8,10 @@ const COL = {
   klaar_voor_review: { label: "Klaar voor review", cls: "b-warn" }, ingepland: { label: "Ingepland", cls: "b-info" }, gepubliceerd: { label: "Gepubliceerd", cls: "b-ok" },
 };
 const RENDER = { in_wachtrij: { label: "Render in wachtrij", cls: "b-info" }, bezig: { label: "Render bezig", cls: "b-gold" }, klaar: { label: "Video klaar", cls: "b-ok" }, mislukt: { label: "Render mislukt", cls: "b-bad" }, geannuleerd: { label: "Render geannuleerd", cls: "b-off" } };
-const PUB = { ingepland: { label: "Ingepland", cls: "b-info" }, bezig: { label: "Wordt geplaatst", cls: "b-gold" }, gepubliceerd: { label: "Gepubliceerd", cls: "b-ok" }, mislukt: { label: "Mislukt", cls: "b-bad" },
+const PUB = { ingepland: { label: "Ingepland", cls: "b-info" }, bezig: { label: "Wordt geplaatst", cls: "b-gold" }, bij_dienst: { label: "Ligt bij Buffer", cls: "b-info" }, wachtrij_vol: { label: "Wachtrij vol: later opnieuw", cls: "b-warn" }, concept_klaar: { label: "Proef: klaar, niet live", cls: "" }, gepubliceerd: { label: "Gepubliceerd", cls: "b-ok" }, mislukt: { label: "Mislukt", cls: "b-bad" },
   onzeker: { label: "Wordt gecontroleerd", cls: "b-warn" }, export_klaar: { label: "Zelf plaatsen", cls: "b-warn" }, handmatig_geplaatst: { label: "Zelf geplaatst", cls: "b-ok" }, geannuleerd: { label: "Geannuleerd", cls: "b-off" } };
 const CH = { instagram: "Instagram", tiktok: "TikTok" };
-const TABS = [["werk", "Werkvoorraad"], ["nieuw", "Nieuw"], ["kalender", "Kalender"], ["projecten", "Projecten"], ["resultaten", "Resultaten"], ["auto", "Automatisering"]];
+const TABS = [["werk", "Werkvoorraad"], ["nieuw", "Nieuw"], ["kalender", "Kalender"], ["projecten", "Projecten"], ["resultaten", "Resultaten"], ["auto", "Kantoor"]];
 const thumb = (p) => p.replace(/\.webp$/, /mobiel/.test(p) ? "-320.webp" : "-800.webp");
 const uuid = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random());
 const fail = (e) => toast(e instanceof ApiError ? e.message + (e.missing?.length ? ` (ontbreekt: ${e.missing.join(", ")})` : "") : String(e.message || e), "bad");
@@ -164,8 +164,9 @@ export async function mount(root, ctx) {
         s.captions.promo_line ? h("p", { class: "faint" }, `Actieregel (wordt alleen meegestuurd vóór ${fmt.dt(s.captions.promo_until)}): ${s.captions.promo_line}`) : null,
         ...["instagram", "tiktok"].map(ch => captionEditor(p, ch, s.captions[ch], act))));
 
-      // Publiceren
-      if (p.status === "goedgekeurd") out.push(publishBox(p, d, act));
+      // Voorbeeld op de telefoon en publiceren
+      out.push(previewBox(p, d));
+      if (p.status === "goedgekeurd" || p.publications.some(x => x.status !== "geannuleerd")) out.push(publishBox(p, d, act));
 
       // Campagne en herkomst
       out.push(h("section", { class: "box stack" }, h("h3", {}, "Herkomst meten"),
@@ -185,7 +186,9 @@ export async function mount(root, ctx) {
 
   function sceneCard(p, sc, i, allowed, d, act) {
     const view = h("div", { class: "scene" },
-      sc.asset ? h("img", { src: thumb(sc.asset), alt: "", loading: "lazy", width: "96", height: sc.asset.includes("mobiel") ? "190" : "54" }) : h("div", { class: "scene-ph" }, sc.type === "cta" ? "CTA" : "Tekst"),
+      // Eigen beelden (brand/) staan niet publiek op de site: label in plaats van miniatuur.
+      sc.asset && !sc.asset.startsWith("/brand/") ? h("img", { src: thumb(sc.asset), alt: "", loading: "lazy", width: "96", height: sc.asset.includes("mobiel") ? "190" : "54" })
+        : h("div", { class: "scene-ph" }, sc.asset ? (sc.type === "screen" ? "Opname" : "Eigen beeld") : sc.type === "cta" ? "CTA" : sc.type === "prices" ? "Prijzen" : "Tekst"),
       h("div", { class: "stack", style: { gap: "2px", minWidth: 0 } },
         h("span", { class: "faint" }, `Scène ${i + 1} · ${{ hook: "Opening", shot: "Beeld", phone: "Telefoon", cta: "Oproep" }[sc.type]} · ${sc.seconds} s`),
         h("b", {}, sc.text.replace(/\*\*/g, "")), sc.sub ? h("span", { class: "muted" }, sc.sub) : null, sc.keyword ? h("span", { class: "muted" }, `App ‘${sc.keyword}’`) : null),
@@ -222,29 +225,39 @@ export async function mount(root, ctx) {
 
   function publishBox(p, d, act) {
     const box = h("section", { class: "box stack" }, h("h3", {}, "Publiceren per kanaal"),
-      h("p", { class: "faint" }, "Renderstatus en publicatiestatus staan los van elkaar. Tijden in Nederlandse tijd (Europe/Amsterdam)."));
+      h("p", { class: "faint" }, "Renderstatus en publicatiestatus staan los van elkaar. Tijden in Nederlandse tijd. ‘Gepubliceerd’ verschijnt pas na bevestiging van het platform of Buffer."),
+      d.office && !d.office.plan.live_publishing ? h("p", { class: "callout" }, "Live publicatie staat uit (proefstand): HQ zet alles klaar en controleert, maar plaatst niets.") : null);
     for (const ch of ["instagram", "tiktok"]) {
       const pub = p.publications.find(x => x.channel === ch && x.status !== "geannuleerd");
-      const row = h("div", { class: "pub" }, h("div", { class: "row" }, h("b", {}, CH[ch]), pub ? badge(PUB, pub.status) : h("span", { class: "faint" }, "Nog niet ingepland")));
-      if (!pub && ctx.can("content.approve")) {
-        const when = h("input", { type: "datetime-local", "aria-label": `Tijdstip ${CH[ch]}` }); when.value = amsNowLocal(ch === "instagram" ? 1 : 2);
-        const api_ok = ch === "instagram" && d.instagram.connected;
+      const route = d.routes?.[ch];
+      const mode = d.office?.plan.channels[ch];
+      const row = h("div", { class: "pub" }, h("div", { class: "row" }, h("b", {}, CH[ch]), pub ? badge(PUB, pub.status) : h("span", { class: "faint" }, "Nog niet ingepland"),
+        route ? h("span", { class: "faint" }, `· route: ${d.routeLabels?.[route.method === "api" ? "instagram_api" : route.method] || route.method}${mode ? ` · ${mode.mode === "auto" ? "automatisch" : "eerst beoordelen"}` : ""}`) : null));
+      if (!pub && ctx.can("content.approve") && (p.status === "goedgekeurd")) {
+        const when = h("input", { type: "datetime-local", "aria-label": `Tijdstip ${CH[ch]}` }); when.value = p.slot_at ? toLocal(p.slot_at) : amsNowLocal(ch === "instagram" ? 1 : 2);
+        const isExport = !route || route.method === "export";
         row.append(h("div", { class: "row" }, when,
-          h("button", { class: "btn btn-gold", type: "button", onclick: () => act(() => api(`studio/pieces/${p.id}/schedule`, { method: "POST", body: { channel: ch, at_local: when.value, method: api_ok ? "api" : "export" } }), api_ok ? "Ingepland" : "Klaargezet als export") }, api_ok ? "Inplannen" : "Klaarzetten (export)")),
-          h("p", { class: "faint" }, ch === "tiktok" ? "TikTok: geen automatische koppeling. HQ zet MP4, cover en caption klaar en zet de geplande datum in je werkvoorraad en kalender." : api_ok ? `Wordt automatisch geplaatst op @${d.instagram.account?.name}.` : `Instagram niet gekoppeld${d.instagram.missing?.length ? ` (ontbreekt: ${d.instagram.missing.join(", ")})` : ""}: je plaatst hem zelf.`));
+          h("button", { class: "btn btn-gold", type: "button", onclick: () => act(() => api(`studio/pieces/${p.id}/schedule`, { method: "POST", body: { channel: ch, at_local: when.value } }), isExport ? "Klaargezet als export" : "Ingepland") }, isExport ? "Klaarzetten (export)" : "Inplannen")),
+          route?.reason ? h("p", { class: "faint" }, `${route.reason}: HQ zet MP4, cover en caption klaar.`) : null);
       }
       if (pub) {
         row.append(h("p", { class: "faint" }, pub.scheduled_at ? `Gepland: ${fmt.dt(pub.scheduled_at)}` : "", pub.published_at ? ` · Geplaatst: ${fmt.dt(pub.published_at)}` : "", pub.external_id ? ` · Post-ID ${pub.external_id}` : ""),
           ...[pub.permalink ? h("a", { href: pub.permalink, target: "_blank", rel: "noopener noreferrer" }, "Bekijk de post") : null,
-          pub.last_error ? h("p", { class: "err-inline" }, pub.last_error) : null].filter(Boolean));
+          pub.last_error ? h("p", { class: pub.status === "wachtrij_vol" ? "faint" : "err-inline" }, pub.last_error) : null].filter(Boolean));
         const btns = h("div", { class: "row" });
+        const rid = p.render?.id || p.approved_render_id;
         if (pub.status === "export_klaar") {
-          btns.append(h("a", { class: "btn btn-sm", href: `/api/hq/media/${p.approved_render_id}/video?download=1` }, "MP4"), h("a", { class: "btn btn-sm", href: `/api/hq/media/${p.approved_render_id}/cover?download=1` }, "Cover"),
+          btns.append(h("a", { class: "btn btn-sm", href: `/api/hq/media/${rid}/video?download=1` }, "MP4"), h("a", { class: "btn btn-sm", href: `/api/hq/media/${rid}/cover?download=1` }, "Cover"),
             h("button", { class: "btn btn-sm", type: "button", onclick: () => copy(pub.caption || "", "Caption gekopieerd") }, "Caption kopiëren"),
             h("button", { class: "btn btn-sm btn-gold", type: "button", onclick: () => manual(pub) }, "Ik heb dit geplaatst"));
         }
+        // Alleen de tijd wijzigen: geen nieuwe AI-aanroep en geen nieuwe render.
+        if (["ingepland", "wachtrij_vol", "export_klaar", "concept_klaar"].includes(pub.status) && ctx.can("content.approve")) {
+          const nt = h("input", { type: "datetime-local", "aria-label": `Nieuwe tijd ${CH[ch]}` }); nt.value = pub.scheduled_at ? toLocal(pub.scheduled_at) : amsNowLocal(1);
+          btns.append(nt, h("button", { class: "btn btn-sm", type: "button", onclick: () => act(() => api(`studio/publications/${pub.id}/tijd`, { method: "POST", body: { at_local: nt.value } }), "Tijd gewijzigd (geen nieuwe video nodig)") }, "Tijd wijzigen"));
+        }
         if (pub.status === "mislukt" && ctx.can("content.approve")) btns.append(h("button", { class: "btn btn-sm btn-gold", type: "button", onclick: () => act(() => api(`studio/publications/${pub.id}/opnieuw`, { method: "POST", body: {} }), "Opnieuw ingepland (eerst controle)") }, "Opnieuw proberen"));
-        if (["ingepland", "export_klaar", "mislukt"].includes(pub.status) && ctx.can("content.approve")) btns.append(h("button", { class: "btn btn-sm", type: "button", onclick: () => act(() => api(`studio/publications/${pub.id}/annuleren`, { method: "POST", body: {} }), "Geannuleerd") }, "Annuleren"));
+        if (["ingepland", "export_klaar", "mislukt", "wachtrij_vol", "concept_klaar"].includes(pub.status) && ctx.can("content.approve")) btns.append(h("button", { class: "btn btn-sm", type: "button", onclick: () => act(() => api(`studio/publications/${pub.id}/annuleren`, { method: "POST", body: {} }), "Geannuleerd") }, "Annuleren"));
         if (["gepubliceerd", "handmatig_geplaatst"].includes(pub.status)) btns.append(h("button", { class: "btn btn-sm", type: "button", onclick: () => metric(pub) }, "Resultaat invullen"));
         row.append(btns);
       }
@@ -264,15 +277,43 @@ export async function mount(root, ctx) {
     return box;
   }
 
+  // Voorbeeld zoals de post op een telefoon verschijnt: video, account en caption per kanaal.
+  function previewBox(p, d) {
+    const r = p.render;
+    if (!r || r.status !== "klaar" || !p.script) return null;
+    const handle = (ch) => d.brand?.socials?.[ch] ? `@${d.brand.socials[ch]}` : "@strakwerk (account nog niet ingesteld)";
+    const tabs = h("div", { class: "seg", role: "group", "aria-label": "Kanaal" });
+    const holder = h("div", {});
+    let cur = "instagram";
+    const draw = () => {
+      tabs.replaceChildren(...["instagram", "tiktok"].map(ch => h("button", { type: "button", "aria-pressed": String(cur === ch), onclick: () => { cur = ch; draw(); } }, CH[ch])));
+      const pub = p.publications.find(x => x.channel === cur && x.status !== "geannuleerd");
+      const cap = pub?.caption || p.script.captions[cur] || "";
+      holder.replaceChildren(h("div", { class: `pv pv-${cur}` },
+        h("video", { src: `/api/hq/media/${r.id}/video`, poster: `/api/hq/media/${r.id}/cover`, muted: true, loop: true, playsinline: true, autoplay: true, preload: "metadata", "aria-label": "Voorbeeld van de video" }),
+        h("div", { class: "pv-ui" }, h("b", {}, handle(cur)), h("p", { class: "pv-cap" }, cap.split("\n").filter(Boolean).slice(0, 3).join(" ")), h("span", { class: "pv-more" }, "… meer")),
+        h("div", { class: "pv-side", "aria-hidden": "true" }, "♡", "💬", "↗")));
+    };
+    draw();
+    return h("section", { class: "box stack" }, h("h3", {}, "Voorbeeld op de telefoon"), tabs, holder,
+      h("p", { class: "faint" }, "Benadering van hoe Instagram en TikTok de post tonen. Account uit je StrakWerk-instellingen."),
+      h("div", { class: "row" }, h("a", { class: "btn btn-sm", href: `/api/hq/media/${r.id}/subtitles?download=1` }, "Ondertitels (SRT)")));
+  }
+  const toLocal = (iso) => { const p = Object.fromEntries(new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Amsterdam", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date(iso)).map(x => [x.type, x.value])); return `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}`; };
+
   // ── Nieuwe opdracht ─────────────────────────────────────────────────────────
   async function newView() {
     if (!ctx.can("content.write")) return empty("Geen rechten", "Je rol kan geen contentopdrachten maken.");
     const projects = data.projects;
-    const proj = h("select", { "aria-label": "Project" }, projects.map(p => h("option", { value: p.id }, `${p.name} (${p.released_count}/${p.asset_count} beelden vrij)`)));
-    const aud = h("select", {}, Object.entries(data.audiences).map(([k, v]) => h("option", { value: k }, v.label)));
+    const proj = h("select", { "aria-label": "Project" }, h("option", { value: "" }, "StrakWerk zelf (geen klantproject)"), projects.map(p => h("option", { value: p.id }, `Portfolio: ${p.name} (${p.released_count}/${p.asset_count} beelden vrij)`)));
+    const topic = h("select", { "aria-label": "Onderwerp" }, Object.entries(data.topics || {}).map(([k, v]) => h("option", { value: k }, v.title)));
+    const aud = h("select", {}, Object.entries(data.audiences).map(([k, v]) => h("option", { value: k, selected: k === "ondernemers" }, v.label)));
     const goal = h("select", {}, Object.entries(data.goals).map(([k, v]) => h("option", { value: k }, v)));
     const grid = h("div", { class: "asset-grid" });
+    const topicField = field("Onderwerp", topic);
     const loadAssets = async () => {
+      topicField.hidden = Boolean(proj.value);
+      if (!proj.value) { grid.replaceChildren(h("p", { class: "faint" }, "Eigen beelden van StrakWerk: schermopname van de configurator, pakketten en offerte (altijd beschikbaar).")); return; }
       const d = await api(`studio/projects/${proj.value}`);
       const sector = (d.project.sector || "").toLowerCase();
       aud.value = /salon|beauty/.test(sector) ? "saloneigenaren" : /auto|garage/.test(sector) ? "garages" : aud.value;
@@ -284,15 +325,15 @@ export async function mount(root, ctx) {
       }));
     };
     proj.addEventListener("change", loadAssets);
-    if (projects.length) await loadAssets();
+    await loadAssets();
     return h("div", { class: "stack" },
-      h("div", { class: "section-h" }, h("h2", {}, "Nieuwe video"), h("p", { class: "muted" }, "Kies project, doelgroep, doel en beelden. De planner maakt drie verkoophoeken; jij kiest er één.")),
-      h("div", { class: "fgrid" }, field("Project", proj), field("Doelgroep", aud), field("Doel", goal)),
-      h("h3", {}, "Beelden"), h("p", { class: "faint" }, "Alleen beelden die zijn vrijgegeven voor social media. Vrijgeven doe je bij Projecten."), grid,
+      h("div", { class: "section-h" }, h("h2", {}, "Nieuwe video"), h("p", { class: "muted" }, "StrakWerk is altijd de afzender. Kies een onderwerp voor je eigen aanbod, of gebruik een opgeleverd project als portfolio. De planner maakt drie hoeken; jij kiest er één.")),
+      h("div", { class: "fgrid" }, field("Waarover", proj), topicField, field("Doelgroep", aud), field("Doel", goal)),
+      h("h3", {}, "Beelden"), grid,
       h("button", { class: "btn btn-gold big", type: "button", onclick: async (e) => {
         const ids = [...grid.querySelectorAll("input:checked")].map(x => x.value);
         const btn = e.currentTarget; btn.disabled = true;
-        try { const r = await api("studio/pieces", { method: "POST", body: { project_id: proj.value, audience: aud.value, goal: goal.value, asset_ids: ids }, idempotencyKey: uuid() });
+        try { const r = await api("studio/pieces", { method: "POST", body: { project_id: proj.value || null, topic: topic.value, audience: aud.value, goal: goal.value, asset_ids: ids }, idempotencyKey: uuid() });
           toast("Opdracht gemaakt; de planner gaat aan de slag.", "ok"); tab = "werk"; renderSeg(); await refresh(); openPiece(r.id); }
         catch (err) { fail(err); } finally { btn.disabled = false; }
       } }, "Drie voorstellen laten maken"));
@@ -375,48 +416,102 @@ export async function mount(root, ctx) {
       : empty("Nog geen video's"));
   }
 
-  // ── Automatisering ──────────────────────────────────────────────────────────
+  // ── Kantoor: één keer instellen, daarna werkt HQ zelf ────────────────────────
   async function autoView() {
-    const d = await api("studio/automation");
+    const [d, b, au] = await Promise.all([api("studio/office"), api("ai/budget"), api("studio/automation")]);
     const can = ctx.can("content.settings");
-    const s = d.settings;
-    const budget = h("input", { type: "number", min: "0", max: "100", step: "0.5", disabled: !can }); budget.value = s.monthly_budget_usd;
-    const perVideo = h("input", { type: "number", min: "0", max: "10", step: "0.05", disabled: !can }); perVideo.value = s.max_cost_per_video_usd;
-    const rate = h("input", { type: "number", min: "0", max: "1", step: "0.001", disabled: !can }); rate.value = s.render_cost_usd_per_min;
-    const ahead = h("input", { type: "number", min: "1", max: "168", step: "1", disabled: !can }); ahead.value = s.min_hours_ahead;
-    const save = async (b) => { try { await api("studio/settings", { method: "PUT", body: b }); toast("Opgeslagen.", "ok"); draw(); refresh(); } catch (e) { fail(e); } };
-    const rules = Object.fromEntries(d.rules.map(r => [`${r.channel}:${r.format_key}`, r]));
+    const P = d.plan;
+    const save = async (path, body, ok = "Opgeslagen.") => { try { await api(path, { method: "PUT", body }); toast(ok, "ok"); draw(); refresh(); } catch (e) { fail(e); } };
     const DAYS = ["ma", "di", "wo", "do", "vr", "za", "zo"];
-    return h("div", { class: "stack" },
-      h("section", { class: `box stack ${s.paused ? "paused" : ""}` }, h("div", { class: "row" }, h("h2", {}, s.paused ? "Automatisering staat op pauze" : "Automatisering actief"), h("span", { class: "spacer" }),
-        can ? h("button", { class: `btn big ${s.paused ? "btn-gold" : "btn-bad"}`, type: "button", onclick: () => save({ paused: !s.paused }) }, s.paused ? "Hervatten" : "Pauzeren") : null),
-        h("p", { class: "muted" }, `Deze maand besteed: ${fmt.usd(d.spent_month_usd)} van ${fmt.usd(s.monthly_budget_usd)}. Bij het plafond stopt HQ met nieuwe afleveringen.`)),
-      h("section", { class: "box stack" }, h("h3", {}, "Kosten"),
-        h("div", { class: "fgrid" }, field("Kostenplafond per maand ($)", budget), field("Maximaal per video ($)", perVideo, { help: "Taalmodelkosten per planner-taak." }),
-          field("Rendertarief ($ per minuut)", rate, { help: "0 als je eigen computer of gratis GitHub Actions-minuten rendert." }), field("Minimaal uren vooruit inplannen", ahead)),
-        can ? h("button", { class: "btn", type: "button", onclick: () => save({ monthly_budget_usd: budget.value, max_cost_per_video_usd: perVideo.value, render_cost_usd_per_min: rate.value, min_hours_ahead: ahead.value }) }, "Opslaan") : null),
-      h("section", { class: "box stack" }, h("h3", {}, "Formats"), d.formats.map(f => h("div", { class: "row" }, h("b", {}, f.name), h("span", { class: "muted" }, f.description), h("span", { class: "spacer" }),
-        can ? h("label", { class: "row", style: { gap: "6px" } }, (() => { const c = h("input", { type: "checkbox", checked: f.released }); c.addEventListener("change", async () => { try { await api(`studio/formats/${f.key}`, { method: "PUT", body: { released: c.checked } }); toast(c.checked ? "Format vrijgegeven voor automatisering." : "Vrijgave ingetrokken.", "ok"); draw(); } catch (e) { fail(e); } }); return c; })(), "Vrijgegeven") : h("span", {}, f.released ? "vrijgegeven" : "niet vrijgegeven")))),
-      ...["instagram", "tiktok"].flatMap(ch => d.formats.map(f => {
-        const r = rules[`${ch}:${f.key}`] || { enabled: false, weekly_limit: 1, weekdays: [2, 4], post_time: "18:30", audience: "ondernemers", goal: "aanvragen" };
-        const en = h("input", { type: "checkbox", checked: r.enabled, disabled: !can });
-        const wl = h("input", { type: "number", min: "0", max: "7", disabled: !can }); wl.value = r.weekly_limit;
-        const time = h("input", { type: "time", disabled: !can }); time.value = r.post_time;
-        const aud = h("select", { disabled: !can }, Object.entries(data.audiences).map(([k, v]) => h("option", { value: k, selected: k === r.audience }, v.label)));
-        const days = DAYS.map((dname, i) => { const c = h("input", { type: "checkbox", checked: r.weekdays.includes(i + 1), disabled: !can }); return [c, h("label", { class: "day" }, c, dname)]; });
-        return h("section", { class: "box stack" }, h("div", { class: "row" }, h("h3", {}, `${CH[ch]} · ${f.name}`), h("span", { class: "spacer" }), h("label", { class: "row", style: { gap: "6px" } }, en, "Aan")),
-          h("p", { class: "faint" }, ch === "tiktok" ? "TikTok heeft geen automatische koppeling: afleveringen worden gemaakt en als export ingepland (jij plaatst ze)." : d.instagram.connected ? "Wordt automatisch geplaatst via de Instagram-koppeling." : "Instagram niet gekoppeld: afleveringen worden als export klaargezet."),
-          h("div", { class: "fgrid" }, field("Weeklimiet", wl), field("Tijd", time), field("Doelgroep", aud)), h("div", { class: "days" }, days.map(x => x[1])),
-          can ? h("button", { class: "btn", type: "button", onclick: async () => {
-            try { await api("studio/automation", { method: "PUT", body: { channel: ch, format_key: f.key, enabled: en.checked, weekly_limit: Number(wl.value), post_time: time.value, audience: aud.value, weekdays: days.map((x, i) => x[0].checked ? i + 1 : null).filter(Boolean) } }); toast("Opgeslagen.", "ok"); draw(); } catch (e) { fail(e); }
-          } }, "Opslaan") : null);
-      })),
-      h("section", { class: "box stack" }, h("h3", {}, "Koppelingen"),
-        h("p", {}, h("b", {}, "Instagram: "), d.instagram.note),
-        can && !d.instagram.missing.length ? h("a", { class: "btn", href: "/api/hq/integrations/instagram/start" }, d.instagram.connected ? "Opnieuw koppelen" : "Instagram koppelen") : null,
-        can && d.instagram.connected ? h("button", { class: "btn btn-sm", type: "button", onclick: async () => { try { await api("integrations/instagram/disconnect", { method: "POST", body: {} }); toast("Ontkoppeld.", "ok"); draw(); } catch (e) { fail(e); } } }, "Ontkoppelen") : null,
-        d.instagram.missing.length ? h("p", { class: "faint" }, "Ontbreekt op de server: ", d.instagram.missing.map((m, i) => [i ? ", " : "", h("code", {}, m)])) : null,
-        h("p", {}, h("b", {}, "TikTok: "), "export (MP4, cover, caption). Een betaalde publicatiedienst is nog niet gekozen; zie docs/hq/contentstudio.md.")));
+    const on = h("input", { type: "checkbox", checked: P.enabled, disabled: !can });
+    const wl = h("input", { type: "number", min: "0", max: "14", step: "1", disabled: !can }); wl.value = P.weekly_limit;
+    const time = h("input", { type: "time", disabled: !can }); time.value = P.post_time;
+    const days = DAYS.map((n, i) => { const c = h("input", { type: "checkbox", checked: P.weekdays.includes(i + 1), disabled: !can }); return [c, h("label", { class: "day" }, c, n)]; });
+    const auds = Object.entries(d.audiences).map(([k, v]) => { const c = h("input", { type: "checkbox", value: k, checked: P.audiences.includes(k), disabled: !can }); return [c, h("label", { class: "day" }, c, v.label)]; });
+    const goals = Object.entries(d.goals).map(([k, v]) => { const c = h("input", { type: "checkbox", value: k, checked: P.goals.includes(k), disabled: !can }); return [c, h("label", { class: "day" }, c, v)]; });
+    const pf = h("input", { type: "number", min: "0", max: "10", step: "1", disabled: !can }); pf.value = P.portfolio_every;
+    const live = h("input", { type: "checkbox", checked: P.live_publishing, disabled: !can });
+    const chans = ["instagram", "tiktok"].map(ch => {
+      const c = P.channels[ch];
+      const en = h("input", { type: "checkbox", checked: c.enabled, disabled: !can });
+      const mode = h("select", { disabled: !can, "aria-label": `Modus ${CH[ch]}` }, Object.entries(d.modeLabels).map(([k, v]) => h("option", { value: k, selected: c.mode === k }, v)));
+      const route = h("select", { disabled: !can, "aria-label": `Route ${CH[ch]}` }, Object.entries(d.routeLabels).filter(([k]) => k !== "instagram_api" || ch === "instagram").map(([k, v]) => h("option", { value: k, selected: c.route === k }, v)));
+      const r = d.routes[ch];
+      return { ch, en, mode, route, el: h("div", { class: "pub" }, h("div", { class: "row" }, h("b", {}, CH[ch]), h("label", { class: "row", style: { gap: "6px" } }, en, "Aan")),
+        h("div", { class: "fgrid" }, field("Na het maken", mode), field("Publicatieroute (één per kanaal)", route)),
+        h("p", { class: "faint" }, r.reason ? `Nu: export (${r.reason}).` : `Nu: ${d.routeLabels[r.route]}.`)) };
+    });
+    const planBox = h("section", { class: "box stack" },
+      h("div", { class: "row" }, h("h2", {}, "Kantoor"), h("span", { class: "spacer" }), h("label", { class: "row", style: { gap: "6px" } }, on, P.enabled ? "Aan: HQ maakt zelf video's" : "Uit")),
+      h("p", { class: "muted" }, "Eén keer instellen. HQ bedenkt daarna zelf onderwerpen, schrijft scripts, kiest eigen beelden, maakt MP4 en cover, schrijft captions, plant in en controleert de uitkomst. Je krijgt alleen een melding als jouw actie nodig is."),
+      h("div", { class: "fgrid" }, field("Video's per week", wl, { help: "Startinstelling: 3." }), field("Tijd (Nederlandse tijd)", time), field("Elke hoeveelste video uit het portfolio", pf, { help: "0 = nooit; portfolio alleen als een project vrijgegeven beelden heeft." })),
+      h("h3", {}, "Publicatiedagen"), h("div", { class: "days" }, days.map(x => x[1])),
+      h("h3", {}, "Doelgroepen"), h("div", { class: "days" }, auds.map(x => x[1])),
+      h("h3", {}, "Doelen"), h("div", { class: "days" }, goals.map(x => x[1])),
+      h("h3", {}, "Kanalen"), ...chans.map(c => c.el),
+      h("label", { class: `row live ${P.live_publishing ? "on" : ""}`, style: { gap: "8px" } }, live, h("span", {}, h("b", {}, "Live publiceren"), " · uit = proefstand: HQ zet alles klaar als concept en plaatst niets. Zet pas aan als je accounts gekoppeld zijn.")),
+      can ? h("button", { class: "btn btn-gold", type: "button", onclick: () => save("studio/office", {
+        enabled: on.checked, weekly_limit: Number(wl.value), post_time: time.value, portfolio_every: Number(pf.value), live_publishing: live.checked,
+        weekdays: days.map((x, i) => x[0].checked ? i + 1 : null).filter(Boolean), audiences: auds.filter(x => x[0].checked).map(x => x[0].value), goals: goals.filter(x => x[0].checked).map(x => x[0].value),
+        channels: Object.fromEntries(chans.map(c => [c.ch, { enabled: c.en.checked, mode: c.mode.value, route: c.route.value }])) }, "Kantoor opgeslagen") }, "Opslaan") : null,
+      h("h3", {}, "Komende publicatiemomenten"),
+      d.slots.length ? h("ul", { class: "acts" }, d.slots.slice(0, 8).map(s => h("li", {}, fmt.dt(s)))) : h("p", { class: "faint" }, "Geen: kies dagen en een weeklimiet."));
+
+    // AI-budget (alle afdelingen samen).
+    const bud = b.budget;
+    const fmtDate = (iso) => iso ? iso.slice(0, 10) : "";
+    const ps = h("input", { type: "date", disabled: !can }); ps.value = fmtDate(bud.period_start);
+    const pe = h("input", { type: "date", disabled: !can }); pe.value = fmtDate(bud.period_end);
+    const granted = h("input", { type: "number", min: "0", step: "1", disabled: !can, placeholder: "bijv. 100" }); granted.value = bud.granted_usd ?? "";
+    const limit = h("input", { type: "number", min: "0", step: "1", disabled: !can, placeholder: "bijv. 80" }); limit.value = bud.hq_limit_usd ?? "";
+    const console_ = h("input", { type: "number", min: "0", step: "0.01", disabled: !can, placeholder: "uit de Anthropic Console" }); console_.value = bud.console_used_usd ?? "";
+    const conf = h("input", { type: "checkbox", checked: bud.confirmed, disabled: !can });
+    const aiOn = h("input", { type: "checkbox", checked: bud.enabled, disabled: !can });
+    const budBox = h("section", { class: `box stack ${b.active ? "" : "paused"}` },
+      h("div", { class: "row" }, h("h2", {}, "AI-budget"), h("span", { class: "spacer" }), h("span", { class: `badge ${b.active ? "b-ok" : "b-warn"}` }, b.active ? "AI actief" : "AI uit")),
+      h("p", { class: "muted" }, b.reasonLabel),
+      h("p", { class: "faint" }, "Eén limiet voor Marketing, Scout, Auditor en Sales samen. HQ reserveert vóór elke aanroep de maximale prijs. Bij het plafond of onvoldoende tegoed pauzeren alleen de AI-taken; gemaakte video's publiceren gewoon volgens planning."),
+      h("div", { class: "fgrid" }, field("Periode van", ps), field("Periode tot", pe), field("Toegekend tegoed ($)", granted), field("HQ-limiet ($)", limit, { help: "Bijv. $80 als er $100 is toegekend." }), field("Verbruik volgens Console ($)", console_, { help: "Optioneel: om ander verbruik te zien." })),
+      h("label", { class: "row", style: { gap: "8px" } }, conf, "Ik heb het beschikbare tegoed gezien in de Anthropic Console"),
+      h("label", { class: "row", style: { gap: "8px" } }, aiOn, "AI gebruiken (alleen na bevestiging)"),
+      can ? h("button", { class: "btn", type: "button", onclick: () => save("ai/budget", { period_start: ps.value || null, period_end: pe.value ? new Date(new Date(pe.value).getTime() + 864e5).toISOString().slice(0, 10) : null,
+        granted_usd: granted.value, hq_limit_usd: limit.value, console_used_usd: console_.value, confirmed: conf.checked, enabled: aiOn.checked }, "AI-budget opgeslagen") }, "Opslaan") : null,
+      h("dl", { class: "kv" },
+        h("dt", {}, "HQ verbruikt (gemeten)"), h("dd", {}, fmt.usd(b.hq_settled_usd)), h("dt", {}, "Gereserveerd (lopend)"), h("dd", {}, fmt.usd(b.hq_reserved_usd)),
+        h("dt", {}, "Nog beschikbaar voor HQ"), h("dd", {}, fmt.usd(b.remaining_usd)),
+        h("dt", {}, "Ander verbruik"), h("dd", {}, b.other_usd == null ? h("span", { class: "faint" }, "onbekend") : fmt.usd(b.other_usd)),
+        ...Object.values(b.byDepartment).flatMap(x => [h("dt", {}, x.label), h("dd", {}, `${fmt.usd(x.usd)} · ${x.calls} aanroep(en)`)]),
+        h("dt", {}, "Wachtende AI-taken"), h("dd", {}, String(b.waiting_tasks))),
+      h("p", { class: "faint" }, b.other_note));
+
+    // Accounts van StrakWerk (afzender).
+    const br = d.brand;
+    const igh = h("input", { disabled: !can, placeholder: "strakwerk" }); igh.value = br.socials.instagram;
+    const tth = h("input", { disabled: !can, placeholder: "strakwerk" }); tth.value = br.socials.tiktok;
+    const bi = h("input", { disabled: !can, placeholder: "Buffer-kanaal-ID" }); bi.value = br.buffer_channels.instagram;
+    const bt = h("input", { disabled: !can, placeholder: "Buffer-kanaal-ID" }); bt.value = br.buffer_channels.tiktok;
+    const chList = h("div", {});
+    const brandBox = h("section", { class: "box stack" }, h("h2", {}, "StrakWerk als afzender"),
+      h("dl", { class: "kv" }, h("dt", {}, "Website"), h("dd", {}, br.site), h("dt", {}, "E-mail"), h("dd", {}, br.email || "—"), h("dt", {}, "Telefoon/WhatsApp"), h("dd", {}, br.phone || "—"), h("dt", {}, "Plaats"), h("dd", {}, br.place)),
+      h("p", { class: "faint" }, "Deze gegevens en de pakketprijzen komen uit de website zelf. Accounts vul je hier in."),
+      h("div", { class: "fgrid" }, field("Instagram-account", igh), field("TikTok-account", tth), field("Buffer-kanaal Instagram", bi), field("Buffer-kanaal TikTok", bt)),
+      can ? h("div", { class: "row" }, h("button", { class: "btn", type: "button", onclick: () => save("studio/brand", { socials: { instagram: igh.value, tiktok: tth.value }, buffer_channels: { instagram: bi.value, tiktok: bt.value } }, "Accounts opgeslagen") }, "Opslaan"),
+        h("button", { class: "btn btn-sm", type: "button", disabled: !d.buffer.configured, onclick: async () => {
+          try { const r = await api("integrations/buffer/channels"); chList.replaceChildren(h("ul", { class: "acts" }, r.channels.map(c => h("li", {}, `${c.service}: ${c.name} · `, h("code", {}, c.id), " ", h("button", { class: "btn btn-sm", type: "button", onclick: () => { if (/instagram/i.test(c.service)) bi.value = c.id; if (/tiktok/i.test(c.service)) bt.value = c.id; } }, "Gebruik"))))); }
+          catch (e) { fail(e); }
+        } }, d.buffer.configured ? "Kanalen ophalen uit Buffer" : "Buffer niet gekoppeld (BUFFER_API_KEY)")) : null, chList);
+
+    // Pauze en kosten (bestaand).
+    const s = au.settings;
+    const budget = h("input", { type: "number", min: "0", max: "100", step: "0.5", disabled: !can }); budget.value = s.monthly_budget_usd;
+    const rate = h("input", { type: "number", min: "0", max: "1", step: "0.001", disabled: !can }); rate.value = s.render_cost_usd_per_min;
+    const pauseBox = h("section", { class: `box stack ${s.paused ? "paused" : ""}` }, h("div", { class: "row" }, h("h2", {}, s.paused ? "Contentkantoor staat op pauze" : "Contentkantoor loopt"), h("span", { class: "spacer" }),
+        can ? h("button", { class: `btn big ${s.paused ? "btn-gold" : "btn-bad"}`, type: "button", onclick: () => save("studio/settings", { paused: !s.paused }, s.paused ? "Hervat" : "Gepauzeerd") }, s.paused ? "Hervatten" : "Pauzeren") : null),
+      h("p", { class: "muted" }, `Contentkosten deze maand: ${fmt.usd(au.spent_month_usd)} van ${fmt.usd(s.monthly_budget_usd)}.`),
+      h("div", { class: "fgrid" }, field("Kostenplafond content per maand ($)", budget), field("Rendertarief ($ per minuut)", rate, { help: "0 bij gratis GitHub Actions of je eigen computer." })),
+      can ? h("button", { class: "btn btn-sm", type: "button", onclick: () => save("studio/settings", { monthly_budget_usd: budget.value, render_cost_usd_per_min: rate.value }) }, "Opslaan") : null,
+      h("p", { class: "faint" }, d.renderWorker?.seen ? `Render-machine laatst gezien ${fmt.ago(d.renderWorker.seen)} (${d.renderWorker.host}).` : "Render-machine nog niet gezien.", d.waitingRender?.n ? ` ${d.waitingRender.n} render(s) wachten.` : ""));
+    return h("div", { class: "stack" }, planBox, budBox, brandBox, pauseBox);
   }
 
   await refresh();

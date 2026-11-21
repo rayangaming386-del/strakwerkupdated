@@ -273,7 +273,7 @@ export async function handle(request) {
     if ((p = route(path, "members/:id")) && m === "PATCH") { assertPerm(auth, "members.manage"); return json(await patchMember(p.id, body, auth)); }
     if (m === "GET" && path === "audit") { assertPerm(auth, "settings.write"); return json({ entries: (await q("select * from hq.audit_log order by at desc limit 200")).rows }); }
 
-    if (path.startsWith("studio/") || path.startsWith("media/") || path.startsWith("integrations/") || /^leads\/[^/]+\/campaign$/.test(path)) {
+    if (path.startsWith("studio/") || path.startsWith("ai/") || path.startsWith("media/") || path.startsWith("integrations/") || /^leads\/[^/]+\/campaign$/.test(path)) {
       const kick = () => { startWorker(); waitUntil(dispatchRenderWorker()); };
       if (m === "GET" && path === "studio/overview") kickIfNeeded(waitUntil).catch(() => {});
       const r = await handleStudio({ m, path, url, body, auth, request, startWorker: kick });

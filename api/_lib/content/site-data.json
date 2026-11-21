@@ -2,6 +2,48 @@
   "_bron": "Gemaakt door scripts/sync-site-data.mjs uit index.html (CONFIG), tools/v2/projects.json en assets/work. Niet met de hand aanpassen.",
   "site": "strakwerkk.nl",
   "whatsapp": "31623462397",
+  "brand": {
+    "name": "StrakWerk",
+    "site": "strakwerkk.nl",
+    "url": "https://www.strakwerkk.nl",
+    "email": "strakwerkk@gmail.com",
+    "phone": "+31623462397",
+    "whatsapp": "31623462397",
+    "place": "Zoetermeer"
+  },
+  "brand_assets": [
+    {
+      "path": "/brand/configurator-mobiel.mp4",
+      "kind": "video",
+      "label": "Configurator (schermopname)",
+      "alt": "Schermopname van de configurator op strakwerkk.nl: pakket kiezen, optie aanzetten, offerte",
+      "width": 780,
+      "height": 1688,
+      "duration_s": 11.6,
+      "moments": {
+        "pakketten": 1.3,
+        "premium": 2.7,
+        "opties": 6.2,
+        "offerte": 9.2
+      }
+    },
+    {
+      "path": "/brand/pakketten.png",
+      "kind": "mobiel",
+      "label": "Pakketten",
+      "alt": "De vier pakketten met prijzen op strakwerkk.nl",
+      "width": 780,
+      "height": 1688
+    },
+    {
+      "path": "/brand/offerte.png",
+      "kind": "mobiel",
+      "label": "Offerte",
+      "alt": "Offerte met totaalprijs in de configurator",
+      "width": 780,
+      "height": 1688
+    }
+  ],
   "bases": {
     "nieuw": {
       "name": "Starter",

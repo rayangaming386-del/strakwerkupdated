@@ -92,10 +92,30 @@ export function sceneHtml(scene, assets, { cover = false } = {}) {
         <div class="phone" style="width:${pw}px; left:${Math.round((W - pw) / 2)}px; top:640px"><div class="in"><img src="${esc(a.src)}" alt=""></div></div>
         ${scene.sub ? `<p class="sub txt" style="top:1740px; display:none">${rich(scene.sub)}</p>` : ""}`);
     }
+    case "screen": {
+      // Schermopname in een telefoon. Het scherm (#hole) wordt later door ffmpeg met de echte
+      // video gevuld; de verhouding van de opname blijft behouden.
+      const ph = 1120, pw = Math.round((ph - 32) * (a.width / a.height)) + 32;
+      return shell(`<div class="txt" style="top:250px">${kicker}
+        <h1 style="font-size:${scene.text.length > 40 ? 72 : 84}px; margin-top:26px">${rich(scene.text)}</h1></div>
+        <div class="phone" style="width:${pw}px; left:${Math.round((W - pw) / 2)}px; top:600px; border-radius:30px"><div class="in" style="border-radius:8px"><div id="hole" style="width:${pw - 32}px; height:${Math.round((pw - 32) * (a.height / a.width))}px; background:#000"></div></div></div>`);
+    }
+    case "prices": {
+      const items = (scene.items || []).slice(0, 4);
+      return shell(`<div class="txt" style="top:250px">${kicker}
+        <h1 style="font-size:${scene.text.length > 40 ? 76 : 88}px; margin-top:26px">${rich(scene.text)}</h1></div>
+        <div style="position:absolute; left:96px; right:96px; top:${scene.text.length > 24 ? 640 : 560}px; display:flex; flex-direction:column; gap:22px">
+          ${items.map(it => `<div style="display:grid; grid-template-columns:1fr auto; align-items:center; gap:8px 24px; border:2px solid rgba(185,151,91,.45); padding:30px 34px; background:rgba(17,17,20,.86)">
+            <b style="font-size:48px; letter-spacing:-.02em">${esc(it.name)}</b><b style="font-size:62px; color:#E2CA97; letter-spacing:-.03em">€${esc(it.price_eur)}</b>
+            ${it.pitch ? `<span style="grid-column:1 / -1; font-size:30px; color:#C8C2B8; line-height:1.3">${esc(it.pitch)}</span>` : ""}</div>`).join("")}
+        </div>
+        ${scene.sub ? `<p class="sub txt" style="top:1470px">${rich(scene.sub)}</p>` : ""}`);
+    }
     case "cta": {
       return shell(`<div class="txt" style="top:560px">${kicker}
         <h1 style="font-size:${scene.text.length > 40 ? 96 : 110}px; margin-top:34px">${rich(scene.text)}</h1>
         ${scene.keyword ? `<div style="margin-top:70px"><span class="key"><svg class="wa" viewBox="0 0 24 24" fill="#E2CA97" aria-hidden="true"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm0 18.2a8.2 8.2 0 01-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1112 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 01-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 00-.7.3 3 3 0 00-.9 2.2 5.2 5.2 0 001.1 2.7 11.8 11.8 0 004.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 001.8-1.3 2.2 2.2 0 00.2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg>App <b>‘${esc(scene.keyword)}’</b></span></div>` : ""}
+        ${!scene.keyword && scene.url ? `<div style="margin-top:70px"><span class="key"><b>${esc(scene.url)}</b></span></div>` : ""}
         ${scene.sub ? `<p class="sub" style="margin-top:60px">${rich(scene.sub)}</p>` : ""}</div>
         ${scene.footer ? `<div class="foot">${esc(scene.footer)}</div>` : ""}`);
     }

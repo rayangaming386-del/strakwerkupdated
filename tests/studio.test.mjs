@@ -295,6 +295,8 @@ test("Instagram: geen dubbele post bij een time-out na verzending of gelijktijdi
   assert.ok(!raw.includes("geheim-test-token"), "token niet leesbaar opgeslagen");
   const ov = (await req("/api/hq/studio/overview", { cookie: o })).buf.toString();
   assert.ok(!ov.includes("geheim-test-token"), "token gaat nooit naar de browser");
+  // Live publicatie staat standaard uit (proefstand); deze test gaat over echt plaatsen.
+  assert.equal((await req("/api/hq/studio/office", { method: "PUT", cookie: o, body: { live_publishing: true } })).status, 200);
   const at = new Date(Date.now() + 10 * 60_000).toISOString();
   const r = await req(`/api/hq/studio/pieces/${pieceId}/schedule`, { method: "POST", cookie: o, body: { channel: "instagram", at, method: "api" } });
   assert.equal(r.status, 201, JSON.stringify(r.json)); assert.equal(r.json.method, "api");

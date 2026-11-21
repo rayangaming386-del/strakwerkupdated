@@ -35,12 +35,20 @@ export function build() {
   const html = readFileSync(path.join(root, "index.html"), "utf8");
   const cfg = readConfig(html);
   const wa = (html.match(/wa\.me\/(\d{8,15})/) || [])[1] || null;
+  const email = (html.match(/mailto:([^"?\s]+@[^"?\s]+)/) || [])[1] || null;
+  const phone = (html.match(/tel:(\+\d{8,15})/) || [])[1] || null;
+  let brandAssets = [];
+  try { brandAssets = JSON.parse(readFileSync(path.join(root, "brand", "brand.json"), "utf8")).assets; } catch { brandAssets = []; }
   const projects = JSON.parse(readFileSync(path.join(root, "tools", "v2", "projects.json"), "utf8"));
   const work = readdirSync(path.join(root, "assets", "work")).filter(f => /\.webp$/.test(f) && !/-(800|320|150|360)\.webp$/.test(f));
   return {
     _bron: "Gemaakt door scripts/sync-site-data.mjs uit index.html (CONFIG), tools/v2/projects.json en assets/work. Niet met de hand aanpassen.",
     site: "strakwerkk.nl",
     whatsapp: wa,
+    // Afzender van alle campagnes: StrakWerk zelf.
+    brand: { name: "StrakWerk", site: "strakwerkk.nl", url: "https://www.strakwerkk.nl", email, phone, whatsapp: wa, place: "Zoetermeer" },
+    // Eigen beeldmateriaal (scripts/brand-assets.mjs): schermopname en schermafbeeldingen van de echte site.
+    brand_assets: brandAssets,
     bases: Object.fromEntries(Object.entries(cfg.bases).map(([k, b]) => [k, { name: b.name, price_eur: b.price, pitch: b.pitch || "" }])),
     promo: cfg.promo ? { until: cfg.promo.until, label: cfg.promo.label || "", free: Object.keys(cfg.promo.free || {}) } : null,
     projects: projects.map(p => {

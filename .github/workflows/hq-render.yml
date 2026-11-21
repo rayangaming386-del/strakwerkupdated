@@ -6,7 +6,7 @@ name: HQ render-worker
 on:
   workflow_dispatch:
   schedule:
-    - cron: "23 6,12,17 * * *"
+    - cron: "23 7,15 * * *"
 concurrency:
   group: hq-render
   cancel-in-progress: false
@@ -28,19 +28,26 @@ jobs:
           if [ -z "$DATABASE_URL" ] || [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_SECRET_KEY" ]; then
             echo "HQ-secrets ontbreken; niets te doen."; echo "ok=false" >> "$GITHUB_OUTPUT"
           else echo "ok=true" >> "$GITHUB_OUTPUT"; fi
+      - name: Is er iets te renderen?
+        id: work
+        if: steps.cfg.outputs.ok == 'true'
+        run: |
+          n=$(psql "$DATABASE_URL" -tAc "select count(*) from hq.tasks where agent_key='video' and status='in_wachtrij' and run_after <= now()" 2>/dev/null || echo 1)
+          echo "Renders in de wachtrij: $n"
+          if [ "$n" = "0" ]; then echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
       - uses: actions/checkout@v4
-        if: steps.cfg.outputs.ok == 'true'
+        if: steps.cfg.outputs.ok == 'true' && steps.work.outputs.go == 'true'
       - uses: actions/setup-node@v4
-        if: steps.cfg.outputs.ok == 'true'
+        if: steps.cfg.outputs.ok == 'true' && steps.work.outputs.go == 'true'
         with:
           node-version: 22
           cache: npm
       - name: Afhankelijkheden
-        if: steps.cfg.outputs.ok == 'true'
+        if: steps.cfg.outputs.ok == 'true' && steps.work.outputs.go == 'true'
         run: |
           npm ci --no-audit --no-fund
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
           npx playwright-core install --with-deps chromium
       - name: Renders uitvoeren
-        if: steps.cfg.outputs.ok == 'true'
+        if: steps.cfg.outputs.ok == 'true' && steps.work.outputs.go == 'true'
         run: npm run render-worker

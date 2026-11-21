@@ -36,10 +36,10 @@ export async function processOne({ workerId, log = console.log } = {}) {
     await q("update hq.renders set status='bezig', started_at=coalesce(started_at, now()), error=null where id=$1", [render.id]);
     await heartbeat(task.id, workerId, 180);
     // Alleen beelden van dit project die (nog) zijn vrijgegeven.
-    const allowed = new Set((await q("select path from hq.project_assets where project_id=$1 and social_ok", [render.project_id])).rows.map(r => r.path));
+    const allowed = new Set((await q("select path from hq.project_assets where (project_id is not distinct from $1 or project_id is null) and social_ok", [render.project_id])).rows.map(r => r.path));
     const resolveAsset = async (p) => {
       if (!allowed.has(p)) throw Object.assign(new Error(`Beeld is niet (meer) vrijgegeven: ${p}`), { retryable: false });
-      if (!/^\/assets\/[a-z0-9/_.-]+$/i.test(p) || p.includes("..")) return null;
+      if (!/^\/(assets|brand)\/[a-z0-9/_.-]+$/i.test(p) || p.includes("..")) return null;
       const f = path.join(root, p);
       try { await access(f); return f; } catch { return null; }
     };
@@ -51,18 +51,21 @@ export async function processOne({ workerId, log = console.log } = {}) {
     await storage.ensureBucket();
     await storage.put(`${base}/video.mp4`, await readFile(res.video), "video/mp4");
     await storage.put(`${base}/cover.jpg`, await readFile(res.cover), "image/jpeg");
+    await storage.put(`${base}/subtitles.srt`, await readFile(res.subtitles), "application/x-subrip");
     out = { ...res, base };
     clearInterval(hb);
     await finish(task, runId, workerId, {
       status: "afgerond", result: { duur_s: res.duration_s, bytes: res.bytes, opslag: storage.driver() }, message: `Video klaar (${res.duration_s} s, ${(res.bytes / 1e6).toFixed(1)} MB).`,
       after: async (db) => {
-        await db.query(`update hq.renders set status='klaar', video_key=$2, cover_key=$3, duration_s=$4, width=$5, height=$6, bytes=$7, render_ms=$8, finished_at=now(), error=null where id=$1`,
-          [render.id, `${base}/video.mp4`, `${base}/cover.jpg`, res.duration_s, res.width, res.height, res.bytes, Date.now() - started]);
+        await db.query(`update hq.renders set status='klaar', video_key=$2, cover_key=$3, duration_s=$4, width=$5, height=$6, bytes=$7, render_ms=$8, finished_at=now(), error=null, subtitles_key=$9 where id=$1`,
+          [render.id, `${base}/video.mp4`, `${base}/cover.jpg`, res.duration_s, res.width, res.height, res.bytes, Date.now() - started, `${base}/subtitles.srt`]);
       },
     });
     if (render.origin === "automatisering") {
       const { onAutoRendered } = await import("../api/_lib/content/studio.js");
+      const { onOfficeRendered } = await import("../api/_lib/content/office.js");
       await onAutoRendered(render.piece_id, render.id).catch(e => log(`  automatisch inplannen mislukt: ${e.message}`));
+      await onOfficeRendered(render.piece_id, render.id).catch(e => log(`  kantoor: inplannen mislukt: ${e.message}`));
     }
     log(`✓ ${task.title}`);
   } catch (e) {

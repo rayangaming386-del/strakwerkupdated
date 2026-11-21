@@ -4,7 +4,8 @@ import { randomUUID, createHash } from "node:crypto";
 import { q, one, getPool } from "./db.js";
 import { claimNext, finish, sweepStale, readControl, enqueue, event, ControlStop, LimitError, agentFilter } from "./queue.js";
 import { EXECUTORS, connection } from "./agents/registry.js";
-import { LlmError } from "./agents/llm.js";
+import { LlmError, refreshAi, aiContext } from "./agents/llm.js";
+import { departmentOf } from "./budget.js";
 import { FetchError } from "./agents/fetcher.js";
 
 export function stableHash(obj) {
@@ -58,7 +59,8 @@ async function runOne(claim, workerId) {
   try {
     if (!exec || !conn.connected) throw new LimitError(`Agent ${task.agent_key} is niet gekoppeld${conn.missing?.length ? ` (ontbreekt: ${conn.missing.join(", ")})` : ""}.`);
     const lead = task.lead_id ? await one("select * from hq.leads where id=$1", [task.lead_id]) : null;
-    const out = await exec.run({ task, lead, ctx });
+    await refreshAi();
+    const out = await aiContext.run({ taskId: task.id, department: departmentOf(task.agent_key) }, () => exec.run({ task, lead, ctx }));
     clearTimeout(timer);
     await finish(task, runId, workerId, {
       status: out.status, result: out.result, costUsd: cost, usage, steps, deferS: out.deferS || 0,
@@ -82,10 +84,16 @@ async function runOne(claim, workerId) {
     });
   } catch (e) {
     clearTimeout(timer);
+    if (e.budget) {
+      // AI-budget op of tegoed onvoldoende: taak bewaren (gepauzeerd) en later dezelfde taak hervatten.
+      await finish(task, runId, workerId, { status: "gepauzeerd", costUsd: cost, usage, steps, message: `Wacht op AI-budget: ${e.message}`,
+        after: async (db) => { await db.query("update hq.tasks set max_attempts=max_attempts+1, pause_reason='budget', error=$2 where id=$1", [task.id, e.message]); } });
+      return;
+    }
     if (e instanceof ControlStop) {
       const status = e.kind === "annuleren" ? "geannuleerd" : "gepauzeerd";
       await finish(task, runId, workerId, { status, costUsd: cost, usage, steps, message: `${status === "geannuleerd" ? "Annulering" : "Pauze"} bevestigd door de uitvoerder.`,
-        after: async (db) => { if (status === "gepauzeerd") await db.query("update hq.tasks set attempts=greatest(attempts-1,0) where id=$1", [task.id]); } });
+        after: async (db) => { if (status === "gepauzeerd") await db.query("update hq.tasks set max_attempts=max_attempts+1 where id=$1", [task.id]); } });
       return;
     }
     const retryable = !(e instanceof LimitError) && e.retryable !== false &&

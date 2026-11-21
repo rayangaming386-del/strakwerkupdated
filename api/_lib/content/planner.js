@@ -154,7 +154,8 @@ export function templateAngles(f) {
 export function fixDurations(scenes) {
   const total = () => scenes.reduce((s, x) => s + x.seconds, 0) - 0.5 * (scenes.length - 1);
   let guard = 0;
-  while (total() < 16 && guard++ < 40) scenes.forEach(s => { s.seconds = Math.min(5.5, Math.round((s.seconds + 0.2) * 10) / 10); });
+  const max = (s) => s.type === "screen" ? 8 : 5.5;
+  while (total() < 16 && guard++ < 40) scenes.forEach(s => { s.seconds = Math.min(max(s), Math.round((s.seconds + 0.2) * 10) / 10); });
   while (total() > 24 && guard++ < 80) scenes.forEach(s => { s.seconds = Math.max(2.4, Math.round((s.seconds - 0.2) * 10) / 10); });
   scenes.forEach((s, i) => { s.id = s.id || `s${i + 1}`; if (!s.sub) delete s.sub; if (!s.asset2) delete s.asset2; });
   return total();
@@ -165,7 +166,7 @@ const LLM_SCHEMA = {
   properties: { hoeken: { type: "array", items: {
     type: "object", additionalProperties: false, required: ["key", "naam", "waarom", "scenes", "instagram", "tiktok"],
     properties: {
-      key: { type: "string", enum: ["pijnpunt", "prijzen", "rondleiding"] }, naam: { type: "string" }, waarom: { type: "string" },
+      key: { type: "string" }, naam: { type: "string" }, waarom: { type: "string" },
       scenes: { type: "array", items: { type: "object", additionalProperties: false, required: ["id", "text"], properties: { id: { type: "string" }, kicker: { type: "string" }, text: { type: "string" }, sub: { type: "string" } } } },
       instagram: { type: "string" }, tiktok: { type: "string" },
     } } } },
@@ -176,12 +177,13 @@ const LLM_SCHEMA = {
  * scènestructuur (beelden, volgorde, duur en oproep tot actie blijven uit het sjabloon).
  */
 export async function planAngles(f, { ctx } = {}) {
-  const base = templateAngles(f);
-  const allowedPrices = [f.price_from_eur];
+  const base = f.kind === "merk" ? brandAngles(f) : templateAngles(f);
+  // Alleen prijzen uit de pakketten van de website (Starter, Premium, Pro, Redesign).
+  const allowedPrices = f.allowed_prices || [f.price_from_eur];
   const check = (angles) => angles.flatMap(an => [...an.scenes.map(s => `${s.kicker || ""} ${s.text} ${s.sub || ""}`), an.captions.instagram, an.captions.tiktok]).flatMap(t => contentGuard(t, { allowedPrices }));
   const problems = check(base);
   if (problems.length) throw Object.assign(new Error(`Sjabloon afgekeurd door controle: ${[...new Set(problems)].join(", ")}`), { retryable: false });
-  if (!llmConfigured() || !ctx) return { angles: base, methode: "sjabloon" };
+  if (!llmConfigured() || !ctx) return { angles: base, methode: "voorbeelddata (AI staat uit)" };
   try {
     await ctx.step("Teksten schrijven (Claude)");
     const r = await ctx.llm(structured({
@@ -203,7 +205,90 @@ export async function planAngles(f, { ctx } = {}) {
     if (check(merged).length) return { angles: base, methode: "sjabloon (tekst van Claude afgekeurd door controle)" };
     return { angles: merged, methode: "Claude" };
   } catch (e) {
-    if (e.retryable === false || /Kostenlimiet|Stappenlimiet/.test(e.message)) throw e;
+    if (e.budget || e.retryable === false || /Kostenlimiet|Stappenlimiet/.test(e.message)) throw e;
     return { angles: base, methode: `sjabloon (Claude niet beschikbaar: ${String(e.message).slice(0, 80)})` };
   }
+}
+
+// ── Campagnes voor StrakWerk zelf (zonder klantproject) ───────────────────────
+// Afzender is altijd StrakWerk: eigen aanbod (pakketprijzen uit de website), eigen beelden
+// (schermopname en schermafbeeldingen van strakwerkk.nl) en eigen contactgegevens.
+export const BRAND_TOPICS = {
+  prijs: { title: "Wat kost een website laten maken?", keyword: "PRIJS" },
+  configurator: { title: "Je websiteprijs in één minuut", keyword: "OFFERTE" },
+  pakketten: { title: "Welk websitepakket past bij jou?", keyword: "PAKKET" },
+};
+
+/** Feiten voor een StrakWerk-campagne: merkgegevens, prijzen van de site en eigen beelden. */
+export function brandFactsFor({ brand, site, prices, assets, audienceKey, goal, topicKey, now = new Date() }) {
+  const aud = AUDIENCES[audienceKey] || AUDIENCES.ondernemers;
+  const promoActive = site.promo && new Date(site.promo.until) > now;
+  return {
+    kind: "merk", topic: { key: topicKey, ...BRAND_TOPICS[topicKey] },
+    brand, audience: { key: audienceKey, ...aud }, goal,
+    packages: ["nieuw", "premium", "pro"].map(k => ({ key: k, name: site.bases[k].name, price_eur: site.bases[k].price_eur, pitch: site.bases[k].pitch })),
+    redesign: site.bases.redesign ? { name: site.bases.redesign.name, price_eur: site.bases.redesign.price_eur, pitch: site.bases.redesign.pitch } : null,
+    price_from_eur: prices.from_eur,
+    assets: assets.map(a => ({ id: a.id, path: a.path, kind: a.kind, label: a.label, duration_s: a.duration_s ? Number(a.duration_s) : null, moments: a.moments || null, width: a.width, height: a.height })),
+    whatsapp: brand.whatsapp, whatsapp_display: phoneNl(brand.whatsapp), site: brand.site,
+    promo: promoActive ? { until: site.promo.until, label: site.promo.label, text: `${site.promo.free.map(k => PROMO_TEXT[k] || k).join(" en ")} gratis bij elke website` } : null,
+  };
+}
+
+function brandCaptions(f, opening, extra = "") {
+  const list = f.packages.map(p => `• ${p.name}: €${p.price_eur}. ${p.pitch}`).join("\n");
+  const tags = ["websitelatenmaken", "webdesign", "ondernemer", "zzp", "mkb", "strakwerk"].map(t => `#${t}`).join(" ");
+  const instagram = `${opening}\n\nBij StrakWerk zie je de prijs vooraf. Vaste pakketten, eenmalig:\n${list}\n\n${extra ? `${extra}\n\n` : ""}Bereken jouw website op ${f.site}. Vragen? App ‘${f.topic.keyword}’ naar ${f.whatsapp_display}.\n\n${tags}`;
+  const tiktok = `${opening} Bij StrakWerk zie je het vooraf: websites vanaf €${f.price_from_eur}. Bereken jouw website op ${f.site}. #websitelatenmaken #webdesign #ondernemer #strakwerk`;
+  return { instagram, tiktok, promo_line: f.promo ? `Actie tot en met ${new Date(new Date(f.promo.until).getTime() - 1).toLocaleDateString("nl-NL", { day: "numeric", month: "long", timeZone: "Europe/Amsterdam" })}: ${f.promo.text}.` : null, promo_until: f.promo?.until || null };
+}
+
+/** Drie hoeken voor een StrakWerk-onderwerp. Geen klantproject nodig. */
+export function brandAngles(f) {
+  const rec = f.assets.find(a => a.kind === "video" && /configurator/.test(a.path));
+  const pak = f.assets.find(a => /pakketten/.test(a.path));
+  const off = f.assets.find(a => /offerte/.test(a.path));
+  if (!rec || !pak || !off) throw Object.assign(new Error("Eigen beelden ontbreken (schermopname configurator, pakketten, offerte). Draai npm run brand-assets."), { retryable: false, code: "geen_eigen_beelden" });
+  const m = rec.moments || {};
+  const recLen = Number(rec.duration_s) || 10;
+  const clipFrom = (key, len) => ({ start: Math.max(0, Math.min((m[key] ?? 1) - 0.3, recLen - len)) });
+  const aud = f.audience;
+  const prices = (text = "Vaste prijzen, **eenmalig**", seconds = 4.2) => ({ type: "prices", kicker: "Pakketten van StrakWerk", text, items: f.packages, seconds });
+  const cta = (seconds = 4) => ({ type: "cta", kicker: "StrakWerk · webdesign uit Zoetermeer", text: "Bereken jouw website op **strakwerkk.nl**", url: f.site, sub: f.whatsapp_display ? `Vragen? WhatsApp ${f.whatsapp_display}` : null, seconds });
+  const screen = (text, key = "pakketten", seconds = 7) => ({ type: "screen", kicker: "De configurator op strakwerkk.nl", text, asset: rec.path, clip: clipFrom(key, seconds), seconds });
+  const total = (seconds = 3.2) => ({ type: "phone", kicker: "Jouw offerte", text: "Je ziet **direct je totaal**", asset: off.path, seconds });
+  const hook = (text, sub, asset = pak.path) => ({ type: "hook", kicker: `Voor ${aud.label.toLowerCase()}`, text, sub, asset, seconds: 3.4 });
+  const T = {
+    prijs: [
+      { key: "vraag", name: "De vraag die iedereen stelt", why: "Beantwoordt de meest gestelde vraag direct met de echte prijzen en laat de configurator zien.",
+        scenes: [hook("Wat kost een **website laten maken?**", "Bij StrakWerk zie je het vooraf."), prices(), screen("Stel je website **zelf samen**"), total(), cta()] },
+      { key: "zonder_verrassingen", name: "Geen verrassingen achteraf", why: "Benadrukt vaste pakketprijzen en het zelf uitrekenen, zonder beloftes over resultaten.",
+        scenes: [hook("Een website laten maken **zonder verrassingen?**", "Vaste pakketten, eenmalige prijs."), prices("Je weet vooraf **wat je betaalt**"), screen("Kies je pakket en opties", "premium"), total(), cta()] },
+      { key: "vanaf", name: `Vanaf €${f.price_from_eur}`, why: "Opent met de instapprijs uit de website en laat zien wat er in de pakketten zit.",
+        scenes: [hook(`Een eigen website **vanaf €${f.price_from_eur}**`, "Wat krijg je daarvoor?"), prices("Drie pakketten, **vaste prijzen**"), screen("Reken het zelf uit", "pakketten"), total(), cta()] },
+    ],
+    configurator: [
+      { key: "minuut", name: "In één minuut", why: "Laat de configurator zelf het werk doen; de kijker ziet precies wat hij krijgt.",
+        scenes: [hook("Je websiteprijs **in één minuut**", "Zonder afspraak, zonder offertegesprek."), screen("Kies een **pakket**", "pakketten", 6), screen("Zet aan wat je **nodig hebt**", "opties", 5), total(), cta()] },
+      { key: "zelf", name: "Zelf samenstellen", why: "Ondernemers die zelf willen kiezen.",
+        scenes: [hook("Stel je website **zelf samen**", "Zie meteen wat het kost."), prices(), screen("Pakket en opties in één scherm", "premium"), total(), cta()] },
+      { key: "offerte", name: "Direct een offerte", why: "Eindigt bij de offerte die je via WhatsApp stuurt.",
+        scenes: [hook("Wil je **direct een offerte?**", "Reken het uit op strakwerkk.nl."), screen("Kies wat je wilt", "premium", 6), total(3.6), prices("Alle pakketten op een rij", 3.6), cta()] },
+    ],
+    pakketten: [
+      { key: "welk", name: "Welk pakket past bij jou?", why: "Helpt kiezen tussen Starter, Premium en Pro met de echte omschrijvingen.",
+        scenes: [hook("Welk websitepakket **past bij jou?**", "Starter, Premium of Pro."), prices("Drie pakketten, **vaste prijzen**", 5.2), screen("Vergelijk ze in de configurator", "pakketten"), total(), cta()] },
+      { key: "premium", name: "Premium uitgelicht", why: "Licht het pakket uit dat op de site als aanrader staat.",
+        scenes: [hook(`Premium: **€${f.packages[1].price_eur}**`, f.packages[1].pitch), screen("Kies Premium en je extra's", "premium"), total(), prices("Of kies Starter of Pro"), cta()] },
+      { key: "starter", name: "Starter uitgelicht", why: "Voor ondernemers die klein willen beginnen.",
+        scenes: [hook(`Starter: **€${f.packages[0].price_eur}**`, f.packages[0].pitch), prices(), screen("Breid uit wanneer je wilt", "opties"), total(), cta()] },
+    ],
+  }[f.topic.key];
+  if (!T) throw Object.assign(new Error("Onbekend onderwerp."), { retryable: false });
+  return T.map(a => {
+    a.scenes.forEach(s => { if (!s.sub) delete s.sub; });
+    fixDurations(a.scenes);
+    const opening = a.scenes[0].text.replace(/\*\*/g, "");
+    return { ...a, opening, cta: "Bereken jouw website op strakwerkk.nl", assets_used: [...new Set(a.scenes.map(s => s.asset).filter(Boolean))], captions: brandCaptions(f, opening, a.scenes.some(s => s.type === "screen") ? "In de configurator stel je zelf je website samen en zie je direct je totaal." : "") };
+  });
 }

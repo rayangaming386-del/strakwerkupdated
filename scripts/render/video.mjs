@@ -41,11 +41,12 @@ export function validateScript(script) {
   if (!Array.isArray(s) || s.length < 3 || s.length > 9) throw new RenderError("Een video heeft 3 tot 9 scènes nodig.");
   let total = 0;
   for (const [i, sc] of s.entries()) {
-    if (!["hook", "shot", "phone", "cta"].includes(sc.type)) throw new RenderError(`Scène ${i + 1}: onbekend type.`);
+    if (!["hook", "shot", "phone", "cta", "screen", "prices"].includes(sc.type)) throw new RenderError(`Scène ${i + 1}: onbekend type.`);
     if (!sc.text || String(sc.text).length > 140) throw new RenderError(`Scène ${i + 1}: tekst ontbreekt of is langer dan 140 tekens.`);
-    if (["shot", "phone"].includes(sc.type) && !sc.asset) throw new RenderError(`Scène ${i + 1}: beeld ontbreekt.`);
-    const sec = Number(sc.seconds);
-    if (!(sec >= 1.5 && sec <= 6)) throw new RenderError(`Scène ${i + 1}: duur moet tussen 1,5 en 6 seconden liggen.`);
+    if (["shot", "phone", "screen"].includes(sc.type) && !sc.asset) throw new RenderError(`Scène ${i + 1}: beeld ontbreekt.`);
+    if (sc.type === "prices" && !(sc.items || []).length) throw new RenderError(`Scène ${i + 1}: prijzen ontbreken.`);
+    const sec = Number(sc.seconds), max = sc.type === "screen" ? 8 : 6;
+    if (!(sec >= 1.5 && sec <= max)) throw new RenderError(`Scène ${i + 1}: duur moet tussen 1,5 en ${max} seconden liggen.`);
     total += sec;
   }
   const dur = total - FADE * (s.length - 1);
@@ -79,6 +80,12 @@ export async function renderVideo({ script, root, resolveAsset, outDir, signal, 
     if (assets[p]) continue;
     const file = await resolveAsset(p);
     if (!file) throw new RenderError(`Beeld niet gevonden: ${p}`);
+    if (/\.(mp4|mov|webm)$/i.test(file)) {
+      const v = await probeInfo(file, ffmpeg).catch(() => null);
+      if (!v?.width) throw new RenderError(`Schermopname niet leesbaar: ${p}`);
+      assets[p] = { src: "", file, video: true, width: v.width, height: v.height, duration: v.duration };
+      continue;
+    }
     const dim = imageSize(await readFile(file));
     if (!dim) throw new RenderError(`Beeldformaat niet herkend: ${p}`);
     assets[p] = { src: pathToFileURL(file).href, width: dim.width, height: dim.height };
@@ -98,30 +105,52 @@ export async function renderVideo({ script, root, resolveAsset, outDir, signal, 
       await page.evaluate(() => document.fonts.ready);
       const broken = await page.evaluate(() => [...document.images].filter(i => !i.complete || !i.naturalWidth).length);
       if (broken) throw new RenderError("Een beeld kon niet worden geladen tijdens het tekenen.");
+      // Plek van de schermopname (in px van de uiteindelijke 1080×1920-video).
+      const hole = await page.evaluate(() => { const r = document.getElementById("hole")?.getBoundingClientRect(); return r ? { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height) } : null; });
       await page.screenshot({ path: file, type: file.endsWith(".jpg") ? "jpeg" : "png", quality: file.endsWith(".jpg") ? 88 : undefined });
+      return hole;
     };
+    const holes = [];
     for (const [i, sc] of script.scenes.entries()) {
       if (signal?.aborted) throw new RenderError("Afgebroken.", { retryable: true });
       const f = path.join(outDir, `scene-${i}.png`);
-      await draw(sc, f);
+      holes[i] = await draw(sc, f);
       frames.push(f);
     }
     // Cover: de openingsscène, met de projectnaam als ondertitel als die er is.
     const coverScene = { ...script.scenes[0], footer: script.cover_footer || script.scenes[0].footer };
     await page.setViewportSize({ width: W, height: H });
     await draw(coverScene, path.join(outDir, "cover.jpg"), { cover: true });
+    script.__holes = holes;
   } finally {
     await browser.close().catch(() => {});
   }
+  const holes = script.__holes; delete script.__holes;
 
   await onStep("Video monteren (ffmpeg)");
   const args = ["-y", "-hide_banner", "-loglevel", "error"];
   const lens = script.scenes.map(s => Number(s.seconds));
-  frames.forEach(f => args.push("-i", f));
+  // Scènes met een schermopname: achtergrondbeeld als lus (-loop 1) en de video erover.
+  frames.forEach((f, i) => { if (script.scenes[i].type === "screen") args.push("-loop", "1", "-t", String(lens[i]), "-i", f); else args.push("-i", f); });
+  const videoInputs = {};
+  let nextIdx = frames.length;
+  script.scenes.forEach((sc, i) => { if (sc.type === "screen") { videoInputs[i] = nextIdx++; args.push("-i", assets[sc.asset].file); } });
+  const audioIdx = nextIdx;
   args.push("-f", "lavfi", "-t", String(duration), "-i", "anullsrc=r=48000:cl=stereo");
   const parts = [];
   lens.forEach((len, i) => {
-    const n = Math.round(len * FPS);
+    const n = Math.round(len * FPS), sc = script.scenes[i];
+    if (sc.type === "screen") {
+      const h = holes[i];
+      if (!h) throw new RenderError(`Scène ${i + 1}: plek voor de schermopname niet gevonden.`);
+      const a = assets[sc.asset], start = Math.max(0, Number(sc.clip?.start) || 0);
+      // Stuk uit de opname; is het korter dan de scène, dan blijft het laatste beeld staan.
+      parts.push(`[${videoInputs[i]}:v]trim=start=${start}:duration=${len},setpts=PTS-STARTPTS,fps=${FPS},scale=${h.w}:${h.h}:flags=lanczos,tpad=stop_mode=clone:stop_duration=${len},trim=duration=${len},setsar=1[sv${i}]`);
+      parts.push(`[${i}:v]scale=${W}:${H}:flags=lanczos,fps=${FPS},setsar=1[bg${i}]`);
+      parts.push(`[bg${i}][sv${i}]overlay=${h.x}:${h.y}:shortest=1,trim=duration=${len},setpts=PTS-STARTPTS,format=yuv420p[v${i}]`);
+      void a;
+      return;
+    }
     // Beelden zijn op 2× getekend (2160×3840): zoompan op hoge resolutie geeft een rustige, schokvrije zoom.
     parts.push(`[${i}:v]zoompan=z='1+0.035*on/${n}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=${n}:s=${W}x${H}:fps=${FPS},setsar=1,format=yuv420p[v${i}]`);
   });
@@ -132,7 +161,7 @@ export async function renderVideo({ script, root, resolveAsset, outDir, signal, 
     acc = out; accLen += lens[i] - FADE;
   }
   const video = path.join(outDir, "video.mp4");
-  args.push("-filter_complex", parts.join(";"), "-map", "[vout]", "-map", `${frames.length}:a`,
+  args.push("-filter_complex", parts.join(";"), "-map", "[vout]", "-map", `${audioIdx}:a`,
     "-c:v", "libx264", "-preset", "medium", "-crf", "20", "-profile:v", "high", "-level", "4.1", "-pix_fmt", "yuv420p", "-r", String(FPS),
     "-c:a", "aac", "-b:a", "96k", "-shortest", "-movflags", "+faststart", video);
   await run(ffmpeg, args, { signal, timeoutMs: 600_000 });
@@ -141,7 +170,10 @@ export async function renderVideo({ script, root, resolveAsset, outDir, signal, 
   const info = await probeInfo(video, ffmpeg);
   if (info.width !== W || info.height !== H) throw new RenderError(`Resultaat heeft het verkeerde formaat (${info.width}×${info.height}).`);
   if (info.duration < 14 || info.duration > 26) throw new RenderError(`Resultaat duurt ${info.duration.toFixed(1)} s.`);
-  return { video, cover: path.join(outDir, "cover.jpg"), duration_s: Math.round(info.duration * 100) / 100, width: info.width, height: info.height, bytes: (await stat(video)).size, frames };
+  // Ondertitels uit het script (zelfde tijden als de scènes), voor platforms die SRT accepteren.
+  const subtitles = path.join(outDir, "subtitles.srt");
+  await writeFile(subtitles, srtFromScript(script));
+  return { video, cover: path.join(outDir, "cover.jpg"), subtitles, duration_s: Math.round(info.duration * 100) / 100, width: info.width, height: info.height, bytes: (await stat(video)).size, frames };
 }
 
 export async function probeInfo(file, ffmpeg = process.env.HQ_FFMPEG || "ffmpeg") {
@@ -156,4 +188,16 @@ export async function probeInfo(file, ffmpeg = process.env.HQ_FFMPEG || "ffmpeg"
       catch { reject(new RenderError("Video kon niet worden gecontroleerd.")); }
     });
   });
+}
+
+/** SRT uit het script: per scène de tekst op het scherm, op de tijden van de montage. */
+export function srtFromScript(script) {
+  const t = (sec) => { const ms = Math.round(sec * 1000); const h = Math.floor(ms / 3600000), m = Math.floor(ms / 60000) % 60, s = Math.floor(ms / 1000) % 60; return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")},${String(ms % 1000).padStart(3, "0")}`; };
+  let at = 0;
+  return script.scenes.map((sc, i) => {
+    const len = Number(sc.seconds), start = i === 0 ? 0 : at + FADE / 2, end = at + len - (i === script.scenes.length - 1 ? 0 : FADE / 2);
+    at += len - FADE;
+    const text = [sc.text, sc.type === "cta" && sc.keyword ? `App ‘${sc.keyword}’` : sc.type === "cta" && sc.url ? sc.url : sc.sub].filter(Boolean).join("\n").replace(/\*\*/g, "");
+    return `${i + 1}\n${t(start)} --> ${t(end)}\n${text}\n`;
+  }).join("\n");
 }
