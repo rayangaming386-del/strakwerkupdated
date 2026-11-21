@@ -6,6 +6,7 @@ import { json, errorResponse } from "./_lib/http.js";
 import { runWorker } from "./_lib/worker.js";
 import { runRetention } from "./_lib/retention.js";
 import { contentCron } from "./_lib/content/cron.js";
+import { klantCron } from "./_lib/klant/cron.js";
 import { timingSafeEqual } from "node:crypto";
 
 function authorized(request) {
@@ -19,10 +20,13 @@ function authorized(request) {
 export async function handle(request) {
   try {
     if (!authorized(request)) return json({ error: "geen_toegang" }, 401);
+    const t0 = Date.now();
     const retention = await runRetention();
     const content = await contentCron().catch(e => ({ fout: e.message }));
-    const worker = await runWorker({ source: "cron", budgetMs: 40_000 });
-    return json({ ok: true, retention, content, worker });
+    const klant = await klantCron().catch(e => ({ fout: e.message }));
+    // Resterende tijd van deze functie (max. 60 s) voor taken; een taak start alleen als hij past.
+    const worker = await runWorker({ source: "cron", budgetMs: Math.max(10_000, 57_000 - (Date.now() - t0)) });
+    return json({ ok: true, retention, content, klant, worker });
   } catch (e) {
     return errorResponse(e);
   }

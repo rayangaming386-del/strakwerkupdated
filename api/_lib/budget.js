@@ -11,7 +11,7 @@ import { env } from "./env.js";
 import { HttpError } from "./http.js";
 
 export const DEPARTMENTS = { marketing: "Marketing", scout: "Scout", auditor: "Auditor", sales: "Sales", overig: "Overig" };
-export const departmentOf = (agentKey) => ({ content: "marketing", scout: "scout", auditor: "auditor", sales: "sales" })[agentKey] || "overig";
+export const departmentOf = (agentKey) => ({ content: "marketing", scout: "scout", auditor: "auditor", sales: "sales", acquisitie: "sales", teamleider: "overig" })[agentKey] || "overig";
 
 export class BudgetError extends Error {
   constructor(message, reason = "plafond") { super(message); this.reason = reason; this.retryable = false; this.budget = true; }

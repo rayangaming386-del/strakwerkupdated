@@ -246,7 +246,9 @@ form = f'''<form class="form ct" id="lead" novalidate>
         <div class="field"><label for="f-msg">Bericht</label><textarea id="f-msg" placeholder="Bijvoorbeeld: ik heb een garage en wil een site met kentekencheck."></textarea></div>
         <a class="btn btn--gold" id="f-send" href="https://wa.me/{SC.WA}" target="_blank" rel="noopener">Verstuur via WhatsApp</a>
         <p class="note">Je bericht opent in WhatsApp, klaar om te versturen. Liever e-mail? <a id="f-mail" href="mailto:{SC.MAIL}" class="tl">Verstuur via e-mail</a></p>
-      </form>'''
+        <p class="note">Je aanvraag komt ook in mijn eigen klantoverzicht, zodat ik hem niet mis. Zie de <a href="/privacy" class="tl">privacyverklaring</a>.</p>
+      </form>
+      <script defer src="/assets/sw-aanvraag.js"></script>'''
 where = f'''<div class="d-text">
         <p>StrakWerk is een webdesignbedrijf uit Zoetermeer. Ik werk voor ondernemers in Zoetermeer, Den Haag, Rijswijk, Delft, het Westland en de rest van Nederland, op afstand.</p>
         <p>Projecten in de buurt: <a href="/werk/glow" class="tl">Glow &amp; Laser For You</a> in Zoetermeer, <a href="/werk/vagpro" class="tl">VAGPRO</a> en <a href="/werk/detak" class="tl">Sleepdienst De Tak</a> in Den Haag, en <a href="/werk/cartronic" class="tl">CarTronic</a> in Rijswijk.</p>

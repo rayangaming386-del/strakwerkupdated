@@ -15,6 +15,7 @@ import { llmConfigured, llmModel } from "./_lib/agents/llm.js";
 import * as vercelSrc from "./_lib/analytics/vercel.js";
 import * as sb from "./_lib/supabase.js";
 import { handleStudio } from "./_lib/content/routes.js";
+import { handleKlant, isKlantPath } from "./_lib/klant/routes.js";
 import { dispatchRenderWorker, dispatchConfigured } from "./_lib/content/dispatch.js";
 import { driver as storageDriver } from "./_lib/content/storage.js";
 import { missingIg } from "./_lib/content/instagram.js";
@@ -273,6 +274,10 @@ export async function handle(request) {
     if ((p = route(path, "members/:id")) && m === "PATCH") { assertPerm(auth, "members.manage"); return json(await patchMember(p.id, body, auth)); }
     if (m === "GET" && path === "audit") { assertPerm(auth, "settings.write"); return json({ entries: (await q("select * from hq.audit_log order by at desc limit 200")).rows }); }
 
+    if (isKlantPath(path)) {
+      const r = await handleKlant({ m, path, url, body, auth, startWorker });
+      if (r) return r;
+    }
     if (path.startsWith("studio/") || path.startsWith("ai/") || path.startsWith("media/") || path.startsWith("integrations/") || /^leads\/[^/]+\/campaign$/.test(path)) {
       const kick = () => { startWorker(); waitUntil(dispatchRenderWorker()); };
       if (m === "GET" && path === "studio/overview") kickIfNeeded(waitUntil).catch(() => {});

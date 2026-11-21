@@ -18,12 +18,14 @@
     "sync-site-data": "node scripts/sync-site-data.mjs",
     "demo:glow": "node scripts/demo-glow.mjs",
     "brand-assets": "node scripts/brand-assets.mjs",
-    "demo:strakwerk": "node scripts/demo-strakwerk.mjs"
+    "demo:strakwerk": "node scripts/demo-strakwerk.mjs",
+    "demo:klanten": "node scripts/demo-klanten.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.9.0",
     "@vercel/functions": "^3.11.3",
     "jose": "^6.2.17",
+    "nodemailer": "^6.9.16",
     "pg": "^8.23.1"
   },
   "devDependencies": {
