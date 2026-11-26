@@ -6,7 +6,7 @@
 // Zonder route of met "live" uit wordt niets verstuurd: het bericht wordt als TEST vastgelegd.
 // Antwoorden gaan naar MAIL_REPLY_TO (Cloudflare Email Routing → de Worker), zodat ze
 // automatisch op de juiste klantkaart komen; anders naar het afzenderadres zelf.
-import { createHmac } from "node:crypto";
+import { createHmac, randomUUID } from "node:crypto";
 import { env } from "../env.js";
 
 const E = (k) => (process.env[k] ?? "").trim();
@@ -104,7 +104,7 @@ async function sendGmail(mime) {
 
 // ── SMTP (alleen Node) ───────────────────────────────────────────────────────
 let transport = null;
-async function sendSmtp({ to, subject, text, outreachId, leadId }) {
+async function smtpTransport() {
   // Niet-letterlijke import: zo komt nodemailer niet in de Cloudflare-bundel.
   const modName = "nodemailer";
   if (!transport) {
@@ -112,6 +112,10 @@ async function sendSmtp({ to, subject, text, outreachId, leadId }) {
     transport = nodemailer.createTransport({ host: E("SMTP_HOST"), port: Number(E("SMTP_PORT")) || 465, secure: (Number(E("SMTP_PORT")) || 465) === 465,
       auth: { user: E("SMTP_USER"), pass: E("SMTP_PASS") }, connectionTimeout: 15_000, greetingTimeout: 10_000, socketTimeout: Number(E("SMTP_TIMEOUT_MS")) || 20_000 });
   }
+  return transport;
+}
+async function sendSmtp({ to, subject, text, outreachId, leadId }) {
+  await smtpTransport();
   try {
     const info = await transport.sendMail({ from: `Rayan van StrakWerk <${fromAddress()}>`, to, replyTo: replyTo() || undefined, subject, text: text + footer(leadId), messageId: messageIdFor(outreachId),
       headers: { "List-Unsubscribe": `<${unsubscribeUrl(leadId)}>, <mailto:${fromAddress()}?subject=afmelden>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" } });
@@ -133,4 +137,24 @@ export async function sendMail({ outreachId, leadId, to, subject, text, inReplyT
     return { messageId: r.messageId || messageIdFor(outreachId), gmailId: r.gmailId, route };
   }
   return { ...(await sendSmtp({ outreachId, leadId, to, subject, text })), route };
+}
+
+/**
+ * Korte melding aan de eigenaar zelf (geen marketing, dus geen afmeldregel). Tip: laat meldingen
+ * naar een ánder adres gaan dan het afzenderadres; mail aan jezelf geeft in Gmail vaak geen pushmelding.
+ */
+export async function sendSimpleMail({ to, subject, text }) {
+  const route = mailRoute();
+  if (!route) throw new MailError(`E-mail is niet gekoppeld (${missingMail().join(", ")}).`);
+  if (route === "gmail_api") {
+    const mime = [
+      `From: ${encWord("StrakWerk HQ")} <${fromAddress()}>`, `To: ${clean(to)}`, `Subject: ${encWord(clean(subject))}`,
+      `Message-ID: <${randomUUID()}@hq.strakwerkk.nl>`, `Date: ${new Date().toUTCString()}`,
+      "MIME-Version: 1.0", "Content-Type: text/plain; charset=UTF-8", "Content-Transfer-Encoding: base64",
+    ].join("\r\n") + `\r\n\r\n${b64(text).replace(/(.{76})/g, "$1\r\n")}\r\n`;
+    await sendGmail(mime);
+    return { route };
+  }
+  await (await smtpTransport()).sendMail({ from: `StrakWerk HQ <${fromAddress()}>`, to, subject, text });
+  return { route };
 }

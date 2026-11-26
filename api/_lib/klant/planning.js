@@ -65,6 +65,18 @@ async function candidates(env, now = new Date()) {
   for (const qu of (await q(`select q.id, q.lead_id, q.sent_at, l.company from hq.quotes q join hq.leads l on l.id=q.lead_id where q.status='verstuurd' and q.interest and q.sent_at < now() - interval '5 days' and q.is_test=${T}
       and not exists (select 1 from hq.outreach o where o.quote_id=q.id and o.status in ('gepland'))`)).rows)
     add({ score: 70, department: "sales", title: `Bel ${qu.company} over de offerte`, reason: "Belangstelling getoond, al 5 dagen geen beslissing", expected: "Offerte naar akkoord", next_step: "Kort bellen of appen; afspraak voorstellen", lead_id: qu.lead_id, quote_id: qu.id, key: `offerte_bellen:${qu.id}` });
+  // Offerte bekeken maar nog geen akkoord: het beste moment om even te bellen.
+  for (const qu of (await q(`select q.id, q.lead_id, q.view_count, l.company from hq.quotes q join hq.leads l on l.id=q.lead_id
+      where q.status='verstuurd' and q.viewed_at is not null and q.viewed_at < $1::timestamptz - interval '2 hours' and (q.valid_until is null or q.valid_until > $1::timestamptz) and q.is_test=${T}`, [now])).rows)
+    add({ score: 85, department: "sales", title: `Bel ${qu.company}: offerte bekeken`, reason: `Offerte ${qu.view_count} keer bekeken, nog geen akkoord`, expected: "Twijfel wegnemen: offerte naar akkoord", next_step: "Kort bellen: vragen of alles duidelijk is en wat er nog nodig is om te starten", lead_id: qu.lead_id, quote_id: qu.id, key: `offerte_bekeken:${qu.id}` });
+  // Akkoord, maar de aanbetaling is na een dag nog niet als ontvangen vastgelegd.
+  for (const qu of (await q(`select q.id, q.lead_id, q.deposit_cents, l.company from hq.quotes q join hq.leads l on l.id=q.lead_id
+      where q.status='geaccepteerd' and coalesce(q.deposit_cents,0) > 0 and q.accepted_at < $1::timestamptz - interval '1 day' and q.is_test=${T}
+        and not exists (select 1 from hq.payments p where p.lead_id=q.lead_id and p.kind in ('aanbetaling','volledig'))`, [now])).rows)
+    add({ score: 75, department: "sales", title: `Aanbetaling ${qu.company} controleren`, reason: `Akkoord gegeven; aanbetaling van €${(qu.deposit_cents / 100).toFixed(2)} nog niet vastgelegd`, expected: "Project kan van start", next_step: "Kijk in je bank; ontvangen? Leg de betaling vast op de klantkaart. Zo niet: stuur een vriendelijke herinnering", lead_id: qu.lead_id, quote_id: qu.id, key: `aanbetaling:${qu.id}` });
+  // Verlopen offerte: niet laten liggen.
+  for (const qu of (await q(`select q.id, q.lead_id, l.company from hq.quotes q join hq.leads l on l.id=q.lead_id where q.status='verstuurd' and q.valid_until < $1::timestamptz and q.is_test=${T}`, [now])).rows)
+    add({ score: 65, department: "sales", title: `Offerte ${qu.company} verlopen`, reason: "Geldigheid voorbij zonder beslissing", expected: "Laatste kans op deze opdracht", next_step: "Bel of app; verleng de offerte met één klik op de klantkaart als de klant nog wil", lead_id: qu.lead_id, quote_id: qu.id, key: `offerte_verlopen:${qu.id}` });
   for (const p of (await q(`select id, name, lead_id from hq.projects where status='intake' and intake_complete_at is null and is_test=${T}`)).rows)
     add({ score: 60, department: "project", title: `Intake ${p.name} afronden`, reason: "Materiaal nog niet compleet", expected: "Project kan starten", next_step: "Herinnering versturen of samen invullen", lead_id: p.lead_id, key: `intake:${p.id}` });
   for (const p of (await q(`select id, name, lead_id from hq.projects where status='websitecontrole' and is_test=${T}`)).rows)

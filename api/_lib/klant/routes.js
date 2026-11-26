@@ -12,9 +12,20 @@ import * as plan from "./planning.js";
 import * as proj from "./project.js";
 import { runCommand } from "./command.js";
 import { budgetOverview } from "../budget.js";
-import { mailConfigured } from "./mail.js";
+import { mailConfigured, fromAddress } from "./mail.js";
+import { notifyTarget } from "./notify.js";
 
-const PREFIXES = ["vandaag", "opdracht", "klanten", "offertes", "outreach", "agenda", "kantoor", "acties", "fouten", "scout", "segmenten", "experimenten", "promptversies", "partners", "bewijs", "projecten", "resultaten", "voorstellen", "observaties"];
+/** IBAN-controle (ISO 13616, mod 97): een typefout komt zo nooit op een offertepagina. */
+export function validIban(v) {
+  const s = String(v || "").replace(/\s+/g, "").toUpperCase();
+  if (!/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/.test(s)) return null;
+  if (s.startsWith("NL") && s.length !== 18) return null;
+  const r = (s.slice(4) + s.slice(0, 4)).replace(/[A-Z]/g, c => String(c.charCodeAt(0) - 55));
+  let m = 0; for (const ch of r) m = (m * 10 + Number(ch)) % 97;
+  return m === 1 ? s.replace(/(.{4})/g, "$1 ").trim() : null;
+}
+
+const PREFIXES = ["meldingen", "vandaag", "opdracht", "klanten", "offertes", "outreach", "agenda", "kantoor", "acties", "fouten", "scout", "segmenten", "experimenten", "promptversies", "partners", "bewijs", "projecten", "resultaten", "voorstellen", "observaties"];
 export const isKlantPath = (path) => PREFIXES.some(p => path === p || path.startsWith(`${p}/`));
 
 async function putSetting(key, value, auth) {
@@ -112,6 +123,29 @@ export async function handleKlant({ m, path, url, body, auth, startWorker }) {
   if ((p = route(path, "offertes/:id/versturen")) && m === "POST") { assertPerm(auth, "approvals.money"); return json(await sales.sendQuote(p.id, body, auth)); }
   if ((p = route(path, "offertes/:id/belangstelling")) && m === "POST") { assertPerm(auth, "quotes.write"); return json(await sales.markInterest(p.id, auth)); }
   if ((p = route(path, "offertes/:id/akkoord")) && m === "POST") { assertPerm(auth, "approvals.money"); return json(await sales.acceptQuote(p.id, auth)); }
+  if ((p = route(path, "offertes/:id/verlengen")) && m === "POST") { assertPerm(auth, "quotes.write"); return json(await sales.extendQuote(p.id, auth)); }
+  if ((p = route(path, "offertes/:id/link")) && m === "GET") {
+    assertUuid(p.id);
+    const qu = await one("select status from hq.quotes where id=$1", [p.id]);
+    if (!qu) throw new HttpError(404, "niet_gevonden", "Offerte niet gevonden.");
+    if (!["verstuurd", "geaccepteerd"].includes(qu.status)) throw new HttpError(409, "niet_verstuurd", "Verstuur de offerte eerst; dan krijgt hij een link.");
+    return json({ url: sales.quoteUrl(p.id) });
+  }
+
+  // ── Meldingen ──
+  if (m === "GET" && path === "meldingen") {
+    const T = env === "test";
+    const rows = (await q("select id, kind, title, body, url, lead_id, created_at, sent_at, send_error, read_at from hq.notifications where is_test=$1 order by created_at desc limit 50", [T])).rows;
+    const target = mailConfigured() ? await notifyTarget() : null;
+    return json({ meldingen: rows, ongelezen: rows.filter(r => !r.read_at).length, email: target,
+      waarschuwing: target && target.toLowerCase() === fromAddress().toLowerCase() ? "Meldingen gaan naar hetzelfde adres als de afzender. Gmail geeft voor mail aan jezelf vaak geen pushmelding: kies bij Kantoor › Instellingen een ander adres." : null });
+  }
+  if (m === "POST" && path === "meldingen/gelezen") {
+    assertPerm(auth, "leads.write");
+    const ids = Array.isArray(body.ids) ? body.ids.filter(x => /^[0-9a-f-]{36}$/i.test(x)).slice(0, 100) : null;
+    const r = ids ? await q("update hq.notifications set read_at=now() where id = any($1::uuid[]) and read_at is null", [ids]) : await q("update hq.notifications set read_at=now() where read_at is null");
+    return json({ gelezen: r.rowCount });
+  }
   if ((p = route(path, "outreach/:id/verstuurd")) && m === "POST") {
     assertPerm(auth, "leads.write"); assertUuid(p.id);
     const o = await one("select lead_id from hq.outreach where id=$1", [p.id]);
@@ -144,7 +178,7 @@ export async function handleKlant({ m, path, url, body, auth, startWorker }) {
   }
   if ((p = route(path, "kantoor/instellingen/:key")) && m === "PUT") {
     assertPerm(auth, "settings.write");
-    if (!["kantoor", "sales", "availability", "scout"].includes(p.key)) throw new HttpError(404, "niet_gevonden", "Onbekende instelling.");
+    if (!["kantoor", "sales", "availability", "scout", "payment", "links", "sales_ai"].includes(p.key)) throw new HttpError(404, "niet_gevonden", "Onbekende instelling.");
     const cur = await getSetting(p.key);
     const v = { ...cur };
     if (p.key === "kantoor") {
@@ -160,6 +194,38 @@ export async function handleKlant({ m, path, url, body, auth, startWorker }) {
       if (Array.isArray(body.weekdays)) v.weekdays = body.weekdays.map(Number).filter(d => d >= 1 && d <= 7);
       for (const k of ["from", "to", "quiet_from", "quiet_to"]) if (body[k] != null) { if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(body[k])) throw new HttpError(400, "ongeldig", "Tijd als UU:MM."); v[k] = body[k]; }
       if (body.slot_min != null) v.slot_min = [15, 30, 45, 60].includes(Number(body.slot_min)) ? Number(body.slot_min) : 30;
+    }
+    if (p.key === "payment") {
+      if (body.deposit_pct != null) { const n = Number(body.deposit_pct); if (!Number.isInteger(n) || n < 0 || n > 100) throw new HttpError(400, "ongeldig", "Aanbetaling tussen 0 en 100%."); v.deposit_pct = n; }
+      if (body.quote_valid_days != null) { const n = Number(body.quote_valid_days); if (!Number.isInteger(n) || n < 1 || n > 90) throw new HttpError(400, "ongeldig", "Geldigheid tussen 1 en 90 dagen."); v.quote_valid_days = n; }
+      if ("iban" in body) {
+        if (!body.iban) v.iban = null;
+        else { const ok = validIban(body.iban); if (!ok) throw new HttpError(400, "ongeldig", "Dit IBAN klopt niet (controlecijfers). Controleer het nummer."); v.iban = ok; }
+      }
+      if ("account_name" in body) v.account_name = str(body.account_name, 80) || null;
+    }
+    if (p.key === "links") {
+      if ("google_review_url" in body) {
+        const u = str(body.google_review_url, 300);
+        if (u && !/^https:\/\/(g\.page|www\.google\.[a-z.]+|google\.[a-z.]+|search\.google\.com|maps\.app\.goo\.gl)\//.test(u)) throw new HttpError(400, "ongeldig", "Gebruik de reviewlink uit je Google Bedrijfsprofiel.");
+        v.google_review_url = u || null;
+      }
+      if ("referral_reward" in body) v.referral_reward = str(body.referral_reward, 200) || null;
+    }
+    if (p.key === "sales_ai") {
+      if ("notify_email" in body) { const e = str(body.notify_email, 254); if (e && !/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(e)) throw new HttpError(400, "ongeldig", "Ongeldig e-mailadres."); v.notify_email = e || null; }
+      for (const [k, lo, hi] of [["calls_per_day", 0, 30], ["visits_per_day", 0, 20], ["checks_per_day", 0, 200], ["learn_min_paid", 1, 50]]) if (body[k] != null) { const n = Number(body[k]); if (!Number.isInteger(n) || n < lo || n > hi) throw new HttpError(400, "ongeldig", `${k} tussen ${lo} en ${hi}.`); v[k] = n; }
+      if (body.posts) {
+        const keys = ["voorbeeldsite", "acquisitie", "websitecheck", "sales", "controle", "overig"];
+        const posts = Object.fromEntries(keys.map(k => [k, Number(body.posts[k] ?? cur.posts?.[k] ?? 0)]));
+        if (keys.some(k => !Number.isFinite(posts[k]) || posts[k] < 0) || Math.abs(Object.values(posts).reduce((a, b) => a + b, 0) - 100) > 0.01) throw new HttpError(400, "ongeldig", "De verdeling moet samen 100% zijn.");
+        v.posts = posts;
+      }
+      if (body.models) {
+        const allowed = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"];
+        v.models = { ...(cur.models || {}) };
+        for (const t of ["overtuigen", "werk", "snel"]) if (body.models[t] != null) { if (!allowed.includes(body.models[t])) throw new HttpError(400, "ongeldig", "Onbekend model."); v.models[t] = body.models[t]; }
+      }
     }
     if (p.key === "scout") {
       if ("enabled" in body) v.enabled = Boolean(body.enabled);

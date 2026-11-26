@@ -6,6 +6,7 @@ import { enqueue } from "../queue.js";
 import { enqueueDueOutreach } from "./acquisition.js";
 import { meetingTick, auditViolations, kantoorSettings } from "./planning.js";
 import { weeklyProposals } from "./project.js";
+import { flushNotifications } from "./notify.js";
 import { amsParts, isoWeekKey } from "../content/studio.js";
 
 async function once(key, hours) {
@@ -20,6 +21,8 @@ export async function klantCron(now = new Date()) {
   // Fouten opsporen draait altijd, ook in pauze (veiligheid).
   try { out.fouten = await auditViolations(); } catch (e) { out.fouten = { fout: e.message }; }
   await q("delete from hq.settings where key like 'rl:%' and updated_at < now() - interval '2 hours'");
+  // Meldingen aan jou gaan altijd door (ook in pauze): het zijn berichten van klanten.
+  try { out.meldingen = await flushNotifications(); } catch (e) { out.meldingen = { fout: e.message }; }
   if (k.paused) return { ...out, gepauzeerd: true };
   try { out.berichten = await enqueueDueOutreach(); } catch (e) { out.berichten = { fout: e.message }; }
   try { out.overleg = await meetingTick(now); } catch (e) { out.overleg = { fout: e.message }; }

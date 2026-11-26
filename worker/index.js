@@ -67,9 +67,10 @@ async function route(request, env) {
     return new Response(request.method === "HEAD" ? null : f.body, { headers: { "content-type": f.type, ...headersFor(url.pathname), "cache-control": "private, no-store" } });
   }
 
-  if (url.pathname === "/intake") {
-    const res = await env.ASSETS.fetch(new Request(new URL("/intake", url), request));
-    return withHeaders(res, headersFor("/intake"));
+  // Pagina's met een persoonlijke link (?t=…): eigen strenge headers (geen referrer, geen index).
+  if (url.pathname === "/intake" || url.pathname === "/offerte") {
+    const res = await env.ASSETS.fetch(new Request(new URL(url.pathname, url), request));
+    return withHeaders(res, headersFor(url.pathname));
   }
   return env.ASSETS.fetch(request);
 }
