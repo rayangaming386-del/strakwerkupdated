@@ -89,7 +89,7 @@ async function runOne(claim, workerId) {
     if (e.budget) {
       // AI-budget op of tegoed onvoldoende: taak bewaren (gepauzeerd) en later dezelfde taak hervatten.
       await finish(task, runId, workerId, { status: "gepauzeerd", costUsd: cost, usage, steps, message: `Wacht op AI-budget: ${e.message}`,
-        after: async (db) => { await db.query("update hq.tasks set max_attempts=max_attempts+1, pause_reason='budget', error=$2 where id=$1", [task.id, e.message]); } });
+        after: async (db) => { await db.query("update hq.tasks set max_attempts=max_attempts+1, pause_reason=$3, error=$2 where id=$1", [task.id, e.message, e.reason === "post" ? "budget_post" : "budget"]); } });
       return;
     }
     if (e instanceof ControlStop) {
