@@ -154,9 +154,20 @@ test("scenario B: concreet mobiel probleem, toegestane route, testmail, reactie 
   // Zonder contactgrond: niets automatisch.
   let ap = await req(`/api/hq/klanten/${leadB}/benaderen`, { method: "POST", body: {} });
   assert.equal(ap.json.decision, "geen_contactgrond");
-  // Contactgrond vastleggen (bron, datum, reikwijdte, onderbouwing).
-  const c = await req(`/api/hq/klanten/${leadB}/toestemming`, { method: "POST", body: { channel: "email", basis: "gerechtvaardigd_belang_zakelijk", source: "Zakelijk adres op eigen website, contactpagina", scope: "Eén bericht over de kapotte afspraaklink, één opvolging",
-    evidence: "Concreet probleem op hun eigen site (afspraaklink 404), zakelijk adres voor klantvragen, eenmalig en met afmeldlink; afweging vastgelegd." } });
+  // Mail of WhatsApp op "gerechtvaardigd belang" mag niet (Telecommunicatiewet); bellen wel.
+  const legit = { basis: "gerechtvaardigd_belang_zakelijk", source: "Zakelijk nummer op eigen website", scope: "Eén belletje over de kapotte afspraaklink",
+    evidence: "Concreet probleem op hun eigen site (afspraaklink 404); zakelijk nummer voor klantvragen; eenmalig, stoppen bij bezwaar." };
+  for (const channel of ["email", "whatsapp"]) {
+    const r = await req(`/api/hq/klanten/${leadB}/toestemming`, { method: "POST", body: { channel, ...legit } });
+    assert.equal(r.status, 400, `${channel} op gerechtvaardigd belang moet geweigerd worden`); assert.match(r.json.message, /toestemming/);
+  }
+  assert.equal((await req(`/api/hq/klanten/${leadB}/toestemming`, { method: "POST", body: { channel: "telefoon", ...legit } })).status, 201);
+  // Een oud vastgelegd "gerechtvaardigd belang" voor e-mail telt niet als grond.
+  await mods.db.q("insert into hq.consents (lead_id, channel, basis, source, scope, evidence) values ($1,'email','gerechtvaardigd_belang_zakelijk','oud','oud','oud')", [leadB]);
+  assert.equal((await req(`/api/hq/klanten/${leadB}/benaderen`, { method: "POST", body: {} })).json.decision, "geen_contactgrond");
+  // Echte route: tijdens een belletje "Mag ik je een voorbeeld mailen?" → ja → vastleggen.
+  const c = await req(`/api/hq/klanten/${leadB}/toestemming`, { method: "POST", body: { channel: "email", basis: "toestemming", source: "Telefoongesprek met de eigenaar", scope: "Voorbeeld en voorstel over de afspraaklink mailen, één opvolging",
+    evidence: "Eigenaar zei tijdens het gesprek ja op de vraag of Rayan een voorbeeld mocht mailen; genoteerd door Rayan." } });
   assert.equal(c.status, 201);
   // Route activeren vraagt eerst de controle van de voorwaarden.
   assert.equal((await req("/api/hq/kantoor/routes", { method: "PUT", body: { email: { auto: true } } })).status, 409);

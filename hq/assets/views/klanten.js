@@ -122,7 +122,10 @@ async function card(root, ctx, id) {
   }
   function consentDialog(leadId) {
     const ch = h("select", {}, ["email", "whatsapp", "telefoon"].map(c => h("option", { value: c }, c)));
-    const basis = h("select", {}, [["toestemming", "Toestemming gegeven"], ["zelf_contact_gezocht", "Klant zocht zelf contact"], ["bestaande_klant", "Bestaande klant"], ["gerechtvaardigd_belang_zakelijk", "Gerechtvaardigd belang (zakelijk, onderbouwd)"]].map(([v, l]) => h("option", { value: v }, l)));
+    const basis = h("select", {}, [["toestemming", "Toestemming gegeven"], ["zelf_contact_gezocht", "Klant zocht zelf contact"], ["bestaande_klant", "Bestaande klant"], ["gerechtvaardigd_belang_zakelijk", "Gerechtvaardigd belang (alleen bellen of langsgaan)"]].map(([v, l]) => h("option", { value: v }, l)));
+    // Mail en WhatsApp: nooit op gerechtvaardigd belang (Telecommunicatiewet).
+    const syncBasis = () => { const legit = basis.querySelector('option[value="gerechtvaardigd_belang_zakelijk"]'); legit.disabled = ch.value !== "telefoon"; if (legit.disabled && basis.value === legit.value) basis.value = "toestemming"; };
+    ch.addEventListener("change", syncBasis); syncBasis();
     const src = h("input", { placeholder: "Waar komt dit vandaan? (link, gesprek, formulier)" }), scope = h("input", { placeholder: "Waarvoor precies? (bijv. één bericht over …)" }), ev = h("textarea", { rows: 3, placeholder: "Onderbouwing. Een openbaar e-mailadres alleen is onvoldoende." });
     return new Promise((ok) => modal("Contactgrond vastleggen", h("div", { class: "fgrid" }, field("Kanaal", ch), field("Grond", basis), field("Bron", src, { full: true }), field("Reikwijdte", scope, { full: true }), field("Onderbouwing", ev, { full: true, help: "Datum en wie het vastlegt worden automatisch bewaard. Handmatig versturen verandert de contactregels niet." })), [
       { label: "Vastleggen", cls: "btn-gold", onClick: async (close) => { await api(`klanten/${leadId}/toestemming`, { method: "POST", body: { channel: ch.value, basis: basis.value, source: src.value, scope: scope.value, evidence: ev.value } }); toast("Contactgrond vastgelegd."); close(); ok(); } }]));
