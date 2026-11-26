@@ -6,7 +6,7 @@
 // - worker/generated/hq-files.js  de HQ-app; zit in de Worker, nooit in dist/
 // Gebruik: npm run build:cf   (wrangler doet dit ook zelf vóór dev/deploy, zie wrangler.toml)
 import { execFileSync } from "node:child_process";
-import { mkdirSync, rmSync, copyFileSync, writeFileSync, readFileSync, existsSync } from "node:fs";
+import { mkdirSync, rmSync, copyFileSync, writeFileSync, readFileSync, existsSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -16,6 +16,15 @@ const dist = path.join(root, "dist");
 // Nooit publiceren: servercode, hulpmiddelen, bronnen, documentatie en HQ (zit in de Worker).
 const PRIVATE_DIRS = ["api/", "worker/", "scripts/", "tests/", "db/", "docs/", "tools/", "brand/", "hq/", ".github/", "node_modules/", "dist/", ".data/"];
 const PRIVATE_FILES = new Set(["middleware.js", "package.json", "package-lock.json", "vercel.json", "wrangler.toml", ".vercelignore", ".gitignore", ".assetsignore", "CLAUDE.md"]);
+
+function walk(dir, base = dir, out = []) {
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, e.name), rel = path.relative(base, full).split(path.sep).join("/");
+    if (e.isDirectory()) { if (!/^(node_modules|\.git|dist|\.wrangler)$/.test(e.name)) walk(full, base, out); }
+    else out.push(rel);
+  }
+  return out;
+}
 
 export function isPublic(file) {
   if (PRIVATE_DIRS.some(d => file.startsWith(d))) return false;
@@ -32,7 +41,12 @@ export function isPublic(file) {
 const TYPES = { ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".html": "text/html; charset=utf-8", ".svg": "image/svg+xml", ".json": "application/json" };
 
 export function build({ log = console.log } = {}) {
-  const files = execFileSync("git", ["ls-files", "-z"], { cwd: root }).toString().split("\0").filter(Boolean);
+  // Alleen bestanden die in Git staan. Zonder git (sommige bouwomgevingen): de map doorlopen
+  // met dezelfde filter, zonder .gitignore-bestanden (node_modules, .env, .data, dist).
+  let files;
+  try { files = execFileSync("git", ["ls-files", "-z"], { cwd: root, stdio: ["ignore", "pipe", "ignore"] }).toString().split("\0").filter(Boolean); }
+  catch { files = walk(root).filter(f => !/^(node_modules|dist|\.data|\.wrangler|\.git|worker\/generated)\//.test(f) && !/(^|\/)\.(env|dev\.vars)/.test(f)); }
+  if (!files.length) throw new Error("Geen bestanden gevonden om te publiceren.");
   rmSync(dist, { recursive: true, force: true });
   let n = 0;
   for (const f of files.filter(isPublic)) {

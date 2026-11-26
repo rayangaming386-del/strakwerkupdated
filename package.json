@@ -23,7 +23,8 @@
     "build:cf": "node scripts/build-cf.mjs",
     "cf:dev": "wrangler dev",
     "cf:deploy": "wrangler deploy",
-    "cf:preview": "wrangler versions upload"
+    "cf:preview": "wrangler versions upload",
+    "sql-bundle": "node scripts/sql-bundle.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.9.0",
