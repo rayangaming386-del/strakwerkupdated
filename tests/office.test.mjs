@@ -113,7 +113,19 @@ const runServerless = async () => {
     await new Promise(r => setTimeout(r, 250));
   }
 };
-const runPublisher = async () => { await mods.db.q("update hq.tasks set run_after=now() where status='in_wachtrij' and agent_key='publisher'"); await mods.worker.runWorker({ source: "test", budgetMs: 60_000 }); };
+// Draait publisher-taken tot er geen meer bezig of aan de beurt is. Goedkeuren start (net als in
+// productie) ook een achtergrondwerker, die dezelfde taak eerder kan oppakken; zonder te wachten
+// las de test dan soms een tussenstand.
+const runPublisher = async () => {
+  await mods.db.q("update hq.tasks set run_after=now() where status='in_wachtrij' and agent_key='publisher'");
+  for (let i = 0; i < 200; i++) {
+    await mods.worker.runWorker({ source: "test", budgetMs: 60_000 });
+    const n = (await mods.db.q("select count(*)::int n from hq.tasks where agent_key='publisher' and (status='bezig' or (status='in_wachtrij' and control is null and run_after<=now()))")).rows[0].n;
+    if (!n) return;
+    await new Promise(r => setTimeout(r, 50));
+  }
+  throw new Error("Publisher-taak bleef bezig.");
+};
 const counts = async () => (await mods.db.q("select (select count(*)::int from hq.tasks where agent_key in ('content','video')) as tasks, (select count(*)::int from hq.renders) as renders, (select count(*)::int from hq.ai_reservations) as ai")).rows[0];
 let pieceId;
 
@@ -275,14 +287,15 @@ test("proefstand: live publicatie uit → klaar als concept, niets naar Buffer",
 
 test("volle wachtrij bij Buffer: bewaren, later opnieuw; onduidelijke uitkomst: hervatten zonder dubbele post", { skip: hasTools ? false : "ffmpeg/Chromium niet beschikbaar" }, async () => {
   await req("/api/hq/studio/office", { method: "PUT", body: { live_publishing: true } });
+  // 1. Wachtrij vol (10 andere posts staan al klaar), al vóór het goedkeuren: welke werker de
+  // publicatie ook als eerste oppakt (de achtergrondwerker of de test), de uitkomst is dezelfde.
+  for (let i = 0; i < 10; i++) buf.posts.push({ id: `x${i}`, text: `ander ${i}`, dueAt: new Date().toISOString(), status: "buffer", channelId: "ch-tt" });
   // TikTok staat op "eerst beoordelen": goedkeuren plant hem in via Buffer op het publicatiemoment.
   const d = (await req(`/api/hq/studio/pieces/${pieceId}`)).json;
   const ap = await req(`/api/hq/studio/pieces/${pieceId}/approve`, { method: "POST", body: { render_id: d.renders[0].id } });
   assert.equal(ap.status, 200, JSON.stringify(ap.json));
   assert.equal(ap.json.scheduled.tiktok?.method, "buffer");
   const tt = (await mods.db.q("select id from hq.publications where piece_id=$1 and channel='tiktok'", [pieceId])).rows[0].id;
-  // 1. Wachtrij vol (10 andere posts staan al klaar).
-  for (let i = 0; i < 10; i++) buf.posts.push({ id: `x${i}`, text: `ander ${i}`, dueAt: new Date().toISOString(), status: "buffer", channelId: "ch-tt" });
   await runPublisher();
   let p = (await mods.db.q("select status, last_error from hq.publications where id=$1", [tt])).rows[0];
   assert.equal(p.status, "wachtrij_vol"); assert.match(p.last_error, /later opnieuw/);

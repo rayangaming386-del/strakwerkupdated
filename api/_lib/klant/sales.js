@@ -6,7 +6,7 @@ import { q, one, tx, audit } from "../db.js";
 import { HttpError, assertUuid, str } from "../http.js";
 import { normalizeDomain, companyKey } from "../crm.js";
 import { SITE, amsParts, amsToUtc, projectFromQuote } from "../content/studio.js";
-import { normEmail, normPhone, suppress, contactCheck, recordConsent } from "./contact.js";
+import { normEmail, normPhone, suppress, contactCheck, recordConsent, phoneAllowed } from "./contact.js";
 import { notify } from "./notify.js";
 import { intakeToken, linkToken } from "./tokens.js";
 
@@ -198,7 +198,9 @@ export async function intakeRequest(input, actor = null) {
 // ── Reacties ───────────────────────────────────────────────────────────────────
 export function classify(text) {
   const t = String(text || "").toLowerCase();
-  if (/\b(afmelden|uitschrijven|unsubscribe|geen berichten meer|stop met mailen|niet meer mailen)\b/.test(t)) return "afmelding";
+  // "stop" als heel bericht (zo staat het in elke WhatsApp van HQ) telt als afmelding.
+  if (/^[\s"'.!]*stop[\s"'.!]*$/.test(t)) return "afmelding";
+  if (/\b(afmelden|uitschrijven|unsubscribe|geen berichten meer|stop met mailen|niet meer mailen|niet meer appen|niet meer benaderen)\b/.test(t)) return "afmelding";
   if (/\b(geen interesse|niet geïnteresseerd|nee bedankt|niet nodig|heb al een)\b/.test(t)) return "afwijzing";
   if (/\b(later|volgend jaar|na de zomer|over een (paar )?maand|nu even niet|kom ik op terug)\b/.test(t)) return "later";
   if (/\b(ja|graag|leuk|interesse|laat (maar )?zien|akkoord|doen|wanneer kun|kunnen we bellen|afspraak)\b/.test(t)) return "interesse";
@@ -509,9 +511,14 @@ export async function customerCard(leadId) {
     (await import("./contact.js")).suppressedFor(lead),
     q("select * from hq.actions where lead_id=$1 and status in ('open','opgepakt') order by day desc, rank", [leadId]),
   ]);
+  const preview = await one("select id, slug, style, status, views, first_viewed_at, last_viewed_at, expires_at, content_by, created_at from hq.previews where lead_id=$1 and status<>'ingetrokken' order by created_at desc limit 1", [leadId]);
+  const calls = (await q("select id, day, kind, outcome, notes, callback_on, done_at from hq.calls where lead_id=$1 order by day desc limit 20", [leadId])).rows;
+  const previewTask = await one("select status, error from hq.tasks where lead_id=$1 and kind='voorbeeldsite' order by created_at desc limit 1", [leadId]);
   // Klant zocht zelf contact of reageerde: dan gaat het om antwoorden, niet om koud benaderen.
   const email = await contactCheck(lead, "email", { kind: lead.last_inbound_at ? "antwoord" : "eerste_contact" });
   return { lead, timeline: timeline.rows, consents: consents.rows, outreach: outreach.rows, quotes: quotes.rows, appointments: appts.rows, project, opportunities: opps.rows, payments: payments.rows,
-    suppressed: sup, actions: actions.rows, contact: { email }, capacity: await capacity(),
+    suppressed: sup, actions: actions.rows, contact: { email, whatsapp: await contactCheck(lead, "whatsapp", { kind: "eerste_contact" }), bellen: await phoneAllowed(lead) }, capacity: await capacity(),
+    preview: preview ? { ...preview, url: `/voorbeeld/${preview.slug}` } : null, preview_task: previewTask, calls,
+    quote_urls: Object.fromEntries(quotes.rows.filter(x => ["verstuurd", "geaccepteerd"].includes(x.status)).map(x => [x.id, quoteUrl(x.id)])),
     wa_link: lead.contact_phone ? `https://wa.me/${String(lead.contact_phone).replace(/\D/g, "")}` : null };
 }

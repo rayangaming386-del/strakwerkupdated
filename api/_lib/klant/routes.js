@@ -14,6 +14,9 @@ import { runCommand } from "./command.js";
 import { budgetOverview } from "../budget.js";
 import { mailConfigured, fromAddress } from "./mail.js";
 import { notifyTarget } from "./notify.js";
+import * as calls from "./calls.js";
+import { requestPreview, previewUrl, STYLES } from "./preview.js";
+import { LEGAL_FORMS, LEGAL_SOURCES } from "./legalform.js";
 
 /** IBAN-controle (ISO 13616, mod 97): een typefout komt zo nooit op een offertepagina. */
 export function validIban(v) {
@@ -25,7 +28,7 @@ export function validIban(v) {
   return m === 1 ? s.replace(/(.{4})/g, "$1 ").trim() : null;
 }
 
-const PREFIXES = ["meldingen", "vandaag", "opdracht", "klanten", "offertes", "outreach", "agenda", "kantoor", "acties", "fouten", "scout", "segmenten", "experimenten", "promptversies", "partners", "bewijs", "projecten", "resultaten", "voorstellen", "observaties"];
+const PREFIXES = ["bellijst", "meldingen", "vandaag", "opdracht", "klanten", "offertes", "outreach", "agenda", "kantoor", "acties", "fouten", "scout", "segmenten", "experimenten", "promptversies", "partners", "bewijs", "projecten", "resultaten", "voorstellen", "observaties"];
 export const isKlantPath = (path) => PREFIXES.some(p => path === p || path.startsWith(`${p}/`));
 
 async function putSetting(key, value, auth) {
@@ -48,10 +51,19 @@ export async function today(env = "productie") {
        union all select 'fout', e.id, e.kind, e.description from hq.agent_errors e where e.resolved_at is null and e.is_test=$1`, [T]),
     one("select * from hq.briefings where env=$1 order by day desc limit 1", [env]),
     q("select a.*, l.company from hq.actions a left join hq.leads l on l.id=a.lead_id where a.status in ('open','opgepakt') and a.is_test=$1 order by a.day desc, a.rank limit 10", [T]),
-    q(`select o.id, o.lead_id, l.company, o.kind, o.channel, o.subject, o.body, o.to_address from hq.outreach o join hq.leads l on l.id=o.lead_id where o.status in ('klaar_handmatig') and o.is_test=$1 order by o.updated_at desc limit 10`, [T]),
+    q(`select o.id, o.lead_id, l.company, o.kind, o.channel, o.subject, o.body, o.to_address from hq.outreach o join hq.leads l on l.id=o.lead_id
+       where o.status in ('klaar_handmatig') and (o.scheduled_at is null or o.scheduled_at <= now()) and o.is_test=$1 order by o.updated_at desc limit 10`, [T]),
   ]);
+  const day = calls.amsDay();
+  const callRows = (await q(`select c.id, c.kind, c.briefing, c.briefing_by, c.outcome, c.callback_on, c.notes, l.id as lead_id, l.company, l.city, l.address, l.contact_phone, l.contact_email, l.contact_name,
+       l.priority, l.priority_reason, l.website, l.website_status, l.segment, l.legal_form, l.legal_form_source,
+       (select slug from hq.previews v where v.lead_id=l.id and v.status<>'ingetrokken' and v.expires_at > now()) as preview_slug,
+       (select views from hq.previews v where v.lead_id=l.id and v.status<>'ingetrokken' and v.expires_at > now()) as preview_views,
+       (select array_agg(distinct cs.channel) from hq.consents cs where cs.lead_id=l.id and cs.revoked_at is null and not (cs.channel in ('email','whatsapp') and cs.basis='gerechtvaardigd_belang_zakelijk')) as consents
+     from hq.calls c join hq.leads l on l.id=c.lead_id where c.day=$1::date and c.is_test=$2 order by c.kind, (c.outcome is not null), l.city, l.fit_score desc nulls last`, [day, T])).rows;
   const k = await plan.kantoorSettings();
-  return { env, requests: requests.rows, quotes: quotes.rows, projects: projects.rows, decisions: decisions.rows, briefing, actions: actions.rows, manual: manual.rows,
+  return { env, day, calls: callRows.filter(c => c.kind === "bellen"), visits: callRows.filter(c => c.kind === "bezoek"), outcomes: calls.OUTCOMES,
+    requests: requests.rows, quotes: quotes.rows, projects: projects.rows, decisions: decisions.rows, briefing, actions: actions.rows, manual: manual.rows,
     capacity: await sales.capacity(null, { test: T }), paused: Boolean(k.paused), routes: await contact.getRoutes(), mail: mailConfigured() };
 }
 
@@ -104,6 +116,19 @@ export async function handleKlant({ m, path, url, body, auth, startWorker }) {
   if ((p = route(path, "klanten/:id/afspraak")) && m === "POST") { assertPerm(auth, "leads.write"); return json(await sales.book(p.id, body, auth), 201); }
   if ((p = route(path, "klanten/:id/beantwoord")) && m === "POST") { assertPerm(auth, "leads.write"); return json(await sales.markAnswered(p.id, body, auth)); }
   if ((p = route(path, "klanten/:id/toestemming")) && m === "POST") { assertPerm(auth, "leads.write"); return json(await contact.recordConsent(p.id, body, auth), 201); }
+  if ((p = route(path, "klanten/:id/rechtsvorm")) && m === "POST") {
+    // Na controle in het KvK-register (gratis op kvk.nl) of zoals de klant het zelf opgaf.
+    assertPerm(auth, "leads.write"); assertUuid(p.id, "klant");
+    const form = String(body.legal_form || ""), source = String(body.source || "kvk");
+    if (!LEGAL_FORMS[form]) throw new HttpError(400, "ongeldig", "Onbekende rechtsvorm.");
+    if (!["kvk", "klant"].includes(source)) throw new HttpError(400, "ongeldig", "Bron moet het KvK-register of de klant zelf zijn.");
+    const r = (await q("update hq.leads set legal_form=$2, legal_form_source=$3, legal_form_evidence=$4, legal_form_at=now(), updated_at=now() where id=$1 returning id, legal_form, legal_form_source, legal_form_evidence",
+      [p.id, form, form === "onbekend" ? null : source, str(body.evidence, 300) || (form === "onbekend" ? null : LEGAL_SOURCES[source])])).rows[0];
+    if (!r) throw new HttpError(404, "niet_gevonden", "Klant niet gevonden.");
+    await audit(null, { actor: auth.userId, label: auth.email, action: "rechtsvorm.vastgelegd", entity: "lead", entityId: p.id, details: { legal_form: form, source } });
+    const lead = await one("select * from hq.leads where id=$1", [p.id]);
+    return json({ ...r, label: LEGAL_FORMS[form].label, bellen: await contact.phoneAllowed(lead) });
+  }
   if ((p = route(path, "klanten/:id/betaling")) && m === "POST") { assertPerm(auth, "payments.write"); return json(await sales.registerPayment(p.id, body, auth), 201); }
   if ((p = route(path, "klanten/:id/benaderen")) && m === "POST") { assertPerm(auth, "leads.write"); const r = await acq.prepareApproach(p.id, auth); return json(r); }
   if ((p = route(path, "klanten/:id/afmelden")) && m === "POST") {
@@ -132,6 +157,13 @@ export async function handleKlant({ m, path, url, body, auth, startWorker }) {
     return json({ url: sales.quoteUrl(p.id) });
   }
 
+  // ── Bellen en langsgaan ──
+  if (m === "POST" && path === "bellijst/maken") { assertPerm(auth, "tasks.start"); const r = await calls.buildDayList({ env, force: Boolean(body.force) }); startWorker(); return json(r); }
+  if ((p = route(path, "bellijst/:id/uitkomst")) && m === "POST") { assertPerm(auth, "leads.write"); return json(await calls.callOutcome(p.id, body, auth)); }
+  if ((p = route(path, "klanten/:id/voorbeeld")) && m === "POST") { assertPerm(auth, "leads.write"); const t = await requestPreview(p.id, body, auth); startWorker(); return json({ task_id: t.id, duplicate: Boolean(t.duplicate), styles: Object.keys(STYLES) }, 201); }
+  if ((p = route(path, "klanten/:id/bericht-na-gesprek")) && m === "POST") { assertPerm(auth, "leads.write"); return json(await calls.composeAfterCall(p.id, body, auth), 201); }
+  if ((p = route(path, "outreach/:id/versturen")) && m === "POST") { assertPerm(auth, "leads.write"); return json(await calls.sendNow(p.id, auth)); }
+
   // ── Meldingen ──
   if (m === "GET" && path === "meldingen") {
     const T = env === "test";
@@ -150,7 +182,9 @@ export async function handleKlant({ m, path, url, body, auth, startWorker }) {
     assertPerm(auth, "leads.write"); assertUuid(p.id);
     const o = await one("select lead_id from hq.outreach where id=$1", [p.id]);
     if (!o) throw new HttpError(404, "niet_gevonden", "Bericht niet gevonden.");
-    return json(await sales.markAnswered(o.lead_id, { outreach_id: p.id }, auth));
+    const r = await sales.markAnswered(o.lead_id, { outreach_id: p.id }, auth);
+    await calls.afterManualSend(p.id);
+    return json(r);
   }
   if ((p = route(path, "outreach/:id/annuleren")) && m === "POST") {
     assertPerm(auth, "leads.write"); assertUuid(p.id);

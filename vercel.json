@@ -87,6 +87,10 @@
     {
       "source": "/offerte",
       "destination": "/offerte.html"
+    },
+    {
+      "source": "/voorbeeld/:slug",
+      "destination": "/api/public?p=voorbeeld/:slug"
     }
   ],
   "headers": [

@@ -161,6 +161,13 @@ test("scenario B: concreet mobiel probleem, toegestane route, testmail, reactie 
     const r = await req(`/api/hq/klanten/${leadB}/toestemming`, { method: "POST", body: { channel, ...legit } });
     assert.equal(r.status, 400, `${channel} op gerechtvaardigd belang moet geweigerd worden`); assert.match(r.json.message, /toestemming/);
   }
+  // Bellen op gerechtvaardigd belang: alleen bij een rechtspersoon (sinds 1 juli 2021). Rechtsvorm nog onbekend → nee.
+  const tel = await req(`/api/hq/klanten/${leadB}/toestemming`, { method: "POST", body: { channel: "telefoon", ...legit } });
+  assert.equal(tel.status, 400); assert.match(tel.json.message, /eenmanszaak/);
+  assert.ok((await one("select website_checks from hq.leads where id=$1", [leadB])).website_checks.some(c => /Rechtsvorm/.test(c.controle)), "Scout meldt de rechtsvorm");
+  const rv = await req(`/api/hq/klanten/${leadB}/rechtsvorm`, { method: "POST", body: { legal_form: "bv", source: "kvk" } });
+  assert.equal(rv.status, 200, JSON.stringify(rv.json)); assert.equal(rv.json.legal_form, "bv");
+  assert.equal((await req(`/api/hq/klanten/${leadB}/rechtsvorm`, { method: "POST", body: { legal_form: "bv", source: "gok" } })).status, 400);
   assert.equal((await req(`/api/hq/klanten/${leadB}/toestemming`, { method: "POST", body: { channel: "telefoon", ...legit } })).status, 201);
   // Een oud vastgelegd "gerechtvaardigd belang" voor e-mail telt niet als grond.
   await mods.db.q("insert into hq.consents (lead_id, channel, basis, source, scope, evidence) values ($1,'email','gerechtvaardigd_belang_zakelijk','oud','oud','oud')", [leadB]);

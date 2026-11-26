@@ -4,6 +4,7 @@
 import { q, one } from "../db.js";
 import { HttpError, assertUuid, str } from "../http.js";
 import { audit } from "../db.js";
+import { LEGAL_FORMS, RECHTSPERSONEN, isRechtspersoon, PHONE_RULE } from "./legalform.js";
 
 export const normEmail = (v) => (v ? String(v).trim().toLowerCase() : null);
 export const normPhone = (v) => { if (!v) return null; let d = String(v).replace(/[^\d+]/g, ""); if (d.startsWith("00")) d = "+" + d.slice(2); if (d.startsWith("06")) d = "+316" + d.slice(2); if (/^0\d{9}$/.test(d)) d = "+31" + d.slice(1); return d || null; };
@@ -13,7 +14,7 @@ export const BASIS_LABEL = {
   toestemming: "Toestemming gegeven",
   zelf_contact_gezocht: "Klant zocht zelf contact (reactie op aanvraag)",
   bestaande_klant: "Bestaande klant (eigen vergelijkbare dienst)",
-  gerechtvaardigd_belang_zakelijk: "Gerechtvaardigd belang, zakelijk (alleen bellen of langsgaan, met onderbouwing)",
+  gerechtvaardigd_belang_zakelijk: "Gerechtvaardigd belang, zakelijk (alleen bellen naar een bv, nv, stichting, vereniging of coöperatie, of langsgaan; met onderbouwing)",
 };
 
 // Elektronische berichten (e-mail, WhatsApp) voor marketing vragen in Nederland vooraf
@@ -22,6 +23,13 @@ export const BASIS_LABEL = {
 // "Gerechtvaardigd belang" telt daarom alleen voor bellen of langsgaan, nooit voor mail/app.
 export const ELECTRONIC = new Set(["email", "whatsapp"]);
 export const ELECTRONIC_RULE = "Voor mail en WhatsApp is vooraf toestemming nodig, ook bij bedrijven (Telecommunicatiewet). Vraag het eerst telefonisch of persoonlijk (\"Mag ik je een voorbeeld sturen?\") en leg het vast als toestemming.";
+// Bellen voor verkoop: sinds 1 juli 2021 alleen naar een rechtspersoon (bv, nv, stichting,
+// vereniging, coöperatie), of met toestemming, of naar een (oud-)klant. Een eenmanszaak, vof of
+// maatschap is een natuurlijk persoon: niet ongevraagd bellen (zie legalform.js).
+export { PHONE_RULE };
+// WhatsApp heeft geen afmeldlink: elk bericht zegt daarom zelf hoe je bezwaar maakt
+// (bij e-mail staat de afmeldlink in de voettekst).
+export const WA_OPT_OUT = "Liever geen berichten meer van mij? Stuur dan 'stop', dan hoor je niets meer.";
 
 export async function getRoutes(db) {
   const r = (await (db || { query: q }).query("select value from hq.settings where key='routes'")).rows[0]?.value || {};
@@ -94,8 +102,11 @@ export async function suppress({ lead, reason, note = null, kind = null }, db) {
 
 export async function validConsent(leadId, channel, db) {
   // Voor mail en WhatsApp telt "gerechtvaardigd belang" nooit als grond (zie ELECTRONIC_RULE).
-  return (await (db || { query: q }).query(`select * from hq.consents where lead_id=$1 and channel=$2 and revoked_at is null
-      and not ($2 in ('email','whatsapp') and basis = 'gerechtvaardigd_belang_zakelijk') order by recorded_at desc limit 1`, [leadId, channel])).rows[0] || null;
+  // Voor bellen telt het alleen bij een rechtspersoon (eenmanszaak, vof, maatschap: nooit).
+  return (await (db || { query: q }).query(`select c.* from hq.consents c where c.lead_id=$1 and c.channel=$2 and c.revoked_at is null
+      and not ($2 in ('email','whatsapp') and c.basis = 'gerechtvaardigd_belang_zakelijk')
+      and not ($2 = 'telefoon' and c.basis = 'gerechtvaardigd_belang_zakelijk' and not exists (select 1 from hq.leads l where l.id=c.lead_id and l.legal_form = any($3::text[])))
+      order by c.recorded_at desc limit 1`, [leadId, channel, RECHTSPERSONEN])).rows[0] || null;
 }
 
 export async function recordConsent(leadId, body, auth, db) {
@@ -104,6 +115,10 @@ export async function recordConsent(leadId, body, auth, db) {
   if (!["email", "whatsapp", "telefoon"].includes(channel)) throw new HttpError(400, "ongeldig", "Onbekend kanaal.");
   if (!BASIS_LABEL[basis]) throw new HttpError(400, "ongeldig", "Onbekende contactgrond.");
   if (ELECTRONIC.has(channel) && basis === "gerechtvaardigd_belang_zakelijk") throw new HttpError(400, "ongeldig", ELECTRONIC_RULE);
+  if (channel === "telefoon" && basis === "gerechtvaardigd_belang_zakelijk") {
+    const l = (await (db || { query: q }).query("select legal_form from hq.leads where id=$1", [leadId])).rows[0];
+    if (!isRechtspersoon(l?.legal_form)) throw new HttpError(400, "ongeldig", `${PHONE_RULE} Rechtsvorm nu: ${LEGAL_FORMS[l?.legal_form || "onbekend"].label.toLowerCase()}. Controleer die in het KvK-register en leg hem vast op de klantkaart.`);
+  }
   const source = str(body.source, 300), scope = str(body.scope, 300), evidence = str(body.evidence, 1000);
   if (!source || !scope || !evidence) throw new HttpError(400, "ongeldig", "Vul bron, reikwijdte en onderbouwing in. Een openbaar e-mailadres alleen is geen contactgrond.");
   if (basis === "gerechtvaardigd_belang_zakelijk" && evidence.length < 40) throw new HttpError(400, "ongeldig", "Onderbouw het gerechtvaardigd belang concreet (afweging, waarom dit bedrijf, waarom dit kanaal).");
@@ -112,6 +127,23 @@ export async function recordConsent(leadId, body, auth, db) {
     [leadId, channel, basis, source, scope, evidence, auth?.userId || null])).rows[0];
   if (auth) await audit(db, { actor: auth.userId, label: auth.email, action: "contactgrond.vastgelegd", entity: "lead", entityId: leadId, details: { channel, basis } });
   return r;
+}
+
+/**
+ * Mag Rayan dit bedrijf bellen voor verkoop? Ja bij een rechtspersoon (met recht van bezwaar
+ * in het gesprek), of met een geldige grond voor bellen (toestemming, zelf contact gezocht,
+ * bestaande klant). Nooit bij een afmelding of een bezwaar tegen bellen.
+ */
+export async function phoneAllowed(lead, db) {
+  if (!normPhone(lead.contact_phone)) return { allowed: false, reason: "geen telefoonnummer bekend" };
+  const sup = await suppressedFor(lead, db, "telefoon");
+  if (sup) return { allowed: false, reason: `wil niet benaderd worden (${sup.reason})` };
+  if (lead.status === "afgemeld") return { allowed: false, reason: "heeft zich afgemeld" };
+  const c = await validConsent(lead.id, "telefoon", db);
+  if (c) return { allowed: true, basis: c.basis, label: BASIS_LABEL[c.basis] };
+  if (isRechtspersoon(lead.legal_form)) return { allowed: true, basis: "rechtspersoon", label: `${LEGAL_FORMS[lead.legal_form].label}: zakelijk bellen mag, met de mogelijkheid om bezwaar te maken` };
+  const form = lead.legal_form || "onbekend";
+  return { allowed: false, reason: form === "onbekend" ? "rechtsvorm onbekend: controleer hem in het KvK-register (bv/nv/stichting/vereniging mag je bellen)" : `${LEGAL_FORMS[form].label.toLowerCase()}: alleen bellen met toestemming of als klant; ga langs of wacht op hun aanvraag` };
 }
 
 /**

@@ -65,7 +65,7 @@ before(async () => {
   // Nep-website van een kapsalon (voor de websitecheck en de bellijst).
   site = http.createServer((rq, rs) => {
     if (rq.url === "/robots.txt") { rs.writeHead(200); return rs.end("User-agent: *\nAllow: /\n"); }
-    if (rq.url === "/") { rs.writeHead(200, { "content-type": "text/html" }); return rs.end(`<!doctype html><html><head><title>Kapsalon Lotus</title></head><body><h1>Kapsalon Lotus</h1><a href="/afspraak">Afspraak maken</a><footer>© 2019</footer></body></html>`); }
+    if (rq.url === "/") { rs.writeHead(200, { "content-type": "text/html" }); return rs.end(`<!doctype html><html><head><title>Kapsalon Lotus</title></head><body><h1>Kapsalon Lotus</h1><a href="/afspraak">Afspraak maken</a><footer>© 2019 Kapsalon Lotus B.V. · Website door Bureau Voorbeeld B.V.</footer></body></html>`); }
     rs.writeHead(404); rs.end("niet gevonden");
   });
   await new Promise(r => site.listen(0, "127.0.0.1", r));
@@ -247,4 +247,188 @@ test("aanbetaling en verlopen offertes in het ochtendoverleg; verlengen met éé
   assert.equal(again.status, 201); assert.equal(again.json.duplicate, false); assert.notEqual(again.json.id, q2);
   const dup = await req(`/api/hq/klanten/${b.json.lead_id}/offerte`, { method: "POST", body: {} });
   assert.equal(dup.json.duplicate, true, "lopend concept: wel dubbel");
+});
+
+// ── Fase 1d: voorbeeldsite, bel- en bezoeklijst, toestemming na gesprek ─────────
+const aiOn = async () => {
+  const now = Date.now();
+  await req("/api/hq/ai/budget", { method: "PUT", body: { period_start: new Date(now - 864e5).toISOString(), period_end: new Date(now + 20 * 864e5).toISOString(), granted_usd: 100, hq_limit_usd: 85, confirmed: true, enabled: true } });
+};
+// Nep-Claude: geeft bewust ook verzonnen claims terug; de controle moet die tegenhouden.
+const fakeAi = (b) => {
+  const sys = JSON.stringify(b.system || "");
+  if (/VOORBEELD-homepage/.test(sys)) return { kop: "Kapsalon Lotus: al 20 jaar de beste in Den Haag", subkop: "Plan je afspraak online, wanneer het jou uitkomt.", cta: "Plan je afspraak",
+    diensten: [{ naam: "Knippen", tekst: "Voor dames, heren en kinderen." }, { naam: "Kleuren", tekst: "Van subtiel tot opvallend." }, { naam: "Föhnen en stylen", tekst: "Voor elke gelegenheid." }],
+    waarom: ["Persoonlijke aandacht", "Lees onze reviews", "Makkelijk online plannen"], over: "Een gezellige salon in de buurt waar je je thuis voelt." };
+  if (/belletje/.test(sys)) return { opening: "Hoi, met Rayan van StrakWerk. Ik zag dat jullie afspraakknop niet werkt.", vragen: ["Hoe boeken klanten nu?", "Hoeveel klanten mis je per week?", "Wat wil je verbeteren?"],
+    bezwaren: [{ bezwaar: "Geen tijd", antwoord: "Ik stuur je een voorbeeld." }, { bezwaar: "Te duur", antwoord: "Het kost maar 99 euro." }, { bezwaar: "Heb al Instagram", antwoord: "Een site helpt mensen die je zoeken." }, { bezwaar: "Ik heb al een site", antwoord: "Ik laat zien wat beter kan." }],
+    afsluiter: "Mag ik je een voorbeeld appen?" };
+  if (/persoonlijk bericht/.test(sys)) return { tekst: "Leuk je net te spreken! Zoals beloofd een voorbeeld van je nieuwe site." };
+  return null;
+};
+let callLead, visitLead, previewSlug;
+
+test("bellijst en bezoeklijst: bellen alleen waar het mag (rechtsvorm), langsgaan alleen bij echte potentie; belcoach met echte prijzen", async () => {
+  claudeReply = fakeAi; await aiOn();
+  const ins = (vals) => mods.db.q(`insert into hq.leads (company, company_key, source, status, segment, city, contact_phone, address, priority, fit_score, website, website_status, active_status, priority_reason, legal_form, legal_form_source)
+    values ($1,$2,'scout_osm','nieuw',$3,$4,$5,$6,$7,$8,$9,$10,$11,'test',$12,$13) returning id`, vals).then(r => r.rows[0].id);
+  // Rechtsvorm van de eigen site: "© 2019 Kapsalon Lotus B.V." telt, "Website door Bureau Voorbeeld B.V." niet.
+  const { websiteStatus } = await import("../api/_lib/klant/discover.js");
+  const ws = await websiteStatus({ name: "Kapsalon Lotus", city: "Den Haag", website: `http://kapsalon-lotus.nl:${sitePort}/` });
+  assert.deepEqual([ws.status, ws.legal?.form, ws.legal?.source, ws.legal?.evidence], ["gevonden", "bv", "website", "kapsalon lotus b.v."]);
+  callLead = await ins(["Kapsalon Lotus", "kapsalon-lotus", "salons", "Den Haag", "+31701112233", "Lotusstraat 1, 2500 AA Den Haag", "hoog", 85, `http://kapsalon-lotus.nl:${sitePort}/`, "gevonden", "actief", ws.legal.form, ws.legal.source]);
+  await mods.db.q("insert into hq.opportunities (lead_id, page_url, goal, observation, evidence, strength, service_key, service_text) values ($1,$2,'afspraak','De link \"Afspraak maken\" op de homepage gaat op mobiel naar een foutpagina (HTTP 404).','{}','concreet','booking','Afspraken plannen')", [callLead, `http://kapsalon-lotus.nl:${sitePort}/afspraak`]);
+  // Veel potentie maar geen telefoonnummer: direct langsgaan.
+  visitLead = await ins(["Barbier Zuid", "barbier-zuid", "salons", "Den Haag", null, "Zuidstraat 9, 2500 BB Den Haag", "hoog", 80, null, "geen_gevonden", "actief", null, null]);
+  // Eenmanszaak met nummer en potentie: niet ongevraagd bellen (Telecommunicatiewet), wel langsgaan.
+  await ins(["Kapper Om De Hoek", "kapper-om-de-hoek", "salons", "Den Haag", "+31706667788", "Hoekstraat 2, 2500 CC Den Haag", "hoog", 78, null, "geen_gevonden", "actief", "eenmanszaak", "kvk"]);
+  // Rechtsvorm onbekend: niet bellen; zonder adres ook niet langsgaan.
+  await ins(["Garage Twijfel", "garage-twijfel", "autobedrijven", "Zoetermeer", "+31793334455", null, "middel", 50, null, "onzeker", "onzeker", null, null]);
+  // Bv (herkend aan de naam), prioriteit middel: bellen mag.
+  await ins(["Autobedrijf Noord B.V.", "autobedrijf-noord-bv", "autobedrijven", "Zoetermeer", "+31795556677", null, "middel", 55, null, "geen_gevonden", "actief", "bv", "naam"]);
+  await ins(["Oude Kapper", "oude-kapper", "salons", "Den Haag", "+31704445566", "Oud 1, Den Haag", "laag", 10, null, "geen_gevonden", "gesloten", null, null]); // niets
+  // Bv gisteren zonder gehoor: vandaag niet opnieuw bellen en ook niet langsgaan (eerst bellen).
+  const gisteren = "(now() at time zone 'Europe/Amsterdam')::date - 1";
+  const stil = await ins(["Salon Stil B.V.", "salon-stil-bv", "salons", "Den Haag", "+31707778899", "Stil 3, 2500 DD Den Haag", "hoog", 75, null, "geen_gevonden", "actief", "bv", "naam"]);
+  await mods.db.q(`insert into hq.calls (lead_id, day, kind, briefing, outcome, done_at) values ($1, ${gisteren}, 'bellen', '{}', 'geen_gehoor', now())`, [stil]);
+  // Bv met interesse aan de telefoon: nu wel langsgaan.
+  const warm = await ins(["Salon Warm B.V.", "salon-warm-bv", "salons", "Den Haag", "+31708889900", "Warm 4, 2500 EE Den Haag", "hoog", 70, null, "geen_gevonden", "actief", "bv", "naam"]);
+  await mods.db.q(`insert into hq.calls (lead_id, day, kind, briefing, outcome, done_at) values ($1, ${gisteren}, 'bellen', '{}', 'interesse', now())`, [warm]);
+  await mods.db.q("update hq.settings set value = value || '{\"calls_per_day\": 3, \"visits_per_day\": 5}'::jsonb where key='sales_ai'");
+  const r = await req("/api/hq/bellijst/maken", { method: "POST", body: { force: true } });
+  assert.equal(r.status, 200, JSON.stringify(r.json));
+  const v = (await req("/api/hq/vandaag")).json;
+  const callNames = v.calls.map(c => c.company), visitNames = v.visits.map(c => c.company);
+  assert.deepEqual(callNames.sort(), ["Autobedrijf Noord B.V.", "Kapsalon Lotus"].sort(), `bellen alleen bij een rechtspersoon (ruimte voor 3): ${callNames}`);
+  assert.deepEqual(visitNames, ["Barbier Zuid", "Kapper Om De Hoek", "Salon Warm B.V."], `langsgaan alleen bij echte potentie: ${visitNames}`);
+  assert.ok(!callNames.includes("Oude Kapper") && !visitNames.includes("Oude Kapper"));
+  const c = v.calls.find(x => x.company === "Kapsalon Lotus");
+  assert.match(c.briefing.voorstel, /€\d+/, "voorstel met prijs uit de prijslijst");
+  assert.match(c.briefing.aanleiding, /foutpagina \(HTTP 404\)/, "aanleiding met bewijs");
+  assert.match(c.briefing.verzet, /niet meer gebeld/, "recht van bezwaar in elk gesprek");
+  assert.ok(c.briefing.let_op.some(x => /zichtbare nummer/.test(x)));
+  const hoek = v.visits.find(x => x.company === "Kapper Om De Hoek");
+  assert.match(hoek.briefing.opening, /Komt het even uit/, "bezoekcoach, geen belscript");
+  assert.ok(hoek.briefing.let_op.some(x => /geen verkopers/.test(x)));
+  // Klantkaart: waarom (niet) bellen.
+  const kc = (await req(`/api/hq/klanten/${(await one("select id from hq.leads where company='Kapper Om De Hoek'")).id}`)).json;
+  assert.equal(kc.contact.bellen.allowed, false); assert.match(kc.contact.bellen.reason, /eenmanszaak/);
+  assert.equal((await req(`/api/hq/klanten/${callLead}`)).json.contact.bellen.basis, "rechtspersoon");
+  // Nogmaals maken: vult alleen aan (geen dubbele regels).
+  await req("/api/hq/bellijst/maken", { method: "POST", body: { force: true } });
+  assert.equal((await one("select count(*)::int n from hq.calls where lead_id=$1", [callLead])).n, 1);
+  // Belcoach met AI: verzonnen claims ("99 euro", "hoeveel klanten") worden vervangen; de prijs blijft uit CONFIG.
+  await drain();
+  const b = (await one("select briefing, briefing_by from hq.calls where lead_id=$1", [callLead]));
+  assert.equal(b.briefing_by, "Claude");
+  assert.ok(b.briefing.vragen.every(x => !/\d/.test(x)), "geen cijfers in vragen");
+  const duur = b.briefing.bezwaren.find(x => /duur/i.test(x.bezwaar));
+  assert.match(duur.antwoord, new RegExp(`€${JSON.parse((await import("node:fs")).readFileSync(new URL("../api/_lib/content/site-data.json", import.meta.url), "utf8")).bases.nieuw.price_eur}`), "echte prijs bij 'te duur'");
+  assert.ok(!JSON.stringify(b.briefing).includes("99 euro"), "verzonnen prijs tegengehouden");
+});
+
+test("voorbeeldsite: echte gegevens, claims tegengehouden, niet vindbaar, telt alleen echte bezoekers, melding bij eerste keer", async () => {
+  const r = await req(`/api/hq/klanten/${callLead}/voorbeeld`, { method: "POST", body: {} });
+  assert.equal(r.status, 201);
+  await drain();
+  const card = (await req(`/api/hq/klanten/${callLead}`)).json;
+  assert.ok(card.preview, JSON.stringify(card.preview_task));
+  previewSlug = card.preview.slug;
+  assert.match(previewSlug, /^kapsalon-lotus-[a-f0-9]{7}$/);
+  const page = await fetch(`${base}/voorbeeld/${previewSlug}`);
+  const html = await page.text();
+  assert.equal(page.status, 200);
+  assert.match(page.headers.get("x-robots-tag"), /noindex/); assert.match(page.headers.get("content-security-policy"), /script-src 'self'/);
+  assert.match(html, /Voorbeeld door <a[^>]*>StrakWerk<\/a> voor Kapsalon Lotus/);
+  assert.ok(!/al 20 jaar|de beste|reviews/i.test(html.replace(/<style>[\s\S]*?<\/style>/, "")), "verzonnen claims niet op de pagina");
+  assert.match(html, /Plan je afspraak online/, "goede AI-tekst blijft");
+  assert.match(html, /tel:\+31701112233/, "echt telefoonnummer uit openbare gegevens");
+  assert.ok(!/<script>(?!<\/script>)/.test(html), "geen inline scripts");
+  // Stijl kiezen geeft dezelfde link (vernieuwd).
+  await req(`/api/hq/klanten/${callLead}/voorbeeld`, { method: "POST", body: { style: "strak" } });
+  await drain();
+  assert.equal((await one("select count(*)::int n, max(style) s from hq.previews where lead_id=$1", [callLead])).s, "strak");
+  assert.equal((await one("select count(*)::int n from hq.previews where lead_id=$1", [callLead])).n, 1);
+  // Rayan zelf telt niet; een echte bezoeker wel (één melding).
+  await req(`/api/public/voorbeeld/${previewSlug}/gezien`, { method: "POST", body: {}, headers: { origin: base } });
+  assert.equal((await one("select views from hq.previews where slug=$1", [previewSlug])).views, 0);
+  for (let i = 0; i < 2; i++) assert.equal((await pub(`/api/public/voorbeeld/${previewSlug}/gezien`, { method: "POST", body: {} })).status, 200);
+  assert.equal((await one("select views from hq.previews where slug=$1", [previewSlug])).views, 2);
+  assert.equal((await one("select count(*)::int n from hq.notifications where kind='voorbeeld_bekeken' and lead_id=$1", [callLead])).n, 1);
+  assert.equal((await pub(`/api/public/voorbeeld/${previewSlug}/gezien`, { method: "POST", body: {}, headers: { origin: "https://kwaad.example" } })).status, 403);
+  // Onbekend → 404, verlopen → 410.
+  assert.equal((await fetch(`${base}/voorbeeld/bestaat-niet-123`)).status, 404);
+  await mods.db.q("update hq.previews set expires_at = now() - interval '1 minute' where slug=$1", [previewSlug]);
+  assert.equal((await fetch(`${base}/voorbeeld/${previewSlug}`)).status, 410);
+  await mods.db.q("update hq.previews set expires_at = now() + interval '45 days' where slug=$1", [previewSlug]);
+});
+
+test("na het gesprek: uitkomst met één tik, toestemming vastgelegd, persoonlijk bericht met voorbeeldsite; zonder toestemming niets", async () => {
+  const call = await one("select id from hq.calls where lead_id=$1", [callLead]);
+  // Zonder toestemming: geen bericht via mail of WhatsApp.
+  const no = await req(`/api/hq/klanten/${callLead}/bericht-na-gesprek`, { method: "POST", body: { channel: "whatsapp" } });
+  assert.equal(no.status, 409); assert.match(no.json.message, /toestemming/);
+  // Terugbellen zonder datum mag niet.
+  assert.equal((await req(`/api/hq/bellijst/${call.id}/uitkomst`, { method: "POST", body: { outcome: "terugbellen" } })).status, 400);
+  // "Interesse" + "ja, app het maar".
+  const o = await req(`/api/hq/bellijst/${call.id}/uitkomst`, { method: "POST", body: { outcome: "interesse", consent: ["whatsapp"], notes: "Wil graag online afspraken" } });
+  assert.equal(o.status, 200, JSON.stringify(o.json)); assert.deepEqual(o.json.consents, ["whatsapp"]);
+  const cs = await one("select basis, source, scope from hq.consents where lead_id=$1 and channel='whatsapp'", [callLead]);
+  assert.equal(cs.basis, "toestemming"); assert.match(cs.source, /^Telefoongesprek op /);
+  const lead = await one("select status, sales_channel from hq.leads where id=$1", [callLead]);
+  assert.deepEqual(lead, { status: "gesprek", sales_channel: "bellen" });
+  // E-mail kon nog niet (geen toestemming voor mail).
+  assert.equal((await req(`/api/hq/klanten/${callLead}/bericht-na-gesprek`, { method: "POST", body: { channel: "email" } })).status, 409);
+  const msg = await req(`/api/hq/klanten/${callLead}/bericht-na-gesprek`, { method: "POST", body: { channel: "whatsapp" } });
+  assert.equal(msg.status, 201, JSON.stringify(msg.json));
+  const body = msg.json.outreach.body;
+  assert.match(body, /Leuk je net te spreken/); assert.match(body, new RegExp(`/voorbeeld/${previewSlug}`)); assert.match(body, /Samen €\d+ eenmalig/);
+  assert.match(body, /Stuur dan 'stop'/, "WhatsApp zegt zelf hoe je bezwaar maakt");
+  assert.match(msg.json.wa_link, /^https:\/\/wa\.me\/31701112233\?text=/);
+  // Nogmaals: zelfde bericht (geen dubbele).
+  const msg2 = await req(`/api/hq/klanten/${callLead}/bericht-na-gesprek`, { method: "POST", body: { channel: "whatsapp" } });
+  assert.equal(msg2.json.outreach.id, msg.json.outreach.id);
+  // Rayan stuurt hem via WhatsApp en tikt "verstuurd": opvolging over 7 dagen staat voor hem klaar (nu nog niet zichtbaar).
+  await req(`/api/hq/outreach/${msg.json.outreach.id}/verstuurd`, { method: "POST", body: {} });
+  const fu = await one("select status, scheduled_at, body from hq.outreach where lead_id=$1 and kind='opvolging'", [callLead]);
+  assert.equal(fu.status, "klaar_handmatig"); assert.ok(new Date(fu.scheduled_at) > new Date(Date.now() + 6 * 864e5));
+  assert.match(fu.body, /voorbeeld/); assert.match(fu.body, /Stuur dan 'stop'/);
+  assert.ok(!(await req("/api/hq/vandaag")).json.manual.some(x => x.lead_id === callLead && x.kind === "opvolging"), "opvolging pas zichtbaar als hij aan de beurt is");
+  assert.equal((await one("select status from hq.previews where slug=$1", [previewSlug])).status, "gedeeld");
+  // Klant reageert → opvolging vervalt.
+  await req(`/api/hq/klanten/${callLead}/reactie`, { method: "POST", body: { text: "Ziet er goed uit, wat kost het precies?", channel: "whatsapp" } });
+  assert.equal((await one("select status from hq.outreach where lead_id=$1 and kind='opvolging'", [callLead])).status, "geannuleerd");
+});
+
+test("niet meer benaderen geldt voorgoed; terugbellen komt terug (ook bij een eenmanszaak, dan met toestemming); afmelding wint; geen lijst in het weekend", async () => {
+  const callOf = (company) => one("select c.id, c.lead_id from hq.calls c join hq.leads l on l.id=c.lead_id where l.company=$1 order by c.day desc limit 1", [company]);
+  const v = await callOf("Barbier Zuid");
+  assert.equal((await req(`/api/hq/bellijst/${v.id}/uitkomst`, { method: "POST", body: { outcome: "niet_bellen" } })).status, 200);
+  assert.ok(await one("select 1 from hq.suppressions where kind='lead' and value=$1", [visitLead]), "geen enkel contact meer");
+  const cb = new Date(Date.now() + 3 * 864e5).toISOString().slice(0, 10);
+  const noord = await callOf("Autobedrijf Noord B.V.");
+  assert.equal((await req(`/api/hq/bellijst/${noord.id}/uitkomst`, { method: "POST", body: { outcome: "terugbellen", callback_on: cb } })).status, 200);
+  // Eenmanszaak bij een bezoek: "bel me volgende week" = toestemming voor dat telefoontje.
+  const hoek = await callOf("Kapper Om De Hoek");
+  const ho = await req(`/api/hq/bellijst/${hoek.id}/uitkomst`, { method: "POST", body: { outcome: "terugbellen", callback_on: cb } });
+  assert.equal(ho.status, 200, JSON.stringify(ho.json)); assert.deepEqual(ho.json.consents, ["telefoon"]);
+  assert.match((await one("select scope from hq.consents where lead_id=$1 and channel='telefoon'", [hoek.lead_id])).scope, /Terugbellen/);
+  // Bezoek met terugbelafspraak, daarna afgemeld: komt niet terug.
+  const warm = await callOf("Salon Warm B.V.");
+  assert.equal((await req(`/api/hq/bellijst/${warm.id}/uitkomst`, { method: "POST", body: { outcome: "terugbellen", callback_on: cb } })).status, 200);
+  assert.equal((await req(`/api/hq/klanten/${warm.lead_id}/afmelden`, { method: "POST", body: { reason: "afmelding" } })).status, 200);
+  const calls = await import("../api/_lib/klant/calls.js");
+  // Over drie dagen: Noord en Om De Hoek staan er weer op om te bellen; Barbier Zuid en Salon Warm nooit meer.
+  const later = new Date(`${cb}T10:00:00+01:00`);
+  await calls.buildDayList({ now: later, force: true });
+  const day = calls.amsDay(later);
+  const rows = (await mods.db.q("select l.company, c.kind from hq.calls c join hq.leads l on l.id=c.lead_id where c.day=$1::date", [day])).rows;
+  const kindOf = Object.fromEntries(rows.map(r => [r.company, r.kind]));
+  assert.equal(kindOf["Autobedrijf Noord B.V."], "bellen", `terugbellen: ${JSON.stringify(kindOf)}`);
+  assert.equal(kindOf["Kapper Om De Hoek"], "bellen", "eenmanszaak: bellen mag nu (afgesproken)");
+  assert.ok(!("Barbier Zuid" in kindOf) && !("Salon Warm B.V." in kindOf), JSON.stringify(kindOf));
+  // Weekend (zaterdag): geen lijst, tenzij je hem zelf maakt.
+  const sat = new Date("2026-11-28T10:00:00+01:00");
+  const r = await calls.buildDayList({ now: sat });
+  assert.equal(r.overgeslagen, "geen werkdag");
 });

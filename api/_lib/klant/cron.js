@@ -7,6 +7,7 @@ import { enqueueDueOutreach } from "./acquisition.js";
 import { meetingTick, auditViolations, kantoorSettings } from "./planning.js";
 import { weeklyProposals } from "./project.js";
 import { flushNotifications } from "./notify.js";
+import { dayListTick } from "./calls.js";
 import { amsParts, isoWeekKey } from "../content/studio.js";
 
 async function once(key, hours) {
@@ -26,6 +27,7 @@ export async function klantCron(now = new Date()) {
   if (k.paused) return { ...out, gepauzeerd: true };
   try { out.berichten = await enqueueDueOutreach(); } catch (e) { out.berichten = { fout: e.message }; }
   try { out.overleg = await meetingTick(now); } catch (e) { out.overleg = { fout: e.message }; }
+  try { out.bellijst = await dayListTick(now); } catch (e) { out.bellijst = { fout: e.message }; }
   // Intake na 3 dagen niet compleet: herinnering klaarzetten (Rayan verstuurt; maximaal 2).
   try {
     const stuck = (await q(`select p.id, p.lead_id, p.name, p.is_test, l.contact_email, l.contact_phone, l.contact_name,

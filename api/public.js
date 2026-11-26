@@ -13,6 +13,7 @@ import { suppress } from "./_lib/klant/contact.js";
 import { checkUnsubscribeToken } from "./_lib/klant/mail.js";
 import { intakeView, saveIntake } from "./_lib/klant/project.js";
 import { quoteView, quoteAccept } from "./_lib/klant/quote-public.js";
+import { previewHtml, previewSeen } from "./_lib/klant/preview.js";
 
 // Rayan zelf (ingelogd in HQ): telt niet als bezoek van een klant.
 const hasHqSession = (request) => /(?:^|;\s*)__Host-sw_hq_at=/.test(request.headers.get("cookie") || "");
@@ -94,6 +95,21 @@ async function handle(request) {
         if (await rateLimited(clientIp(request), "intake", 60)) throw new HttpError(429, "limiet", "Even wachten en opnieuw proberen.");
         return json(await saveIntake(t, await readJson(request, 4_400_000)));
       }
+    }
+
+    // Persoonlijke voorbeeldsite (HTML) en het "echt bekeken"-signaal van de pagina zelf.
+    let mv;
+    if ((mv = path.match(/^voorbeeld\/([a-z0-9-]{3,60})$/)) && (m === "GET" || m === "HEAD")) {
+      const r = await previewHtml(mv[1]);
+      return new Response(m === "HEAD" ? null : r.html, { status: r.status, headers: {
+        "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "x-robots-tag": "noindex, nofollow", "referrer-policy": "strict-origin-when-cross-origin",
+        "x-content-type-options": "nosniff", "x-frame-options": "DENY",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'" } });
+    }
+    if ((mv = path.match(/^voorbeeld\/([a-z0-9-]{3,60})\/gezien$/)) && m === "POST") {
+      if (!sameSite(request)) throw new HttpError(403, "herkomst", "Verzoek geweigerd.");
+      if (await rateLimited(clientIp(request), "voorbeeld", 30)) return json({ ok: true });
+      return json(await previewSeen(mv[1], { owner: hasHqSession(request) }));
     }
 
     if (path === "offerte") {
