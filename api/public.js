@@ -3,6 +3,10 @@
 //   GET/POST afmelden    afmelden met één klik (ondertekende link uit elke mail)
 //   POST inbound         binnenkomende mail (bijv. Cloudflare Email Worker) met gedeeld geheim
 //   GET/POST intake      persoonlijke intake-link van één project (token, geen account)
+//   POST websitecheck    gratis websitecheck starten (honeypot, herkomst, limieten) → geheim token
+//   GET  websitecheck    uitslag bij het token; POST websitecheck/contact: gegevens achterlaten (met vinkje)
+//   GET  voorbeeld/<code> persoonlijke voorbeeldsite; POST …/gezien: echt bekeken
+//   GET/POST offerte     offertepagina met akkoordknop (ondertekende link)
 import { createHash, timingSafeEqual } from "node:crypto";
 import { q, one, tx } from "./_lib/db.js";
 import { env } from "./_lib/env.js";
@@ -14,6 +18,7 @@ import { checkUnsubscribeToken } from "./_lib/klant/mail.js";
 import { intakeView, saveIntake } from "./_lib/klant/project.js";
 import { quoteView, quoteAccept } from "./_lib/klant/quote-public.js";
 import { previewHtml, previewSeen } from "./_lib/klant/preview.js";
+import { startCheck, checkView, checkContact } from "./_lib/klant/sitecheck.js";
 
 // Rayan zelf (ingelogd in HQ): telt niet als bezoek van een klant.
 const hasHqSession = (request) => /(?:^|;\s*)__Host-sw_hq_at=/.test(request.headers.get("cookie") || "");
@@ -95,6 +100,26 @@ async function handle(request) {
         if (await rateLimited(clientIp(request), "intake", 60)) throw new HttpError(429, "limiet", "Even wachten en opnieuw proberen.");
         return json(await saveIntake(t, await readJson(request, 4_400_000)));
       }
+    }
+
+    // Gratis websitecheck (leadmagneet op /websitecheck).
+    if (path === "websitecheck" && m === "POST") {
+      if (!sameSite(request)) throw new HttpError(403, "herkomst", "Verzoek geweigerd.");
+      const body = await readJson(request, 4 * 1024);
+      if (body.hp || body.website_url) return json({ ok: true, token: null, status: "bezig" }); // honeypot: stil negeren
+      if (await rateLimited(clientIp(request), "websitecheck", 10)) throw new HttpError(429, "limiet", "Even wachten en opnieuw proberen, of stuur je adres via WhatsApp.");
+      return json({ ok: true, ...(await startCheck({ url: body.url, ip: clientIp(request), isTest: url.searchParams.get("sw_test") === "1" || body.sw_test === true })) });
+    }
+    if (path === "websitecheck" && m === "GET") {
+      if (await rateLimited(clientIp(request), "websitecheck_poll", 600)) throw new HttpError(429, "limiet", "Even wachten en opnieuw proberen.");
+      return json(await checkView(url.searchParams.get("t")));
+    }
+    if (path === "websitecheck/contact" && m === "POST") {
+      if (!sameSite(request)) throw new HttpError(403, "herkomst", "Verzoek geweigerd.");
+      const body = await readJson(request, 8 * 1024);
+      if (body.hp || body.website_url) return json({ ok: true }); // honeypot
+      if (await rateLimited(clientIp(request), "websitecheck_contact", 6)) throw new HttpError(429, "limiet", "Te veel verzoeken; stuur gerust een WhatsApp.");
+      return json(await checkContact(body.t, body));
     }
 
     // Persoonlijke voorbeeldsite (HTML) en het "echt bekeken"-signaal van de pagina zelf.

@@ -432,3 +432,144 @@ test("niet meer benaderen geldt voorgoed; terugbellen komt terug (ook bij een ee
   const r = await calls.buildDayList({ now: sat });
   assert.equal(r.overgeslagen, "geen werkdag");
 });
+
+// ── Fase 1e: gratis websitecheck (leadmagneet) ─────────────────────────────────
+test("websitecheck: meet echte punten, advies met prijzen uit de prijslijst, misbruiklimieten, gegevens alleen met vinkje, opruimen", async () => {
+  const site = JSON.parse((await import("node:fs")).readFileSync(new URL("../api/_lib/content/site-data.json", import.meta.url), "utf8"));
+  claudeReply = (b) => /websitecheck/.test(JSON.stringify(b.system || "")) ? { samenvatting: "Je site laadt en heeft een duidelijke kop. Het belangrijkste verbeterpunt: hij is nog niet ingesteld voor telefoons." } : fakeAi(b);
+  const as = (ip) => ({ headers: { "x-forwarded-for": ip } });
+  const target = `http://kapsalon-lotus.nl:${sitePort}/`;
+  // Herkomst, honeypot en ongeldige adressen.
+  assert.equal((await req("/api/public/websitecheck", { anon: true, method: "POST", body: { url: target } })).status, 403, "zonder herkomst geweigerd");
+  const hp = await pub("/api/public/websitecheck", { method: "POST", body: { url: target, hp: "x" } });
+  assert.equal(hp.status, 200); assert.equal(hp.json.token, null);
+  assert.equal((await one("select count(*)::int n from hq.site_checks")).n, 0, "honeypot maakt niets aan");
+  for (const bad of ["localhost", "http://127.0.0.1/", "ftp://kapsalon-lotus.nl", ""]) assert.equal((await pub("/api/public/websitecheck", { method: "POST", body: { url: bad } })).status, 400, bad);
+  // Echte check (op de achtergrond), uitslag via het geheime token.
+  const st = await pub("/api/public/websitecheck", { method: "POST", ...as("203.0.113.7"), body: { url: target } });
+  assert.equal(st.status, 200, JSON.stringify(st.json)); assert.match(st.json.token, /^[A-Za-z0-9_-]{24,64}$/); assert.equal(st.json.status, "bezig");
+  let v;
+  for (let i = 0; i < 80; i++) { v = (await pub(`/api/public/websitecheck?t=${st.json.token}`)).json; if (v.status !== "bezig") break; await new Promise(r => setTimeout(r, 250)); }
+  assert.equal(v.status, "klaar", JSON.stringify(v));
+  const ck = Object.fromEntries(v.result.checks.map(c => [c.key, c]));
+  assert.equal(ck.bereikbaar.ok, true); assert.equal(ck.https.ok, false); assert.equal(ck.mobiel.ok, false); assert.equal(ck.contact.ok, false);
+  assert.equal(ck.links.ok, false); assert.match(ck.links.detail, /HTTP 404/, "kapotte afspraakknop gevonden zoals een klant hem zou volgen");
+  assert.equal(ck.google.ok, false); assert.equal(ck.kop.ok, true); assert.equal(ck.afbeeldingen.ok, null);
+  assert.equal(v.advice.ok_count, 2); assert.equal(v.advice.total, 7);
+  assert.equal(v.advice.package.key, "redesign"); assert.equal(v.advice.package.price_eur, site.bases.redesign.price_eur, "prijs uit CONFIG");
+  const booking = v.advice.options.find(o => o.id === "booking");
+  assert.ok(booking, JSON.stringify(v.advice.options)); assert.equal(booking.price_eur, site.options.find(o => o.id === "booking").price_eur);
+  assert.equal(v.advice.summary_by, "Claude"); assert.ok(!/\d/.test(v.advice.summary));
+  const res = await one("select post, department from hq.ai_reservations order by created_at desc limit 1");
+  assert.deepEqual(res, { post: "websitecheck", department: "auditor" }, "eigen budgetpost: kan nooit het hele tegoed opmaken");
+  assert.ok(!("observations" in v.result) && !("lead_id" in v) && !("ip_hash" in v), "pagina krijgt alleen wat hij mag zien");
+  // Zelfde domein kort daarna: uitslag hergebruikt (geen nieuwe meting, geen AI-kosten).
+  const aiBefore = (await one("select count(*)::int n from hq.ai_reservations")).n;
+  const again = await pub("/api/public/websitecheck", { method: "POST", ...as("203.0.113.7"), body: { url: "kapsalon-lotus.nl:" + sitePort } });
+  assert.equal(again.json.status, "klaar"); assert.equal(again.json.reused, true);
+  assert.equal((await one("select count(*)::int n from hq.ai_reservations")).n, aiBefore);
+  // Maximaal 5 per bezoeker per dag; een andere bezoeker kan nog wel.
+  for (let i = 0; i < 3; i++) assert.equal((await pub("/api/public/websitecheck", { method: "POST", ...as("203.0.113.7"), body: { url: target } })).status, 200);
+  const six = await pub("/api/public/websitecheck", { method: "POST", ...as("203.0.113.7"), body: { url: target } });
+  assert.equal(six.status, 429); assert.match(six.json.message, /WhatsApp/);
+  assert.equal((await pub("/api/public/websitecheck", { method: "POST", ...as("198.51.100.4"), body: { url: target } })).status, 200);
+  // Dagmaximum (instelling).
+  await mods.db.q("update hq.settings set value = value || '{\"checks_per_day\": 6}'::jsonb where key='sales_ai'");
+  const full = await pub("/api/public/websitecheck", { method: "POST", ...as("198.51.100.9"), body: { url: target } });
+  assert.equal(full.status, 429); assert.match(full.json.message, /vol/);
+  await mods.db.q("update hq.settings set value = value || '{\"checks_per_day\": 40}'::jsonb where key='sales_ai'");
+  assert.equal((await one("select count(*)::int n from hq.site_checks where ip_hash is null")).n, 0);
+  assert.ok(!(await one("select 1 from hq.site_checks where ip_hash like '%203.0.113.7%'")), "geen IP-adres opgeslagen");
+  // Gegevens achterlaten: alleen met vinkje en met telefoon of e-mail.
+  const t = st.json.token;
+  assert.equal((await pub("/api/public/websitecheck/contact", { method: "POST", body: { t, name: "Lotus", phone: "0698765432", consent: false } })).status, 400);
+  assert.equal((await pub("/api/public/websitecheck/contact", { method: "POST", body: { t, name: "Lotus", consent: true } })).status, 400);
+  assert.equal((await pub("/api/public/websitecheck/contact", { method: "POST", body: { t: "x".repeat(30), phone: "0698765432", consent: true } })).status, 404);
+  const ok = await pub("/api/public/websitecheck/contact", { method: "POST", body: { t, name: "Mila de Vries", company: "Kapsalon Lotus Delft", phone: "06 9876 5432", consent: true, message: "Graag meer afspraken" } });
+  assert.equal(ok.status, 200, JSON.stringify(ok.json));
+  const sc = await one("select lead_id from hq.site_checks where token_hash=encode(sha256($1::bytea),'hex')", [t]);
+  assert.ok(sc.lead_id, "check hangt aan de klantkaart");
+  const lead = await one("select * from hq.leads where id=$1", [sc.lead_id]);
+  assert.equal(lead.sales_channel, "websitecheck"); assert.equal(lead.contact_phone, "+31698765432");
+  const cons = (await mods.db.q("select channel, basis from hq.consents where lead_id=$1 and revoked_at is null order by channel, basis", [lead.id])).rows.map(r => `${r.channel}:${r.basis}`);
+  assert.ok(cons.includes("telefoon:toestemming") && cons.includes("whatsapp:toestemming"), cons.join(","));
+  assert.ok(await one("select 1 from hq.opportunities where lead_id=$1 and strength='concreet' and observation like '%HTTP 404%'", [lead.id]), "bevindingen op de klantkaart");
+  assert.ok(await one("select 1 from hq.notifications where kind='aanvraag' and lead_id=$1", [lead.id]), "melding: nieuwe aanvraag");
+  // Bellen mag nu (vinkje), ook al is de rechtsvorm onbekend.
+  assert.equal((await req(`/api/hq/klanten/${lead.id}`)).json.contact.bellen.allowed, true);
+  assert.equal((await pub(`/api/public/websitecheck?t=${t}`)).json.contact_sent, true);
+  const dup = await pub("/api/public/websitecheck/contact", { method: "POST", body: { t, name: "Mila de Vries", phone: "0698765432", consent: true, message: "Graag meer afspraken" } });
+  assert.equal(dup.status, 200); assert.equal(dup.json.duplicate, true);
+  // Onbekend token: niets prijsgeven.
+  assert.equal((await pub(`/api/public/websitecheck?t=${"A".repeat(32)}`)).status, 404);
+  // Opruimen: zonder gegevens na 90 dagen weg, met gegevens niet; bezoekershash na 2 dagen gewist.
+  await mods.db.q("update hq.site_checks set created_at = now() - interval '91 days'");
+  const { runRetention } = await import("../api/_lib/retention.js");
+  const r = await runRetention();
+  assert.equal(r.checks, 5, JSON.stringify(r)); // 6 checks, waarvan 1 met gegevens
+  assert.equal((await one("select count(*)::int n from hq.site_checks")).n, 1, "alleen de check met achtergelaten gegevens blijft");
+  assert.equal((await one("select ip_hash from hq.site_checks")).ip_hash, null);
+});
+
+// ── Fase 1e: bestaande klanten (review, verwijzing, onderhoud) ─────────────────
+test("bestaande klanten: invoeren met bevestiging, berichten alleen met grond en afmeldregel, verwijslink herkend, melding bij een verwijzing", async () => {
+  const site = JSON.parse((await import("node:fs")).readFileSync(new URL("../api/_lib/content/site-data.json", import.meta.url), "utf8"));
+  const rows = [{ company: "Garage Oud B.V.", contact_name: "Henk de Vries", phone: "06 2222 3333", email: "henk@garage-oud.nl", website: "garage-oud.nl" },
+    { company: "Bakker Klaas", contact_name: "Klaas", phone: "06 4444 5555" }];
+  assert.equal((await req("/api/hq/klanten/bestaand", { method: "POST", body: { rows } })).status, 400, "zonder bevestiging over de herkomst");
+  assert.equal((await req("/api/hq/klanten/bestaand", { method: "POST", body: { rows, confirmed: true } })).status, 400, "afmeldkans bij het verzamelen moet ingevuld zijn");
+  assert.equal((await req("/api/hq/klanten/bestaand", { method: "POST", user: staff, body: { rows, confirmed: true, optout_offered: true } })).status, 403, "alleen de eigenaar");
+  const im1 = await req("/api/hq/klanten/bestaand", { method: "POST", body: { rows: [rows[0]], confirmed: true, optout_offered: true } });
+  assert.equal(im1.status, 200, JSON.stringify(im1.json)); assert.equal(im1.json.nieuw, 1);
+  const im2 = await req("/api/hq/klanten/bestaand", { method: "POST", body: { rows: [rows[1], { company: "", phone: "1" }], confirmed: true, optout_offered: false } });
+  assert.equal(im2.json.nieuw, 1); assert.equal(im2.json.overgeslagen.length, 1);
+  const oud = await one("select * from hq.leads where company='Garage Oud B.V.'"), klaas = await one("select * from hq.leads where company='Bakker Klaas'");
+  assert.equal(oud.status, "gewonnen"); assert.equal(oud.sales_channel, "bestaande_klant");
+  const basis = async (id) => (await mods.db.q("select channel from hq.consents where lead_id=$1 and basis='bestaande_klant' and revoked_at is null order by channel", [id])).rows.map(r => r.channel);
+  assert.deepEqual(await basis(oud.id), ["email", "telefoon", "whatsapp"]);
+  assert.deepEqual(await basis(klaas.id), ["telefoon"], "zonder afmeldkans bij het verzamelen: alleen bellen");
+  // Salon Mila accepteerde online zonder het vinkje "liever geen berichten": grond voor berichten over eigen diensten.
+  assert.deepEqual(await basis(leadQ.id), ["email", "telefoon", "whatsapp"]);
+  // Review: alleen met je Google-reviewlink.
+  assert.equal((await req("/api/hq/klanten/campagne", { method: "POST", body: { kind: "review" } })).status, 409);
+  assert.equal((await req("/api/hq/kantoor/instellingen/links", { method: "PUT", body: { google_review_url: "https://g.page/r/strakwerk-test/review" } })).status, 200);
+  const rv = await req("/api/hq/klanten/campagne", { method: "POST", body: { kind: "review" } });
+  assert.equal(rv.status, 200, JSON.stringify(rv.json));
+  const msgOud = await one("select * from hq.outreach where lead_id=$1 and kind='review_verzoek' and idempotency_key like 'campagne:%'", [oud.id]);
+  assert.equal(msgOud.channel, "whatsapp"); assert.equal(msgOud.status, "klaar_handmatig");
+  assert.match(msgOud.body, /^Hoi Henk,/); assert.match(msgOud.body, /https:\/\/g\.page\/r\/strakwerk-test\/review/); assert.match(msgOud.body, /Stuur dan 'stop'/);
+  assert.ok(!/korting|beloning|cadeau/i.test(msgOud.body), "geen beloning voor een review");
+  assert.ok(rv.json.overgeslagen.some(x => x.bedrijf === "Bakker Klaas" && /telefonisch|bel/.test(x.reden)), JSON.stringify(rv.json.overgeslagen));
+  assert.equal((await req("/api/hq/klanten/campagne", { method: "POST", body: { kind: "review" } })).json.klaar, 0, "per maand één keer per klant");
+  // Verwijzing: eigen link; beloning alleen als je die zelf instelt.
+  await mods.db.q("update hq.outreach set sent_at=now() - interval '10 days', status='handmatig_verzonden' where id=$1", [msgOud.id]);
+  await req("/api/hq/klanten/campagne", { method: "POST", body: { kind: "verwijzing", lead_ids: [oud.id] } });
+  const vw = await one("select body from hq.outreach where lead_id=$1 and kind='verwijzing'", [oud.id]);
+  assert.match(vw.body, new RegExp(`/\\?ref=${oud.id.slice(0, 8)}`)); assert.ok(!/krijg jij/.test(vw.body), "geen beloning zonder jouw regel");
+  // Onderhoud: namen en prijzen uit de prijslijst.
+  await mods.db.q("update hq.outreach set sent_at=now() - interval '10 days', status='handmatig_verzonden' where lead_id=$1 and kind='verwijzing'", [oud.id]);
+  await req("/api/hq/klanten/campagne", { method: "POST", body: { kind: "onderhoud", lead_ids: [oud.id] } });
+  const oh = await one("select body from hq.outreach where lead_id=$1 and kind='onderhoud'", [oud.id]);
+  for (const id of ["onderhoud", "onderhoudplus"]) { const o = site.options.find(x => x.id === id); assert.ok(oh.body.includes(`${o.name} voor €${o.price_eur} per maand`), `${id}: ${oh.body}`); }
+  // Afgemeld: geen berichten meer.
+  await req(`/api/hq/klanten/${leadQ.id}/afmelden`, { method: "POST", body: { reason: "afmelding" } });
+  const after = await req("/api/hq/klanten/campagne", { method: "POST", body: { kind: "onderhoud", lead_ids: [leadQ.id] } });
+  assert.equal(after.json.klaar, 0); assert.ok(!(await one("select 1 from hq.outreach where lead_id=$1 and kind='onderhoud'", [leadQ.id])), "geen bericht na afmelding");
+  // Verwijzing werkt: aanvraag via de link van Garage Oud → klant → melding (met jouw beloningsregel).
+  await req("/api/hq/kantoor/instellingen/links", { method: "PUT", body: { referral_reward: "een maand gratis onderhoud" } });
+  const a = await pub("/api/public/aanvraag", { method: "POST", body: { name: "Sanne", company: "Bloemen Sanne", email: "sanne@bloemen-sanne.nl", message: "Ik wil een website.", ref: oud.id.slice(0, 8), form_id: "form-ref-0001" } });
+  assert.equal(a.status, 200);
+  const sanne = await one("select id, referral_lead_id, sales_channel from hq.leads where contact_email='sanne@bloemen-sanne.nl'");
+  assert.equal(sanne.referral_lead_id, oud.id); assert.equal(sanne.sales_channel, "verwijzing");
+  const qr = await req(`/api/hq/klanten/${sanne.id}/offerte`, { method: "POST", body: {} });
+  assert.equal(qr.status, 201, JSON.stringify(qr.json));
+  await mods.db.q("update hq.quotes set terms='Voorwaarden StrakWerk (test)' where id=$1", [qr.json.id]);
+  const sq = await req(`/api/hq/offertes/${qr.json.id}/versturen`, { method: "POST", body: { interest: true } });
+  assert.equal(sq.status, 200, JSON.stringify(sq.json));
+  const t = new URL(sq.json.url, base).searchParams.get("t");
+  const acc = await pub(`/api/public/offerte?t=${encodeURIComponent(t)}`, { method: "POST", body: { name: "Sanne", agree: true, no_marketing: true } });
+  assert.equal(acc.status, 200, JSON.stringify(acc.json));
+  const nt = await one("select title, body, lead_id from hq.notifications where kind='verwijzing'");
+  assert.equal(nt.lead_id, oud.id); assert.match(nt.title, /Via Garage Oud B\.V\.: Bloemen Sanne/); assert.match(nt.body, /een maand gratis onderhoud/);
+  assert.deepEqual(await basis(sanne.id), [], "vinkje 'liever geen berichten' → geen grond voor berichten over andere diensten");
+});

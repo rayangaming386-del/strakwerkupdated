@@ -5,6 +5,7 @@ import { createHash } from "node:crypto";
 import { one, q } from "../db.js";
 import { HttpError, str } from "../http.js";
 import { checkLinkToken, intakeToken } from "./tokens.js";
+import { customerBasis } from "./clients.js";
 import { acceptQuote, paymentSettings } from "./sales.js";
 import { notify } from "./notify.js";
 import { SITE } from "../content/studio.js";
@@ -69,7 +70,12 @@ export async function quoteAccept(token, body, { ip = "" } = {}) {
   if (qu.valid_until && new Date(qu.valid_until) < new Date()) throw new HttpError(410, "verlopen", "Deze offerte is verlopen. Stuur Rayan een berichtje: hij maakt graag een nieuwe.");
   const ipHash = ip ? createHash("sha256").update(`${ip}|${new Date().toISOString().slice(0, 10)}|offerte`).digest("hex").slice(0, 32) : null;
   await acceptQuote(id, null, { via: "klant_online", name, ipHash });
+  const noMarketing = body?.no_marketing === true;
   await q("insert into hq.interactions (lead_id, direction, channel, kind, classification, body, quote_id, is_test, created_label) values ($1,'in','formulier','bericht','interesse',$2,$3,$4,'offertepagina')",
-    [qu.lead_id, `Offerte online geaccepteerd door ${name}.`, id, qu.is_test]);
+    [qu.lead_id, `Offerte online geaccepteerd door ${name}.${noMarketing ? " Wil geen berichten over andere diensten." : ""}`, id, qu.is_test]);
+  // Bestaande klant: berichten over eigen, vergelijkbare diensten mogen, want bij het akkoord
+  // kreeg de klant de kans om dat te weigeren (vinkje) en elk bericht heeft een afmeldregel.
+  if (!noMarketing) await customerBasis(qu.lead_id, { source: `Offerte online geaccepteerd door ${name}`,
+    evidence: "Bij het akkoord stond: 'Na de oplevering stuur ik je soms een bericht over je website, bijvoorbeeld over onderhoud. Afmelden kan altijd.' Het vinkje 'Liever geen berichten over andere diensten' stond uit." });
   return quoteView(token, { countView: false });
 }

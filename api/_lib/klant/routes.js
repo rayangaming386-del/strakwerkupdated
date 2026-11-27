@@ -17,6 +17,7 @@ import { notifyTarget } from "./notify.js";
 import * as calls from "./calls.js";
 import { requestPreview, previewUrl, STYLES } from "./preview.js";
 import { LEGAL_FORMS, LEGAL_SOURCES } from "./legalform.js";
+import { importClients, prepareCampaign, CAMPAIGNS, referralLink } from "./clients.js";
 
 /** IBAN-controle (ISO 13616, mod 97): een typefout komt zo nooit op een offertepagina. */
 export function validIban(v) {
@@ -116,6 +117,15 @@ export async function handleKlant({ m, path, url, body, auth, startWorker }) {
   if ((p = route(path, "klanten/:id/afspraak")) && m === "POST") { assertPerm(auth, "leads.write"); return json(await sales.book(p.id, body, auth), 201); }
   if ((p = route(path, "klanten/:id/beantwoord")) && m === "POST") { assertPerm(auth, "leads.write"); return json(await sales.markAnswered(p.id, body, auth)); }
   if ((p = route(path, "klanten/:id/toestemming")) && m === "POST") { assertPerm(auth, "leads.write"); return json(await contact.recordConsent(p.id, body, auth), 201); }
+  // Bestaande klanten: lijst invoeren (eigenaar, met bevestiging over de herkomst) en berichten klaarzetten.
+  if (m === "POST" && path === "klanten/bestaand") { assertPerm(auth, "settings.write"); return json(await importClients(body, auth, { env })); }
+  if (m === "POST" && path === "klanten/campagne") { assertPerm(auth, "leads.write"); return json(await prepareCampaign(body, auth, { env })); }
+  if (m === "GET" && path === "klanten/campagnes") {
+    const links = (await one("select value from hq.settings where key='links'"))?.value || {};
+    const n = (await one("select count(*)::int n from hq.leads where status='gewonnen' and is_test=$1", [env === "test"])).n;
+    return json({ klanten: n, campagnes: Object.entries(CAMPAIGNS).map(([k, c]) => ({ key: k, label: c.label, klaar: k !== "review" || Boolean(links.google_review_url) })), beloning: links.referral_reward || null });
+  }
+  if ((p = route(path, "klanten/:id/verwijslink")) && m === "GET") { assertUuid(p.id, "klant"); return json({ url: referralLink(p.id) }); }
   if ((p = route(path, "klanten/:id/rechtsvorm")) && m === "POST") {
     // Na controle in het KvK-register (gratis op kvk.nl) of zoals de klant het zelf opgaf.
     assertPerm(auth, "leads.write"); assertUuid(p.id, "klant");

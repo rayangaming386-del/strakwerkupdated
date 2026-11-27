@@ -57,7 +57,7 @@
   $("accept").addEventListener("submit", async (ev) => {
     ev.preventDefault();
     const btn = $("accept").querySelector("button"); btn.disabled = true; $("msg").textContent = "Even verwerken…"; $("msg").className = "small";
-    try { render(await api({ method: "POST", body: JSON.stringify({ name: $("name").value, agree: $("agree").checked }) })); }
+    try { render(await api({ method: "POST", body: JSON.stringify({ name: $("name").value, agree: $("agree").checked, no_marketing: $("noMarketing").checked }) })); }
     catch (e) { $("msg").textContent = e.message; $("msg").className = "small err"; }
     finally { btn.disabled = false; }
   });

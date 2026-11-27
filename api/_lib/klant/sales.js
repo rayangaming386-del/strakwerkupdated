@@ -406,6 +406,13 @@ export async function acceptQuote(quoteId, auth, { via = "hq", name = null, ipHa
       await notify({ key: `offerte_akkoord:${quoteId}`, kind: "akkoord", title: `Akkoord: ${lead?.company || "klant"} (€${qu.price_cents / 100})`,
         body: `${via === "klant_online" ? `Online geaccepteerd door ${name || "de klant"}.` : "Akkoord vastgelegd in HQ."}${qu.deposit_cents ? ` Aanbetaling gevraagd: €${(qu.deposit_cents / 100).toFixed(2)}.` : ""}`,
         leadId: qu.lead_id, url: `/hq/klanten?id=${qu.lead_id}`, isTest: qu.is_test }, db);
+      // Kwam deze klant via de verwijslink van een andere klant? Dan niet vergeten te bedanken.
+      const ref = (await db.query("select r.id, r.company from hq.leads l join hq.leads r on r.id=l.referral_lead_id where l.id=$1", [qu.lead_id])).rows[0];
+      if (ref) {
+        const reward = (await db.query("select value->>'referral_reward' as r from hq.settings where key='links'")).rows[0]?.r;
+        await notify({ key: `verwijzing:${qu.lead_id}`, kind: "verwijzing", title: `Via ${ref.company}: ${lead?.company || "nieuwe klant"} is klant geworden`,
+          body: reward ? `Volgens je regel krijgt ${ref.company} nu: ${reward}.` : `Bedank ${ref.company} voor de verwijzing.`, leadId: ref.id, url: `/hq/klanten?id=${ref.id}`, isTest: qu.is_test }, db);
+      }
     }
     await audit(db, { actor: auth?.userId || null, label: auth?.email || "systeem", action: "offerte.akkoord", entity: "quote", entityId: quoteId, details: { project: pid, via } });
     return { project_id: pid, intake_url: current ? `/intake?t=${token}` : null };
