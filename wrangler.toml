@@ -39,6 +39,6 @@ enabled = true
 # Optioneel (gratis): Hyperdrive bundelt databaseverbindingen voor Workers.
 # Maak hem met `npx wrangler hyperdrive create strakwerk-db --connection-string="..."`
 # en zet de id hieronder (zonder Hyperdrive gebruikt de Worker DATABASE_URL).
-# [[hyperdrive]]
-# binding = "HYPERDRIVE"
-# id = "..."
+[[hyperdrive]]
+binding = "HYPERDRIVE"
+id = "80934a0fa5574d69bf8ab17eeb91508b"
