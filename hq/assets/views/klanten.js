@@ -3,6 +3,7 @@
 import { h, fmt, errorBox, skeleton, toast, empty, modal, field } from "../ui.js";
 import { api } from "../api.js";
 import { put, envSwitch, getEnv, envQs, copyBtn, waHref, mailHref } from "./klant-ui.js";
+import { salesCardSections, quoteExtras, outreachButtons } from "./sales-ui.js";
 
 const STATUS = { nieuw: "Nieuw", onderzocht: "Onderzocht", goedgekeurd: "Goedgekeurd", benaderd: "Benaderd", aanvraag: "Aanvraag", gekwalificeerd: "Gekwalificeerd", gesprek: "In gesprek", afspraak: "Afspraak", offerte: "Offerte", gewonnen: "Klant", verloren: "Verloren", afgemeld: "Afgemeld" };
 const WS = { gevonden: "Website gevonden", alleen_sociaal: "Alleen sociaal profiel", onzeker: "Onzeker", geen_gevonden: "Geen eigen website gevonden na deze controles" };
@@ -56,7 +57,7 @@ async function card(root, ctx, id) {
       const sec = (title, ...c) => h("section", { class: "card stack" }, h("h2", { style: { fontSize: "1.02rem", margin: 0 } }, title), ...c);
       const reply = d.outreach.find(o => o.kind === "antwoord" && o.status === "concept");
       const quote = d.quotes[0];
-      const manual = d.outreach.filter(o => o.status === "klaar_handmatig");
+      const manual = d.outreach.filter(o => o.status === "klaar_handmatig" || (o.status === "concept" && (["review_verzoek", "verwijzing", "onderhoud"].includes(o.kind) || String(o.prompt_version || "").startsWith("na_gesprek"))));
       put(box, 
         h("div", { class: "stack" }, h("div", { class: "row", style: { justifyContent: "space-between" } }, h("h2", { style: { margin: 0 } }, l.company), h("span", { class: "badge b-gold" }, STATUS[l.status] || l.status)),
           h("p", { class: "muted", style: { margin: 0 } }, [l.contact_name, l.contact_email, l.contact_phone, l.city].filter(Boolean).join(" · ")),
@@ -69,7 +70,7 @@ async function card(root, ctx, id) {
           h("div", { class: "row" }, copyBtn(reply.body), l.contact_phone ? h("a", { class: "btn btn-sm", href: waHref(l.contact_phone, reply.body), target: "_blank", rel: "noopener" }, "WhatsApp") : null,
             l.contact_email ? h("a", { class: "btn btn-sm", href: mailHref(l.contact_email, reply.subject, reply.body) }, "Mail") : null,
             act("Ik heb geantwoord", () => api(`klanten/${id}/beantwoord`, { method: "POST", body: { outreach_id: reply.id } }), "btn-gold"))) : null,
-        manual.length ? sec("Klaar om zelf te versturen", ...manual.map(o => h("div", { class: "stack" }, h("pre", { class: "pre" }, o.body), h("div", { class: "row" }, copyBtn(o.body), act("Verstuurd", () => api(`outreach/${o.id}/verstuurd`, { method: "POST", body: {} }), "btn-gold"), act("Annuleren", () => api(`outreach/${o.id}/annuleren`, { method: "POST", body: {} })))))) : null,
+        manual.length ? sec("Klaar om zelf te versturen", ...manual.map(o => h("div", { class: "stack" }, h("pre", { class: "pre" }, o.body), h("div", { class: "row" }, outreachButtons(o, refresh), act("Annuleren", () => api(`outreach/${o.id}/annuleren`, { method: "POST", body: {} })))))) : null,
         sec("Offerte", quote ? h("div", { class: "stack" },
           h("div", { class: "row", style: { justifyContent: "space-between" } }, h("strong", {}, fmt.eur(quote.price_cents)), h("span", { class: "badge" }, quote.status)),
           h("p", { style: { margin: 0 } }, quote.description),
@@ -80,7 +81,9 @@ async function card(root, ctx, id) {
             quote.status === "verstuurd" && !quote.interest ? act("Belangstelling getoond", () => api(`offertes/${quote.id}/belangstelling`, { method: "POST", body: {} })) : null,
             quote.status === "verstuurd" && ctx.can("approvals.money") ? act("Akkoord ontvangen", async () => { const r = await api(`offertes/${quote.id}/akkoord`, { method: "POST", body: {} }); if (r.intake_url) modal("Intake-link", h("div", { class: "stack" }, h("p", {}, "Stuur deze persoonlijke link naar de klant. Hij is alleen nu zichtbaar."), h("pre", { class: "pre" }, location.origin + r.intake_url), copyBtn(location.origin + r.intake_url))); }, "btn-gold") : null))
           : h("p", { class: "muted", style: { margin: 0 } }, "Nog geen offerte."),
+          quoteExtras(d, quote, ctx, refresh),
           ctx.can("quotes.write") && (!quote || ["afgewezen", "vervallen"].includes(quote.status)) ? act("Offerteconcept maken (prijzen uit de prijslijst)", () => api(`klanten/${id}/offerte`, { method: "POST", body: {} }), "btn-gold") : null),
+        ...salesCardSections(d, id, ctx, refresh),
         d.project ? sec("Project", h("dl", { class: "kv" }, h("dt", {}, "Status"), h("dd", {}, d.project.status.replace(/_/g, " ")), h("dt", {}, "Prijs"), h("dd", {}, fmt.eur(d.project.price_cents)), h("dt", {}, "Intake"), h("dd", {}, d.project.intake_complete_at ? `compleet ${fmt.dt(d.project.intake_complete_at)}` : "nog niet compleet"), h("dt", {}, "Briefing"), h("dd", {}, d.project.briefing_at ? "klaar" : "—")),
           h("div", { class: "row" }, act("Nieuwe intake-link", async () => { const r = await api(`projecten/${d.project.id}/intake-link`, { method: "POST", body: {} }); modal("Nieuwe intake-link", h("div", { class: "stack" }, h("pre", { class: "pre" }, location.origin + r.intake_url), copyBtn(location.origin + r.intake_url))); }),
             d.project.briefing_at ? act("Briefing bekijken", async () => { const r = await api(`projecten/${d.project.id}/briefing`); modal("Bouwbriefing", h("div", { class: "stack" }, h("pre", { class: "pre" }, r.briefing.text), copyBtn(r.briefing.text, "Kopieer voor Claude"))); }) : null)) : null,

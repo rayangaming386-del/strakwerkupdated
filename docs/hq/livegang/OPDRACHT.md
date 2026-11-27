@@ -176,3 +176,21 @@ Heb je een terminal: `node scripts/cf-smoke.mjs --base <preview> --cron-secret <
   - afmelden met één klik.
 - Wat nog aanstaat voor Rayan: acquisitie live zetten, AI-tegoed bevestigen, wekelijkse Scout, eventueel Hyperdrive.
 - Eventuele blokkades, precies: welke toegang of instelling ontbreekt.
+
+## Daarna: salesmotor (PR #5, pas na de livegang)
+Alleen uitvoeren als Rayan PR #5 heeft gemerged en Workers Builds de nieuwe versie heeft gebouwd.
+1. **Database:** voer `docs/hq/livegang/migraties.sql` opnieuw uit in de Supabase SQL Editor. Het
+   bestand slaat 001 t/m 005 over ("Al gedaan") en voert 006, 007 en 008 uit. Controle:
+   `select name from public.hq_schema_migrations order by name;` toont acht regels.
+2. **Instellingen** (HQ › Kantoor › Instellingen › Verkoop), samen met Rayan:
+   - IBAN en tenaamstelling (staan op de offertepagina bij de aanbetaling);
+   - e-mailadres voor meldingen: een ander adres dan het afzendadres (mail aan jezelf geeft vaak geen pushmelding);
+   - Google-reviewlink uit zijn Bedrijfsprofiel (als dat er al is);
+   - beloning voor een verwijzing alleen als Rayan die wil.
+3. **Controles op de echte site** (`node scripts/cf-smoke.mjs --base https://www.strakwerkk.nl` moet alles groen geven), plus:
+   - `/websitecheck`: vul `strakwerkk.nl` in; binnen een halve minuut een uitslag;
+   - `/_vercel/insights/script.js` geeft 200 (geen 404 meer in de console op elke pagina);
+   - HQ › Vandaag toont "Bellen en langsgaan" en "Meldingen"; HQ › Kantoor › Instellingen toont "Verkoop", "AI-budget per post" en "Bestaande klanten".
+4. **Bestaande klanten** (HQ › Kantoor › Instellingen › Bestaande klanten): alleen invoeren als Rayan de
+   lijst aanlevert en zelf de twee vragen over de herkomst beantwoordt. Niets versturen zonder Rayan.
+5. **Niets** op automatisch of live zetten. Bellen en langsgaan doet Rayan zelf; HQ zet alleen klaar.

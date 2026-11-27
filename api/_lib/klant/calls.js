@@ -65,7 +65,7 @@ export function rulesBriefing(lead, opp, prop, kind = "bellen") {
     aanleiding, vragen, voorstel: prop.tekst, bezwaren,
     afsluiter: "Mag ik je een voorbeeld van je nieuwe website appen of mailen? Dan kijk je wanneer het jou uitkomt.",
     verzet: VERZET,
-    let_op: ["Bel met je eigen, zichtbare nummer (niet anoniem).", "Bied in elk gesprek de mogelijkheid om bezwaar te maken (zie 'verzet').", "Noem geen cijfers, resultaten of reviews die je niet zeker weet.", "Wil iemand niet meer gebeld worden: tik 'Niet meer benaderen'. Dat geldt dan voorgoed."],
+    let_op: ["Bel met je eigen, zichtbare nummer (niet anoniem).", "Bied in elk gesprek de mogelijkheid om bezwaar te maken (zie het recht van bezwaar hierboven).", "Noem geen cijfers, resultaten of reviews die je niet zeker weet.", "Wil iemand niet meer gebeld worden: tik 'Niet meer benaderen'. Dat geldt dan voorgoed."],
   };
 }
 

@@ -3,6 +3,7 @@
 import { h, fmt, errorBox, skeleton, toast, empty, field } from "../ui.js";
 import { api } from "../api.js";
 import { put, envSwitch, envQs, DEPT } from "./klant-ui.js";
+import { salesSettings } from "./sales-ui.js";
 
 const TABS = [["overleg", "Overleg"], ["scores", "Scorekaarten"], ["routes", "Routes & fouten"], ["scout", "Scout"], ["exp", "Experimenten"], ["partners", "Partners"], ["resultaten", "Resultaten"], ["instellingen", "Instellingen"]];
 
@@ -84,7 +85,7 @@ export async function mount(root, ctx) {
           p.status === "voorstel" && ctx.can("settings.write") ? h("div", { class: "row" }, act("Goedkeuren", () => api(`voorstellen/${p.id}`, { method: "POST", body: { status: "goedgekeurd" } })), act("Afwijzen", () => api(`voorstellen/${p.id}`, { method: "POST", body: { status: "afgewezen" } }))) : null))) : empty("Nog geen voorstellen", "Maandag maakt HQ voorstellen uit echte bezoekersgegevens."),
           ctx.can("settings.write") ? act("Nu voorstellen maken", async () => { const r = await api("voorstellen/maken", { method: "POST", body: {} }); toast(r.note || `${r.created} nieuw voorstel/voorstellen.`); }) : null),
       ]; },
-      instellingen: () => [settingsForm()],
+      instellingen: () => [settingsForm(), ...salesSettings(d, ctx, refresh)],
     };
     put(box, ...T[tab]());
   }

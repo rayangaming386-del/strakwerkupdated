@@ -47,13 +47,15 @@ export async function today(env = "productie") {
        where q.is_test=$1 and (q.status='concept' or (q.status='verstuurd' and (q.interest or q.sent_at < now() - interval '5 days'))) order by q.created_at desc limit 20`, [T]),
     q(`select p.id, p.name, p.status, p.intake_complete_at, p.briefing_at, p.price_cents, p.lead_id from hq.projects p where p.status in ('akkoord','intake','in_aanbouw','websitecontrole') and p.is_test=$1 order by p.updated_at desc`, [T]),
     q(`select 'feedback' as soort, f.id, p.name as titel, f.scope_note as waarom from hq.project_feedback f join hq.projects p on p.id=f.project_id where f.status='voorstel' and p.is_test=$1
-       union all select 'review', o.id, l.company, 'Reviewverzoek staat klaar (jij verstuurt)' from hq.outreach o join hq.leads l on l.id=o.lead_id where o.kind='review_verzoek' and o.status='concept' and o.is_test=$1
        union all select 'onzeker', o.id, l.company, coalesce(o.last_error,'Uitkomst onduidelijk: eerst controleren') from hq.outreach o join hq.leads l on l.id=o.lead_id where o.status='onzeker' and o.is_test=$1
        union all select 'fout', e.id, e.kind, e.description from hq.agent_errors e where e.resolved_at is null and e.is_test=$1`, [T]),
     one("select * from hq.briefings where env=$1 order by day desc limit 1", [env]),
     q("select a.*, l.company from hq.actions a left join hq.leads l on l.id=a.lead_id where a.status in ('open','opgepakt') and a.is_test=$1 order by a.day desc, a.rank limit 10", [T]),
-    q(`select o.id, o.lead_id, l.company, o.kind, o.channel, o.subject, o.body, o.to_address from hq.outreach o join hq.leads l on l.id=o.lead_id
-       where o.status in ('klaar_handmatig') and (o.scheduled_at is null or o.scheduled_at <= now()) and o.is_test=$1 order by o.updated_at desc limit 10`, [T]),
+    // Klaar om zelf te versturen: handmatige berichten, plus e-mailconcepten die jij met één klik
+    // vanuit HQ verstuurt (na een gesprek, review, verwijzing, onderhoud).
+    q(`select o.id, o.lead_id, l.company, o.kind, o.channel, o.status, o.subject, o.body, o.to_address from hq.outreach o join hq.leads l on l.id=o.lead_id
+       where (o.status='klaar_handmatig' or (o.status='concept' and (o.kind in ('review_verzoek','verwijzing','onderhoud') or o.prompt_version like 'na_gesprek%')))
+         and (o.scheduled_at is null or o.scheduled_at <= now()) and o.is_test=$1 order by o.updated_at desc limit 20`, [T]),
   ]);
   const day = calls.amsDay();
   const callRows = (await q(`select c.id, c.kind, c.briefing, c.briefing_by, c.outcome, c.callback_on, c.notes, l.id as lead_id, l.company, l.city, l.address, l.contact_phone, l.contact_email, l.contact_name,
@@ -79,12 +81,15 @@ export async function kantoor(env = "productie") {
     q("select * from hq.segments order by key"),
     proj.partners(),
     q("select * from hq.proposals order by created_at desc limit 20"),
-    Promise.all(["kantoor", "sales", "availability", "scout"].map(getSetting)),
+    Promise.all(["kantoor", "sales", "availability", "scout", "payment", "links", "sales_ai"].map(getSetting)),
   ]);
   const exps = [];
   for (const e of experiments.rows) exps.push(await plan.experimentResults(e.id));
   return { briefings: briefings.rows, scorecards: scores, routes, errors: errors.rows, experiments: exps, prompts: prompts.rows, segments: segments.rows, partners, proposals: proposals.rows,
-    settings: { kantoor: settings[0], sales: settings[1], availability: settings[2], scout: settings[3] }, capacity: await sales.capacity(), ai: await budgetOverview(), mail: mailConfigured(),
+    settings: { kantoor: settings[0], sales: settings[1], availability: settings[2], scout: settings[3], payment: settings[4], links: settings[5], sales_ai: settings[6] },
+    // Gratis websitecheck: gebruik en hoeveel daarvan een aanvraag werden (eigen telling, geen klikken).
+    websitecheck: await one(`select count(*) filter (where created_at > now() - interval '1 day')::int as dag, count(*) filter (where created_at > now() - interval '7 days')::int as week,
+      count(*) filter (where created_at > now() - interval '7 days' and lead_id is not null)::int as aanvragen_week from hq.site_checks where is_test=$1`, [env === "test"]), capacity: await sales.capacity(), ai: await budgetOverview(), mail: mailConfigured(),
     results: await proj.results({ env }), consent_bases: contact.BASIS_LABEL,
     cron: (await q("select key, updated_at from hq.settings where key like 'cron:%' order by key")).rows.map(r => ({ part: r.key.slice(5), at: r.updated_at })) };
 }

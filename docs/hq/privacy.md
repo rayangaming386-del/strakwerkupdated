@@ -45,14 +45,29 @@ Een doorlopende conversietrechter wordt bewust niet getoond.
   herkenbare user-agent. Geen scans, geen formulieren.
 - Met `ANTHROPIC_API_KEY` gaat paginatekst en metingen naar Anthropic (verwerker, VS). Zonder
   sleutel blijft alles binnen eigen systemen (behalve optioneel Google PageSpeed).
-- Koude benadering: per e-mail aan bedrijven geldt de Telecommunicatiewet (art. 11.7: voor
-  e-mail aan natuurlijke personen/eenmanszaken in principe voorafgaande toestemming). HQ verstuurt
-  niets zelf; goedkeuring in HQ vervangt geen toestemming van de ontvanger.
+- Mail en WhatsApp voor verkoop (Telecommunicatiewet art. 11.7): alleen met voorafgaande
+  toestemming (ook bij bedrijven), na eigen contact van de klant, of aan een bestaande klant voor
+  eigen vergelijkbare diensten (alleen als die bij het geven van zijn gegevens berichten kon
+  weigeren), met in elk bericht een afmeldmogelijkheid. HQ dwingt dit af per kanaal.
+- Bellen voor verkoop (sinds 1 juli 2021): een eenmanszaak, vof of maatschap alleen met
+  toestemming of als (oud-)klant; een rechtspersoon wel, met recht van bezwaar in elk gesprek. HQ
+  legt daarvoor de rechtsvorm vast (naam, eigen site of KvK-register) en zet alleen toegestane
+  bedrijven op de bellijst. Langsgaan: alleen bij echte potentie; bezwaar = nooit meer contact.
+- Persoonlijke voorbeeldsites (`/voorbeeld/<code>`): alleen openbare gegevens, noindex, geheime
+  link, duidelijk gemarkeerd als voorbeeld, telt bezoeken zonder cookies (eigenaar telt niet),
+  verloopt na 45 dagen, offline bij bezwaar, verwijderd 60 dagen na verlopen.
+- Gratis websitecheck: alleen publieke pagina's, uitslag achter geheime link (alleen hash
+  opgeslagen), bezoekershash per dag (geen IP) na 2 dagen gewist, check zonder gegevens na 90
+  dagen verwijderd. Gegevens achterlaten alleen met een vinkje voor contact (toestemming).
+- Offertepagina: akkoord met naam en vinkje; bewijs = naam, tijdstip en IP-hash. Vinkje "liever
+  geen berichten over andere diensten" voorkomt de grond "bestaande klant".
+- Meldingen aan de eigenaar (e-mail): titel en korte tekst, nooit testgegevens, niet in stille uren.
 - Verwijderen van een lead (eigenaar, met bevestiging) verwijdert ook taken, goedkeuringen, offertes
   en betalingen die eraan hangen. Controlelog blijft (bevat geen inhoud, alleen acties en id's).
 
 ## Dienstverleners
 
-Vercel (hosting, functies, Web Analytics), Supabase (database, authenticatie, e-mail), optioneel
-Anthropic (Claude API), Google (PageSpeed Insights). Controleer per partij de verwerkersovereenkomst
-en doorgiftegrondslag (Supabase-project in EU-regio kiezen).
+Cloudflare (hosting, Workers, e-mailroutering), Supabase (database, authenticatie), Google (Gmail
+API voor e-mail; PageSpeed Insights), optioneel Anthropic (Claude API). Tot de overstap ook Vercel
+(hosting, Web Analytics). Controleer per partij de verwerkersovereenkomst en doorgiftegrondslag
+(Supabase-project in EU-regio kiezen).
