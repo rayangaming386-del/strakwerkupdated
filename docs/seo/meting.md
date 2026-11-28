@@ -13,7 +13,13 @@ Vercel Analytics telt anoniem, zonder cookies en zonder persoonsgegevens. Een ev
 | Naar calculator | Klik naar `/#prijzen` vanaf een subpagina |
 | Pakket gekozen, Optie aan, Tip gevolgd, Keuzehulp | Gebruik van de calculator |
 | Offerte gekopieerd, Offerte-link gekopieerd, Offerte PDF | Offerte bewaard of gedeeld |
-| Snelheidscheck, Demo geopend, Demo bekeken, Demo: ik wil dit | Overige acties |
+| Snelheidscheck | Homepageblok "Gratis check" (opent `/websitecheck`) |
+| Websitecheck, Websitecheck contact | Check gestart op `/websitecheck`; gegevens achtergelaten na de uitslag |
+| Demo geopend, Demo bekeken, Demo: ik wil dit | Overige acties |
+
+Na de overstap naar Cloudflare draait Vercel Analytics niet meer: de `va`-events worden dan
+genegeerd (er staat een leeg vervangscript op `/_vercel/insights/script.js`). HQ telt de
+websitecheck zelf (Kantoor › Instellingen: checks per dag en week, en hoeveel een aanvraag werden).
 
 ## Eigen meting in StrakWerk HQ
 

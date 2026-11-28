@@ -1,5 +1,5 @@
 // Centrale configuratie. Alle geheimen komen uit omgevingsvariabelen op de server
-// (Vercel > Settings > Environment Variables). Niets hiervan gaat naar de browser,
+// (Cloudflare: Workers › Settings › Variables and Secrets; lokaal: .env.local). Niets hiervan gaat naar de browser,
 // behalve wat publicConfig() expliciet teruggeeft (de publieke Supabase-sleutel).
 
 const e = (k) => (process.env[k] ?? "").trim();
@@ -25,7 +25,6 @@ export const env = {
   get vercelTeamId() { return e("VERCEL_TEAM_ID"); },
   get productionHosts() { return (e("HQ_PRODUCTION_HOSTS") || "www.strakwerkk.nl,strakwerkk.nl").split(",").map(s => s.trim().toLowerCase()).filter(Boolean); },
   get vercelEnv() { return e("VERCEL_ENV") || "development"; },
-  get isDev() { return !process.env.VERCEL || e("VERCEL_ENV") === "development"; },
 };
 
 export function publicConfig() {

@@ -1,7 +1,6 @@
 // Contentstudio: klantprojecten, vrijgegeven beelden, contentopdrachten, renders,
 // publicaties per kanaal, automatisering en resultaten. Alles via dezelfde klant- en
 // projectgegevens als het CRM (hq.leads → hq.projects → hq.content_pieces).
-import { readFileSync } from "node:fs";
 import { createHash, randomUUID } from "node:crypto";
 import { q, one, tx, audit } from "../db.js";
 import { HttpError, assertUuid, str } from "../http.js";
@@ -10,7 +9,8 @@ import { AUDIENCES, GOALS, BRAND_TOPICS, contentGuard } from "./planner.js";
 import { instagramState } from "./instagram.js";
 import { routeFor, getPlan } from "./plan.js";
 
-export const SITE = JSON.parse(readFileSync(new URL("./site-data.json", import.meta.url), "utf8"));
+import SITE_DATA from "./site-data.json" with { type: "json" };
+export const SITE = SITE_DATA;
 
 export const PROJECT_STATUS = ["akkoord", "intake", "in_aanbouw", "websitecontrole", "opgeleverd", "nazorg", "gestopt"];
 export const PROJECT_STATUS_LABEL = { akkoord: "Akkoord", intake: "Intake", in_aanbouw: "In aanbouw", websitecontrole: "Websitecontrole", opgeleverd: "Opgeleverd", nazorg: "Nazorg", gestopt: "Gestopt" };

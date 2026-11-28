@@ -113,7 +113,19 @@ const runServerless = async () => {
     await new Promise(r => setTimeout(r, 250));
   }
 };
-const runPublisher = async () => { await mods.db.q("update hq.tasks set run_after=now() where status='in_wachtrij' and agent_key='publisher'"); await mods.worker.runWorker({ source: "test", budgetMs: 60_000 }); };
+// Draait publisher-taken tot er geen meer bezig of aan de beurt is. Goedkeuren start (net als in
+// productie) ook een achtergrondwerker, die dezelfde taak eerder kan oppakken; zonder te wachten
+// las de test dan soms een tussenstand.
+const runPublisher = async () => {
+  await mods.db.q("update hq.tasks set run_after=now() where status='in_wachtrij' and agent_key='publisher'");
+  for (let i = 0; i < 200; i++) {
+    await mods.worker.runWorker({ source: "test", budgetMs: 60_000 });
+    const n = (await mods.db.q("select count(*)::int n from hq.tasks where agent_key='publisher' and (status='bezig' or (status='in_wachtrij' and control is null and run_after<=now()))")).rows[0].n;
+    if (!n) return;
+    await new Promise(r => setTimeout(r, 50));
+  }
+  throw new Error("Publisher-taak bleef bezig.");
+};
 const counts = async () => (await mods.db.q("select (select count(*)::int from hq.tasks where agent_key in ('content','video')) as tasks, (select count(*)::int from hq.renders) as renders, (select count(*)::int from hq.ai_reservations) as ai")).rows[0];
 let pieceId;
 
@@ -184,6 +196,9 @@ test("lege AI-portemonnee: AI-taken pauzeren, geen aanroep, hervatten zonder dub
 
 test("reserveringen: gelijktijdige aanvragen gaan samen nooit boven de HQ-limiet", async () => {
   const now = Date.now();
+  // Deze test gaat over de totale HQ-limiet: geef de post "sales" tijdelijk het hele budget.
+  const prevAi = (await mods.db.q("select value from hq.settings where key='sales_ai'")).rows[0].value;
+  await mods.db.q("update hq.settings set value = jsonb_set(value, '{posts}', $1) where key='sales_ai'", [{ sales: 100, voorbeeldsite: 0, acquisitie: 0, websitecheck: 0, controle: 0, overig: 0 }]);
   await req("/api/hq/ai/budget", { method: "PUT", body: { period_start: new Date(now - 864e5).toISOString(), period_end: new Date(now + 20 * 864e5).toISOString(), hq_limit_usd: 1, confirmed: true, enabled: true } });
   const tries = await Promise.allSettled(Array.from({ length: 8 }, () => mods.budget.reserve({ department: "sales", maxUsd: 0.3, model: "claude-opus-5-5" })));
   const ok = tries.filter(t => t.status === "fulfilled").length;
@@ -192,6 +207,40 @@ test("reserveringen: gelijktijdige aanvragen gaan samen nooit boven de HQ-limiet
   const ov = (await req("/api/hq/ai/budget")).json;
   assert.ok(Math.abs(ov.hq_reserved_usd - 0.9) < 1e-6);
   assert.equal(ov.reason, "plafond"); assert.equal(ov.active, false, "plafond bereikt: AI-taken pauzeren");
+  await mods.db.q("delete from hq.ai_reservations");
+  await mods.db.q("update hq.settings set value=$1 where key='sales_ai'", [prevAi]);
+  await req("/api/hq/ai/budget", { method: "PUT", body: { enabled: false } });
+});
+
+test("budget per post: openbare websitecheck kan nooit het hele tegoed opmaken; budget volgt betalende klanten", async () => {
+  const now = Date.now();
+  await req("/api/hq/ai/budget", { method: "PUT", body: { period_start: new Date(now - 864e5).toISOString(), period_end: new Date(now + 20 * 864e5).toISOString(), hq_limit_usd: 10, confirmed: true, enabled: true } });
+  // Basisverdeling: websitecheck 20% van $10 = $2 → vier keer $0,50 past, de vijfde niet.
+  const tries = [];
+  for (let i = 0; i < 5; i++) tries.push(await mods.budget.reserve({ department: "overig", post: "websitecheck", maxUsd: 0.5, model: "claude-sonnet-5-5" }).then(() => "ok", (e) => e.reason));
+  assert.deepEqual(tries, ["ok", "ok", "ok", "ok", "post"]);
+  const ov = (await req("/api/hq/ai/budget")).json;
+  assert.equal(ov.active, true, "een volle post pauzeert de rest van HQ niet");
+  const wc = ov.posts.items.find(x => x.post === "websitecheck");
+  assert.equal(wc.cap_usd, 2); assert.equal(ov.posts.learned, false); assert.match(ov.posts.note, /onvoldoende bewijs/);
+  // Andere posten hebben hun eigen ruimte (voorbeeldsite 25% = $2,50).
+  await mods.budget.reserve({ department: "sales", post: "voorbeeldsite", maxUsd: 2.4, model: "claude-opus-5-5" });
+  // Drie betalende klanten (echt, geen test): twee via bellen, één via de websitecheck → verdeling past zich aan.
+  for (const [i, ch] of [[1, "bellen"], [2, "bellen"], [3, "websitecheck"]]) {
+    const l = (await mods.db.q("insert into hq.leads (company, company_key, source, status, sales_channel) values ($1,$2,'handmatig','gewonnen',$3) returning id", [`Betaald ${i}`, `betaald-${i}`, ch])).rows[0];
+    await mods.db.q("insert into hq.payments (lead_id, amount_cents, received_on, kind) values ($1, 10000, current_date, 'aanbetaling')", [l.id]);
+  }
+  const sh = await mods.budget.postShares();
+  assert.equal(sh.learned, true);
+  // Lerende posten (65% samen): helft basis, helft naar betaalde klanten (acquisitie 2/3, websitecheck 1/3).
+  assert.equal(sh.shares.acquisitie, Math.round((0.5 * 20 + 0.5 * 65 * 2 / 3) * 10) / 10);
+  assert.equal(sh.shares.websitecheck, Math.round((0.5 * 20 + 0.5 * 65 / 3) * 10) / 10);
+  assert.equal(sh.shares.voorbeeldsite, 12.5, "geen betaalde klant via een voorbeeldsite: alleen de helft van de basis");
+  assert.equal(sh.shares.sales, 15, "sales, controle en overig blijven vast");
+  const total = Object.values(sh.shares).reduce((a, b) => a + b, 0);
+  assert.ok(Math.abs(total - 100) < 0.2, `samen ${total}%`);
+  await mods.db.q("delete from hq.payments where lead_id in (select id from hq.leads where company like 'Betaald %')");
+  await mods.db.q("delete from hq.leads where company like 'Betaald %'");
   await mods.db.q("delete from hq.ai_reservations");
   await req("/api/hq/ai/budget", { method: "PUT", body: { enabled: false } });
 });
@@ -238,14 +287,15 @@ test("proefstand: live publicatie uit → klaar als concept, niets naar Buffer",
 
 test("volle wachtrij bij Buffer: bewaren, later opnieuw; onduidelijke uitkomst: hervatten zonder dubbele post", { skip: hasTools ? false : "ffmpeg/Chromium niet beschikbaar" }, async () => {
   await req("/api/hq/studio/office", { method: "PUT", body: { live_publishing: true } });
+  // 1. Wachtrij vol (10 andere posts staan al klaar), al vóór het goedkeuren: welke werker de
+  // publicatie ook als eerste oppakt (de achtergrondwerker of de test), de uitkomst is dezelfde.
+  for (let i = 0; i < 10; i++) buf.posts.push({ id: `x${i}`, text: `ander ${i}`, dueAt: new Date().toISOString(), status: "buffer", channelId: "ch-tt" });
   // TikTok staat op "eerst beoordelen": goedkeuren plant hem in via Buffer op het publicatiemoment.
   const d = (await req(`/api/hq/studio/pieces/${pieceId}`)).json;
   const ap = await req(`/api/hq/studio/pieces/${pieceId}/approve`, { method: "POST", body: { render_id: d.renders[0].id } });
   assert.equal(ap.status, 200, JSON.stringify(ap.json));
   assert.equal(ap.json.scheduled.tiktok?.method, "buffer");
   const tt = (await mods.db.q("select id from hq.publications where piece_id=$1 and channel='tiktok'", [pieceId])).rows[0].id;
-  // 1. Wachtrij vol (10 andere posts staan al klaar).
-  for (let i = 0; i < 10; i++) buf.posts.push({ id: `x${i}`, text: `ander ${i}`, dueAt: new Date().toISOString(), status: "buffer", channelId: "ch-tt" });
   await runPublisher();
   let p = (await mods.db.q("select status, last_error from hq.publications where id=$1", [tt])).rows[0];
   assert.equal(p.status, "wachtrij_vol"); assert.match(p.last_error, /later opnieuw/);
