@@ -3,6 +3,9 @@
 // - dist/                      publieke bestanden (alleen wat in Git staat en publiek hoort)
 // - dist/_headers              beveiligingsheaders voor statische pagina's (uit vercel.json)
 // - dist/_redirects            permanente doorverwijzingen (uit vercel.json)
+// - dist/_vercel/insights/script.js  leeg vervangscript: de pagina's laden het Vercel-analysescript;
+//   op Cloudflare bestaat dat niet en zou elke pagina een 404 in de console geven. HQ meet zelf
+//   (assets/sw-metrics.js → /api/collect).
 // - worker/generated/hq-files.js  de HQ-app; zit in de Worker, nooit in dist/
 // Gebruik: npm run build:cf   (wrangler doet dit ook zelf vóór dev/deploy, zie wrangler.toml)
 import { execFileSync } from "node:child_process";
@@ -64,6 +67,8 @@ export function build({ log = console.log } = {}) {
   // _redirects: eenvoudige paden; de kale domeinnaam → www regelt een Redirect Rule (zie overdracht).
   const red = (vercel.redirects || []).filter(r => !r.has && !/[()\\]/.test(r.source)).map(r => `${toPat(r.source)} ${r.destination} ${r.permanent ? 308 : 307}`);
   writeFileSync(path.join(dist, "_redirects"), `${red.join("\n")}\n`);
+  mkdirSync(path.join(dist, "_vercel", "insights"), { recursive: true });
+  writeFileSync(path.join(dist, "_vercel", "insights", "script.js"), "/* Vercel Analytics draait niet op Cloudflare. StrakWerk HQ meet zelf, zonder cookies (assets/sw-metrics.js). */\n");
   // HQ-app in de Worker.
   const hq = files.filter(f => f.startsWith("hq/") && TYPES[path.extname(f)]);
   const map = Object.fromEntries(hq.map(f => [f, { type: TYPES[path.extname(f)], body: readFileSync(path.join(root, f), "utf8") }]));

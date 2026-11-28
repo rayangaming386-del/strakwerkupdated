@@ -71,8 +71,9 @@ export async function demoKlanten({ log = console.log } = {}) {
   const bravo = await one("select * from hq.leads where osm_id='node/9101'");
   const opp = await one("select * from hq.opportunities where lead_id=$1 and strength='concreet'", [bravo.id]);
   log(`Auditor: ${opp.observation} · ${opp.page_url} → ${opp.service_text}`);
-  await contact.recordConsent(bravo.id, { channel: "email", basis: "gerechtvaardigd_belang_zakelijk", source: "Zakelijk adres op eigen website (demo)", scope: "Eén bericht over de afspraaklink, hooguit één opvolging",
-    evidence: "Concreet probleem op hun eigen site (afspraaklink geeft 404), zakelijk adres voor klantvragen, eenmalig en met afmeldlink. (DEMO)" }, owner);
+  // Eerst gebeld; de eigenaar zegt ja op "Mag ik je een voorbeeld mailen?" (mail zonder toestemming mag niet).
+  await contact.recordConsent(bravo.id, { channel: "email", basis: "toestemming", source: "Telefoongesprek met de eigenaar (demo)", scope: "Voorbeeld en voorstel over de afspraaklink mailen, hooguit één opvolging",
+    evidence: "Eigenaar zei tijdens het gesprek ja op de vraag of Rayan een voorbeeld mocht mailen; genoteerd door Rayan. (DEMO)" }, owner);
   const routes = await contact.getRoutes();
   await contact.putRoutes({ email: { auto: true, live: false, terms_checked: true } }, owner);
   const bp = await acq.prepareApproach(bravo.id, owner);

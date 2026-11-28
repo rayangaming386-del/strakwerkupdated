@@ -2,7 +2,8 @@
 // en een opdrachtveld in gewone taal. Test- en productiegegevens zijn strikt gescheiden.
 import { h, fmt, errorBox, skeleton, toast, empty } from "../ui.js";
 import { api } from "../api.js";
-import { put, envSwitch, getEnv, envQs, copyBtn, waHref, mailHref, DEPT } from "./klant-ui.js";
+import { put, envSwitch, getEnv, envQs, DEPT } from "./klant-ui.js";
+import { notificationsSection, callsSection, outreachButtons } from "./sales-ui.js";
 
 export async function mount(root, ctx) {
   const out = h("div", { class: "stack" });
@@ -28,7 +29,7 @@ export async function mount(root, ctx) {
 
   async function refresh() {
     try {
-      const d = await api(`vandaag${envQs()}`);
+      const [d, meldingen] = await Promise.all([api(`vandaag${envQs()}`), notificationsSection(() => refresh())]);
       pauseBtn.textContent = d.paused ? "Kantoor hervatten" : "Kantoor pauzeren";
       pauseBtn.className = `btn btn-sm ${d.paused ? "btn-gold" : ""}`;
       pauseBtn.onclick = async () => { try { await api("kantoor/pauze", { method: "PUT", body: { paused: !d.paused } }); toast(d.paused ? "Kantoor draait weer." : "Kantoor gepauzeerd: niets wordt automatisch verstuurd."); refresh(); } catch (e) { toast(e.message, "bad"); } };
@@ -36,16 +37,17 @@ export async function mount(root, ctx) {
       const b = d.briefing;
       put(body, 
         d.paused ? h("div", { class: "callout" }, "Het kantoor staat op pauze: geen automatische berichten, geen overleg, geen Scout-rondes.") : null,
+        meldingen,
         sec("v-wacht", `Wacht op antwoord (${d.requests.length})`, "Warme aanvragen gaan voor alles.",
           d.requests.length ? h("div", { class: "grid g2" }, d.requests.map(l => h("a", { class: "card lead-card", href: `/hq/klanten?id=${l.id}`, "data-nav": "" },
             h("div", { class: "row", style: { justifyContent: "space-between" } }, h("strong", {}, l.company), h("span", { class: "badge b-warn" }, `wacht ${fmt.ago(l.awaiting_reply_since).replace(" geleden", "")}`)),
             h("p", { class: "muted", style: { margin: "6px 0 0" } }, l.need_summary || "")))) : empty("Niemand wacht op je", "Nieuwe aanvragen verschijnen hier direct.")),
-        sec("v-hand", `Klaar om zelf te versturen (${d.manual.length})`, "Toegestaan, maar zonder automatische route: kopiëren en versturen.",
+        callsSection(d, () => refresh()),
+        sec("v-hand", `Klaar om zelf te versturen (${d.manual.length})`, "Toegestaan en klaar: WhatsApp verstuur je zelf, e-mail met één klik vanuit HQ.",
           d.manual.length ? h("div", { class: "stack" }, d.manual.map(o => h("div", { class: "card stack" },
-            h("div", { class: "row", style: { justifyContent: "space-between" } }, h("strong", {}, o.company), h("span", { class: "badge" }, o.kind.replace(/_/g, " "))),
+            h("div", { class: "row", style: { justifyContent: "space-between" } }, h("strong", {}, o.company), h("span", { class: "badge" }, `${o.kind.replace(/_/g, " ")} · ${o.channel === "whatsapp" ? "WhatsApp" : "e-mail"}`)),
             h("pre", { class: "pre" }, o.body),
-            h("div", { class: "row" }, copyBtn(o.body), o.channel === "whatsapp" ? h("a", { class: "btn btn-sm", href: waHref(o.to_address, o.body), target: "_blank", rel: "noopener" }, "Open WhatsApp") : h("a", { class: "btn btn-sm", href: mailHref(o.to_address, o.subject, o.body) }, "Open mail"),
-              h("button", { class: "btn btn-sm btn-gold", type: "button", onclick: async () => { await api(`outreach/${o.id}/verstuurd`, { method: "POST", body: {} }); toast("Gemarkeerd als verstuurd."); refresh(); } }, "Ik heb het verstuurd"))))) : empty("Niets klaar te zetten")),
+            outreachButtons(o, () => refresh())))) : empty("Niets klaar te zetten")),
         sec("v-off", `Offertes die aandacht vragen (${d.quotes.length})`, null,
           d.quotes.length ? h("div", { class: "grid g2" }, d.quotes.map(q => h("a", { class: "card", href: `/hq/klanten?id=${q.lead_id}`, "data-nav": "" },
             h("div", { class: "row", style: { justifyContent: "space-between" } }, h("strong", {}, q.company), h("span", { class: "num" }, fmt.eur(q.price_cents))),

@@ -67,9 +67,18 @@ async function route(request, env) {
     return new Response(request.method === "HEAD" ? null : f.body, { headers: { "content-type": f.type, ...headersFor(url.pathname), "cache-control": "private, no-store" } });
   }
 
-  if (url.pathname === "/intake") {
-    const res = await env.ASSETS.fetch(new Request(new URL("/intake", url), request));
-    return withHeaders(res, headersFor("/intake"));
+  // Persoonlijke voorbeeldsite: dynamisch (verloopt, telt bezoekers) via de publieke API.
+  const vb = url.pathname.match(/^\/voorbeeld\/([a-z0-9-]{3,60})$/);
+  if (vb) {
+    const u = new URL("/api/public", url); u.searchParams.set("p", `voorbeeld/${vb[1]}`);
+    return publicApi.GET(new Request(u, request));
+  }
+  if (url.pathname.startsWith("/voorbeeld/")) return notFound();
+
+  // Pagina's met een persoonlijke link (?t=…): eigen strenge headers (geen referrer, geen index).
+  if (url.pathname === "/intake" || url.pathname === "/offerte") {
+    const res = await env.ASSETS.fetch(new Request(new URL(url.pathname, url), request));
+    return withHeaders(res, headersFor(url.pathname));
   }
   return env.ASSETS.fetch(request);
 }

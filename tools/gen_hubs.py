@@ -271,4 +271,60 @@ page('/contact', 'Contact | StrakWerk, webdesign uit Zoetermeer',
      f'Neem contact op met StrakWerk, webdesign uit Zoetermeer: app of bel {SC.TEL_TXT} of mail {SC.MAIL}. Je hoort dezelfde dag van me.',
      body, active='/contact', ld=[crumb_ld(cld, '/contact'),
                                  {"@context": "https://schema.org", "@type": "ContactPage", "name": "Contact met StrakWerk", "url": SC.SITE + '/contact', "about": {"@id": SC.ORG_ID}}])
+# ---------------------------------------------------------------- /websitecheck
+# Gratis websitecheck (leadmagneet). De controle draait in HQ (api/_lib/klant/sitecheck.js);
+# deze pagina toont het formulier, de uitslag (assets/websitecheck.js) en wat er gecontroleerd wordt.
+wc_form = '''<form class="wc-form" id="wcForm" novalidate>
+        <label class="wc-sr" for="wcUrl">Adres van je website</label>
+        <input id="wcUrl" type="text" inputmode="url" placeholder="jouwbedrijf.nl" autocomplete="url" autocapitalize="none" spellcheck="false" aria-describedby="wcMsg">
+        <input class="wc-hp" id="wcHp" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button class="btn btn--gold" type="submit">Check mijn site</button>
+        <p class="wc-msg" id="wcMsg" role="status" aria-live="polite"></p>
+      </form>'''
+h, cld = hero([('StrakWerk', '/'), ('Websitecheck', None)], 'Gratis websitecheck', 'Hoe doet jouw website het op een telefoon?',
+              'Vul je webadres in. Ik controleer meteen of je site goed werkt op een telefoon, of klanten je met één tik kunnen bellen, appen of een afspraak maken, en wat Google van je homepage ziet. Gratis en zonder account.',
+              extra=wc_form)
+wc_lead = f'''<form class="form ct wc-lead" id="wcLead" novalidate hidden>
+        <small>Gratis meekijken</small>
+        <b>Wil je dat ik de uitslag met je doorneem?</b>
+        <p>Laat je gegevens achter, dan neem ik contact met je op. Vrijblijvend: je zit nergens aan vast.</p>
+        <div class="c-grid2"><div class="field"><label for="wl-naam">Naam</label><input id="wl-naam" autocomplete="name" placeholder="Je naam"></div>
+        <div class="field"><label for="wl-bedrijf">Bedrijf</label><input id="wl-bedrijf" autocomplete="organization" placeholder="Bedrijfsnaam"></div></div>
+        <div class="c-grid2"><div class="field"><label for="wl-tel">Telefoon</label><input id="wl-tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="06 12345678"></div>
+        <div class="field"><label for="wl-mail">E-mail</label><input id="wl-mail" type="email" autocomplete="email" placeholder="naam@bedrijf.nl"></div></div>
+        <div class="field"><label for="wl-msg">Vraag of opmerking (mag leeg)</label><textarea id="wl-msg" placeholder="Bijvoorbeeld: ik wil vooral meer afspraken via de site."></textarea></div>
+        <label class="wc-ok"><input type="checkbox" id="wl-ok"><span>Ja, Rayan van StrakWerk mag mij over deze check bellen, appen of mailen.</span></label>
+        <input class="wc-hp" id="wl-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button class="btn btn--gold" type="submit">Stuur mijn gegevens</button>
+        <p class="wc-msg" id="wl-status" role="status" aria-live="polite"></p>
+        <p class="note">Je gegevens komen alleen in mijn eigen klantoverzicht. Liever direct contact? <a class="tl" href="{SC.wa('Hoi Rayan, ik heb de websitecheck gedaan. Kun je meekijken?')}" target="_blank" rel="noopener">App Rayan</a>. Zie ook de <a href="/privacy" class="tl">privacyverklaring</a>.</p>
+      </form>'''
+wc_result = f'''  <section class="c-sec wc-out" id="uitslag" hidden>
+    <div class="wrap">
+      <div class="wc-res" id="wcRes" aria-live="polite"></div>
+      {wc_lead}
+    </div>
+  </section>
+  <script defer src="/assets/websitecheck.js"></script>'''
+wc_checks = ''.join(f'<article class="f"><span class="ic">{ICON}</span><h3>{e(t)}</h3><p>{e(d)}</p></article>' for t, d in [
+    ('Bereikbaar en veilig', 'Laadt je homepage op een telefoon, en gebruikt hij een beveiligde verbinding (https)?'),
+    ('Gemaakt voor de telefoon', 'Past de pagina zich aan het scherm aan, of zien bezoekers een verkleinde computersite?'),
+    ('Direct contact', 'Kunnen bezoekers met één tik bellen of je een WhatsApp sturen?'),
+    ('Werkende knoppen', 'Ik volg de knoppen voor afspraak, prijzen en contact, zoals een klant dat doet. Komen ze op een werkende pagina uit?'),
+    ('Gevonden in Google', 'Heeft je homepage een titel, een omschrijving en een duidelijke hoofdkop?'),
+    ('Afbeeldingen', 'Hebben je afbeeldingen een korte beschrijving (alt-tekst) voor Google en voor mensen die slecht zien?')])
+wc_how = '''<div class="d-text">
+        <p>Ik bekijk alleen openbare pagina's, zoals een bezoeker op een telefoon dat doet. Er worden geen formulieren verstuurd, er wordt niet ingelogd en er wordt niets gescand. Vraagt je site robots om niet mee te kijken (robots.txt), dan respecteer ik dat.</p>
+        <p>Je uitslag staat achter een persoonlijke link. Laat je geen gegevens achter, dan wordt de check na 90 dagen verwijderd. Lees meer in de <a href="/privacy" class="tl">privacyverklaring</a>.</p>
+        <p>Wil je ook een volledige snelheidstest? Die doe je gratis bij Google: <a href="https://pagespeed.web.dev/" class="tl" target="_blank" rel="noopener">PageSpeed Insights</a>.</p>
+      </div>'''
+body = h + '\n' + wc_result + '\n' \
+    + sec('Wat ik controleer', 'Zes punten die klanten direct merken.', f'<div class="feat">{wc_checks}</div>') + '\n' \
+    + sec('Eerlijk en veilig', 'Zo werkt de check.', wc_how) + '\n' \
+    + endbox('Liever meteen een nieuwe site?', f'Een complete website start op {eur(P_START)}, een redesign van je huidige site op {eur(P_RED)}. Stuur een appje, dan denk ik met je mee.',
+             f'<a class="btn btn--gold" href="{SC.wa("Hoi Rayan, ik wil graag een website.")}" target="_blank" rel="noopener">App Rayan</a><a class="btn" href="/prijzen">Bekijk de prijzen</a>')
+page('/websitecheck', 'Gratis websitecheck: werkt je site goed op een telefoon? | StrakWerk',
+     'Check gratis of je website goed werkt op een telefoon: bereikbaar, beveiligd, bellen of appen met één tik, werkende knoppen en wat Google ziet. Direct de uitslag, zonder account.',
+     body, ld=[crumb_ld(cld, '/websitecheck'),
+               {"@context": "https://schema.org", "@type": "WebPage", "name": "Gratis websitecheck", "url": SC.SITE + '/websitecheck', "about": {"@id": SC.ORG_ID}}])
 print('ok hubs')

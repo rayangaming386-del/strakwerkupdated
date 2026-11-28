@@ -12,13 +12,16 @@ const get = (p, init = {}) => fetch(base + p, { redirect: "manual", ...init });
 
 async function main() {
   // ── Statische site ──
-  for (const [p, want] of [["/", 200], ["/werk/vagpro", 200], ["/diensten", 200], ["/prijzen", 200], ["/kennisbank", 200], ["/login", 200], ["/intake", 200]]) {
+  for (const [p, want] of [["/", 200], ["/werk/vagpro", 200], ["/diensten", 200], ["/prijzen", 200], ["/kennisbank", 200], ["/websitecheck", 200], ["/login", 200], ["/intake", 200], ["/offerte", 200]]) {
     const r = await get(p); check(`pagina ${p}`, r.status === want, `HTTP ${r.status}`);
   }
   { const r = await get("/service-pro"); check("oude URL stuurt permanent door", [301, 308].includes(r.status) && r.headers.get("location")?.endsWith("/prijzen"), `${r.status} → ${r.headers.get("location")}`); }
   { const r = await get("/bestaat-niet-xyz"); check("onbekende pagina geeft 404", r.status === 404, `HTTP ${r.status}`); }
   { const r = await get("/login"); check("/login heeft CSP en noindex", Boolean(r.headers.get("content-security-policy")) && /noindex/.test(r.headers.get("x-robots-tag") || "")); }
   { const r = await get("/intake"); check("/intake lekt geen token via referrer", r.headers.get("referrer-policy") === "no-referrer"); }
+  { const r = await get("/offerte"); check("/offerte lekt geen token via referrer", r.headers.get("referrer-policy") === "no-referrer"); }
+  // De pagina's laden het Vercel-analysescript; op Cloudflare staat er een leeg vervangscript (geen 404 in de console).
+  { const r = await get("/_vercel/insights/script.js"); check("geen 404 voor het oude analysescript", r.status === 200 && /javascript/.test(r.headers.get("content-type") || ""), `HTTP ${r.status} ${r.headers.get("content-type")}`); }
 
   // ── Niets privés publiek ──
   for (const p of ["/package.json", "/vercel.json", "/wrangler.toml", "/CLAUDE.md", "/middleware.js", "/api/_lib/db.js", "/api/_lib/env.js", "/worker/index.js", "/db/migrations/001_hq.sql",
@@ -46,6 +49,10 @@ async function main() {
   { const r = await get("/api/public/aanvraag", { method: "POST", headers: { "content-type": "application/json", origin: "https://kwaad.example" }, body: "{}" }); check("formulier weigert andere site", r.status === 403, `HTTP ${r.status}`); }
   { const r = await get(`/api/public/intake?t=${"0".repeat(48)}`); check("intake met onbekende link geweigerd", r.status === 404, `HTTP ${r.status}`); }
   { const r = await get("/api/public/afmelden?t=nep.nep"); check("afmeldlink wordt gecontroleerd", r.status === 400, `HTTP ${r.status}`); }
+  { const r = await get("/api/public/websitecheck", { method: "POST", headers: { "content-type": "application/json", origin: "https://kwaad.example" }, body: "{}" }); check("websitecheck weigert andere site", r.status === 403, `HTTP ${r.status}`); }
+  { const r = await get(`/api/public/websitecheck?t=${"A".repeat(32)}`); check("websitecheck met onbekende link geweigerd", r.status === 404, `HTTP ${r.status}`); }
+  { const r = await get(`/api/public/offerte?t=00000000-0000-4000-8000-000000000000.AAAAAAAAAAAAAAAAAAAAAAAAAA`); check("offerte met onbekende link geweigerd", r.status === 404, `HTTP ${r.status}`); }
+  { const r = await get("/voorbeeld/bestaat-niet-1234567"); check("onbekende voorbeeldsite geeft 404 (noindex)", r.status === 404 && /noindex/.test(r.headers.get("x-robots-tag") || ""), `HTTP ${r.status}`); }
   { const r = await get("/api/onbekend"); check("onbekende API geeft 404", r.status === 404, `HTTP ${r.status}`); }
 
   // ── Ingelogd (alleen met een geldige sessie) ──

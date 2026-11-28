@@ -16,6 +16,10 @@ test("build: alleen publieke bestanden in dist/, HQ alleen in de Worker", async 
   assert.equal(existsSync("dist/api"), false);
   assert.match(readFileSync("dist/_redirects", "utf8"), /^\/service-pro \/prijzen 308$/m);
   assert.match(readFileSync("dist/_headers", "utf8"), /^\/login\n {2}X-Robots-Tag: noindex/m);
+  // Leeg vervangscript voor het Vercel-analysescript (anders een 404 op elke pagina).
+  assert.match(readFileSync("dist/_vercel/insights/script.js", "utf8"), /^\/\*[^]*\*\/\n$/);
+  for (const f of ["websitecheck.html", "offerte.html", "assets/websitecheck.js", "assets/voorbeeld.js"]) assert.equal(isPublic(f), true, f);
+  assert.ok(existsSync("dist/websitecheck.html") && existsSync("dist/assets/websitecheck.js"));
 });
 
 test("cron: taken elke minuut, klant elke 5, content elke 10, bewaren elk uur", async () => {

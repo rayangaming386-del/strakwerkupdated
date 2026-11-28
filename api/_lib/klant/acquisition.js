@@ -6,7 +6,7 @@
 import { q, one, tx, audit } from "../db.js";
 import { HttpError, assertUuid } from "../http.js";
 import { enqueue } from "../queue.js";
-import { contactCheck, suppressedFor, getRoutes } from "./contact.js";
+import { contactCheck, suppressedFor, getRoutes, WA_OPT_OUT } from "./contact.js";
 import { mailConfigured } from "./mail.js";
 
 export async function fitCheck(lead, db) {
@@ -155,16 +155,25 @@ export async function run({ task, ctx }) {
   }
 }
 
-async function afterSent(o, lead, messageId, test) {
-  await q("insert into hq.interactions (lead_id, direction, channel, kind, subject, body, outreach_id, quote_id, is_test, created_label) values ($1,'uit',$2,'bericht',$3,$4,$5,$6,$7,$8)",
+/**
+ * Na een verstuurd eerste bericht: vastleggen en hooguit één opvolging plannen (alleen als er
+ * geen reactie komt; vlak voor verzenden opnieuw gecontroleerd). manualFollowup: de opvolging
+ * staat over 7 dagen voor jou klaar om zelf te versturen (na een handmatig bericht).
+ */
+export async function afterSent(o, lead, messageId, test, { manualFollowup = false, interaction = true } = {}) {
+  if (interaction) await q("insert into hq.interactions (lead_id, direction, channel, kind, subject, body, outreach_id, quote_id, is_test, created_label) values ($1,'uit',$2,'bericht',$3,$4,$5,$6,$7,$8)",
     [lead.id, o.channel, (test ? "[TEST] " : "") + (o.subject || o.kind), o.body, o.id, o.quote_id, test || lead.is_test, "agent:acquisitie"]);
   await q("update hq.leads set last_outbound_at=now(), status=case when $2 and status in ('nieuw','onderzocht','goedgekeurd') then 'benaderd' else status end, updated_at=now() where id=$1", [lead.id, o.kind === "eerste_contact"]);
-  // Na het eerste contact: hooguit één opvolging, alleen als er geen reactie komt (gecontroleerd vlak voor verzenden).
   if (o.kind === "eerste_contact") {
+    const hi = `Hoi${lead.contact_name ? ` ${lead.contact_name.split(" ")[0]}` : ""},`;
+    const afterCall = /\/voorbeeld\//.test(o.body || "") || String(o.prompt_version || "").startsWith("na_gesprek");
+    const text = (afterCall
+      ? `${hi}\n\nHeb je het voorbeeld van je nieuwe website al kunnen bekijken? Zeg het gerust als je iets anders wilt zien of als je vragen hebt.\n\nGroet,\nRayan`
+      : `${hi}\n\nIk stuurde je vorige week een korte observatie over je website. Is het handig als ik het in twee minuten laat zien? Zo niet, dan hoor je verder niets van me.\n\nGroet,\nRayan`)
+      + (o.channel === "whatsapp" ? `\n\n${WA_OPT_OUT}` : "");
     await q(`insert into hq.outreach (lead_id, channel, kind, sequence, status, subject, body, to_address, scheduled_at, idempotency_key, is_test)
-      values ($1,$2,'opvolging',1,'gepland',$3,$4,$5,now() + interval '7 days',$6,$7) on conflict (idempotency_key) do nothing`,
-      [lead.id, o.channel, `Re: ${o.subject}`, `Hoi${lead.contact_name ? ` ${lead.contact_name.split(" ")[0]}` : ""},\n\nIk stuurde je vorige week een korte observatie over je website. Is het handig als ik het in twee minuten laat zien? Zo niet, dan hoor je verder niets van me.\n\nGroet,\nRayan`,
-       o.to_address, `opvolging:${lead.id}:1`, o.is_test]);
+      values ($1,$2,'opvolging',1,$8,$3,$4,$5,now() + interval '7 days',$6,$7) on conflict (idempotency_key) do nothing`,
+      [lead.id, o.channel, `Re: ${o.subject || "je nieuwe website"}`, text, o.to_address, `opvolging:${lead.id}:1`, o.is_test, manualFollowup ? "klaar_handmatig" : "gepland"]);
   }
 }
 export { mailConfigured };

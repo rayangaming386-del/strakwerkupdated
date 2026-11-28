@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Offerte · StrakWerk</title>
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
+<link rel="stylesheet" href="/assets/offerte/offerte.css">
+</head>
+<body>
+<main class="of">
+  <header class="of-top"><span class="logo">STRAK<b>WERK</b></span><span class="kicker">Offerte</span></header>
+  <section id="state" class="of-card" aria-live="polite"><p>Even laden…</p></section>
+  <div id="view" hidden>
+    <section class="of-card">
+      <p class="kicker">Voor <span id="company"></span></p>
+      <h1 id="title">Je nieuwe website</h1>
+      <p id="description" class="muted"></p>
+      <table class="lines" aria-label="Wat je krijgt"><tbody id="lines"></tbody></table>
+      <div class="total"><span>Totaal (eenmalig)</span><b id="total"></b></div>
+      <p id="monthly" class="small muted" hidden></p>
+      <div class="deposit"><span id="depositLabel">Aanbetaling bij akkoord</span><b id="deposit"></b></div>
+      <p id="rest" class="small muted"></p>
+      <p id="start" class="small"></p>
+      <p id="valid" class="small muted"></p>
+    </section>
+    <section class="of-card" id="infoCard" hidden>
+      <h2>Wat ik nog van je nodig heb</h2>
+      <ul id="info" class="list"></ul>
+      <p id="next" class="small muted"></p>
+    </section>
+    <details class="of-card terms" id="termsCard" hidden>
+      <summary>Voorwaarden</summary>
+      <p id="terms" class="small pre"></p>
+    </details>
+    <form id="accept" class="of-card" novalidate hidden>
+      <h2>Akkoord geven</h2>
+      <label for="name">Je naam</label>
+      <input id="name" type="text" autocomplete="name" required>
+      <label class="check"><input id="agree" type="checkbox"> <span>Ik ga akkoord met deze offerte en de voorwaarden.</span></label>
+      <p class="small">Na de oplevering stuur ik je soms een bericht over je website, bijvoorbeeld over onderhoud. Afmelden kan altijd.</p>
+      <label class="check"><input id="noMarketing" type="checkbox"> <span>Liever geen berichten over andere diensten.</span></label>
+      <button type="submit" class="btn">Akkoord en doorgaan</button>
+      <p id="msg" class="small" role="status"></p>
+    </form>
+    <section id="done" class="of-card done" hidden>
+      <h2>Bedankt, het is rond!</h2>
+      <p id="doneText"></p>
+      <div id="pay" class="pay" hidden>
+        <h3>Aanbetaling</h3>
+        <dl>
+          <dt>Bedrag</dt><dd><span id="payAmount"></span></dd>
+          <dt>Rekening</dt><dd><span id="payIban"></span> <button type="button" class="copy" data-copy="payIban">Kopieer</button></dd>
+          <dt>Ten name van</dt><dd id="payName"></dd>
+          <dt>Omschrijving</dt><dd><span id="payRef"></span> <button type="button" class="copy" data-copy="payRef">Kopieer</button></dd>
+        </dl>
+      </div>
+      <p id="payNote" class="small muted" hidden></p>
+      <a id="intake" class="btn" hidden>Materiaal aanleveren (intake)</a>
+    </section>
+    <p class="foot small muted">Vragen? <a id="wa" target="_blank" rel="noopener">App Rayan</a> of bel <a id="tel"></a>.</p>
+  </div>
+</main>
+<script src="/assets/offerte/offerte.js" defer></script>
+</body>
+</html>

@@ -9,6 +9,8 @@ import * as content from "./content.js";
 import * as publisher from "./publisher.js";
 import * as acquisitie from "../klant/acquisition.js";
 import { runDiscover, runSalesCheck, runCheckLead } from "../klant/agents.js";
+import { runPreviewTask } from "../klant/preview.js";
+import { runBriefingTask } from "../klant/calls.js";
 import { missingIg } from "../content/instagram.js";
 import { mailConfigured, mailRoute, missingMail } from "../klant/mail.js";
 
@@ -17,7 +19,8 @@ import { mailConfigured, mailRoute, missingMail } from "../klant/mail.js";
 // Scout en Auditor kiezen per taaksoort: ontdekken (OpenStreetMap) en verkoopkans (mobiele klantroute).
 const scoutX = { run: (a) => (a.task.kind === "ontdekken" ? runDiscover(a) : a.task.kind === "websitestatus" ? runCheckLead(a) : scout.run(a)) };
 const auditorX = { run: (a) => (a.task.kind === "verkoopkans" ? runSalesCheck(a) : auditor.run(a)) };
-export const EXECUTORS = { scout: scoutX, auditor: auditorX, sales, content, publisher, acquisitie };
+const salesX = { run: (a) => (a.task.kind === "voorbeeldsite" ? runPreviewTask(a) : a.task.kind === "belcoach" ? runBriefingTask(a) : sales.run(a)) };
+export const EXECUTORS = { scout: scoutX, auditor: auditorX, sales: salesX, content, publisher, acquisitie };
 
 export const TOOLS = {
   scout:   ["OpenStreetMap (Overpass API, open data)", "web.get (alleen publieke homepage + robots.txt)", "crm.lezen (lead)"],

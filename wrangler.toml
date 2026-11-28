@@ -17,7 +17,7 @@ binding = "ASSETS"
 html_handling = "auto-trailing-slash"
 not_found_handling = "404-page"
 # Alleen deze paden komen langs de Worker (beveiliging en API); de rest is statisch.
-run_worker_first = ["/api/*", "/hq", "/hq/*", "/intake"]
+run_worker_first = ["/api/*", "/hq", "/hq/*", "/intake", "/offerte", "/voorbeeld/*"]
 
 # Elke minuut; de Worker kiest per minuut welke onderdelen draaien (worker/index.js).
 [triggers]
@@ -32,6 +32,8 @@ service = "strakwerk"
 HQ_SITE_URL = "https://www.strakwerkk.nl"
 HQ_STORAGE = "supabase"
 MAIL_FROM = "strakwerkk@gmail.com"
+MAIL_REPLY_TO = "antwoord@reply.strakwerkk.nl"
+MAIL_FORWARD_TO = "strakwerkk@gmail.com"
 
 [observability]
 enabled = true
@@ -39,6 +41,6 @@ enabled = true
 # Optioneel (gratis): Hyperdrive bundelt databaseverbindingen voor Workers.
 # Maak hem met `npx wrangler hyperdrive create strakwerk-db --connection-string="..."`
 # en zet de id hieronder (zonder Hyperdrive gebruikt de Worker DATABASE_URL).
-# [[hyperdrive]]
-# binding = "HYPERDRIVE"
-# id = "..."
+[[hyperdrive]]
+binding = "HYPERDRIVE"
+id = "80934a0fa5574d69bf8ab17eeb91508b"
