@@ -1,6 +1,6 @@
 // /api/hq/* — alle gegevens van StrakWerk HQ. Elke route controleert sessie, lidmaatschap,
 // MFA (voor eigenaars) en de rechten van de rol aan de serverkant.
-import { waitUntil as vercelWaitUntil } from "@vercel/functions";
+import { waitUntil, isWorkers } from "./_lib/runtime.js";
 import { q, one, tx, audit } from "./_lib/db.js";
 import { env, missingCore } from "./_lib/env.js";
 import { json, errorResponse, readJson, assertSameOrigin, route, HttpError, assertUuid, str } from "./_lib/http.js";
@@ -15,12 +15,13 @@ import { llmConfigured, llmModel } from "./_lib/agents/llm.js";
 import * as vercelSrc from "./_lib/analytics/vercel.js";
 import * as sb from "./_lib/supabase.js";
 import { handleStudio } from "./_lib/content/routes.js";
+import { handleKlant, isKlantPath } from "./_lib/klant/routes.js";
 import { dispatchRenderWorker, dispatchConfigured } from "./_lib/content/dispatch.js";
 import { driver as storageDriver } from "./_lib/content/storage.js";
 import { missingIg } from "./_lib/content/instagram.js";
 
-const waitUntil = (p) => { try { vercelWaitUntil(p); } catch {} return p; };
-const startWorker = () => waitUntil(runWorker({ source: "api", budgetMs: 50_000 }).catch(e => console.error(`[worker] ${e.message}`)));
+// Cloudflare: werk na het antwoord mag max. 30 s duren; daarna pakt de cron (elke minuut) het op.
+const startWorker = () => waitUntil(runWorker({ source: "api", budgetMs: isWorkers ? 25_000 : 50_000 }));
 
 // ── Agentwereld ──────────────────────────────────────────────────────────
 async function world() {
@@ -273,6 +274,10 @@ export async function handle(request) {
     if ((p = route(path, "members/:id")) && m === "PATCH") { assertPerm(auth, "members.manage"); return json(await patchMember(p.id, body, auth)); }
     if (m === "GET" && path === "audit") { assertPerm(auth, "settings.write"); return json({ entries: (await q("select * from hq.audit_log order by at desc limit 200")).rows }); }
 
+    if (isKlantPath(path)) {
+      const r = await handleKlant({ m, path, url, body, auth, startWorker });
+      if (r) return r;
+    }
     if (path.startsWith("studio/") || path.startsWith("ai/") || path.startsWith("media/") || path.startsWith("integrations/") || /^leads\/[^/]+\/campaign$/.test(path)) {
       const kick = () => { startWorker(); waitUntil(dispatchRenderWorker()); };
       if (m === "GET" && path === "studio/overview") kickIfNeeded(waitUntil).catch(() => {});

@@ -1,0 +1,156 @@
+// Publieke ingangen van HQ (zonder inlog), onder /api/public/*:
+//   POST aanvraag        formulier op de site → klantkaart + Sales-taak (honeypot, herkomstcontrole, limiet)
+//   GET/POST afmelden    afmelden met één klik (ondertekende link uit elke mail)
+//   POST inbound         binnenkomende mail (bijv. Cloudflare Email Worker) met gedeeld geheim
+//   GET/POST intake      persoonlijke intake-link van één project (token, geen account)
+//   POST websitecheck    gratis websitecheck starten (honeypot, herkomst, limieten) → geheim token
+//   GET  websitecheck    uitslag bij het token; POST websitecheck/contact: gegevens achterlaten (met vinkje)
+//   GET  voorbeeld/<code> persoonlijke voorbeeldsite; POST …/gezien: echt bekeken
+//   GET/POST offerte     offertepagina met akkoordknop (ondertekende link)
+import { createHash, timingSafeEqual } from "node:crypto";
+import { q, one, tx } from "./_lib/db.js";
+import { env } from "./_lib/env.js";
+import { json, errorResponse, readJson, clientIp, HttpError, str } from "./_lib/http.js";
+import { intakeRequest } from "./_lib/klant/sales.js";
+import { processInbound } from "./_lib/klant/inbound.js";
+import { suppress } from "./_lib/klant/contact.js";
+import { checkUnsubscribeToken } from "./_lib/klant/mail.js";
+import { intakeView, saveIntake } from "./_lib/klant/project.js";
+import { quoteView, quoteAccept } from "./_lib/klant/quote-public.js";
+import { previewHtml, previewSeen } from "./_lib/klant/preview.js";
+import { startCheck, checkView, checkContact } from "./_lib/klant/sitecheck.js";
+
+// Rayan zelf (ingelogd in HQ): telt niet als bezoek van een klant.
+const hasHqSession = (request) => /(?:^|;\s*)__Host-sw_hq_at=/.test(request.headers.get("cookie") || "");
+
+const html = (body, status = 200) => new Response(`<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>StrakWerk</title>
+<style>body{margin:0;background:#070708;color:#eee;font:16px/1.55 system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;padding:16px}main{max-width:460px;border:1px solid #2a2a2e;padding:28px;border-radius:2px}h1{font-size:22px;margin:0 0 10px;color:#E2CA97}button{background:#B9975B;color:#070708;border:0;padding:12px 18px;font-weight:600;border-radius:2px;cursor:pointer}a{color:#E2CA97}</style></head><body><main>${body}</main></body></html>`,
+  { status, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "x-robots-tag": "noindex", "referrer-policy": "no-referrer" } });
+
+// Eenvoudige limiet per IP-hash per uur (tabel-loos: via audit_log zou te zwaar zijn; interactions telt per bron).
+async function rateLimited(ip, kind, max) {
+  const key = createHash("sha256").update(`${ip}|${kind}|${new Date().toISOString().slice(0, 13)}`).digest("hex").slice(0, 32);
+  const r = await one(`insert into hq.settings (key, value, updated_at) values ($1, '{"n":1}'::jsonb, now())
+    on conflict (key) do update set value=jsonb_build_object('n', (hq.settings.value->>'n')::int + 1), updated_at=now() returning (value->>'n')::int as n`, [`rl:${key}`]);
+  return r.n > max;
+}
+
+function sameSite(request) {
+  const allowed = new Set([new URL(env.siteUrl).host, "strakwerkk.nl", "www.strakwerkk.nl"]);
+  const host = request.headers.get("x-forwarded-host") || request.headers.get("host");
+  if (host) allowed.add(host);
+  const o = request.headers.get("origin") || request.headers.get("referer");
+  if (!o) return false;
+  try { return allowed.has(new URL(o).host); } catch { return false; }
+}
+
+function secretOk(given) {
+  const want = (process.env.HQ_INBOUND_SECRET || "").trim();
+  if (!want || !given) return false;
+  const a = Buffer.from(createHash("sha256").update(want).digest("hex")), b = Buffer.from(createHash("sha256").update(String(given)).digest("hex"));
+  return timingSafeEqual(a, b);
+}
+
+async function handle(request) {
+  try {
+    const url = new URL(request.url);
+    const path = (url.searchParams.get("p") || url.pathname.replace(/^\/api\/public\/?/, "")).replace(/^\/+|\/+$/g, "");
+    const m = request.method;
+
+    if (path === "aanvraag" && m === "POST") {
+      if (!sameSite(request)) throw new HttpError(403, "herkomst", "Verzoek geweigerd.");
+      const body = await readJson(request, 16 * 1024);
+      if (body.website_url || body.hp) return json({ ok: true }); // honeypot: stil negeren
+      if (await rateLimited(clientIp(request), "aanvraag", 8)) throw new HttpError(429, "limiet", "Te veel aanvragen; probeer het later of stuur een WhatsApp.");
+      const r = await intakeRequest({
+        name: body.name, company: body.company, email: body.email, phone: body.phone, message: body.message, type: body.type, website: body.site,
+        channel: "formulier", page: body.page, ref: body.ref, utm: body.utm, external_id: typeof body.form_id === "string" && /^[a-z0-9-]{8,64}$/i.test(body.form_id) ? `form:${body.form_id}` : null,
+        is_test: url.searchParams.get("sw_test") === "1" || body.sw_test === true,
+      });
+      return json({ ok: true, duplicate: r.duplicate });
+    }
+
+    if (path === "afmelden") {
+      const leadId = checkUnsubscribeToken(url.searchParams.get("t"));
+      if (!leadId) return html("<h1>Link ongeldig</h1><p>Deze afmeldlink klopt niet. Stuur een mail met 'afmelden' en ik haal je direct van de lijst.</p>", 400);
+      const lead = await one("select * from hq.leads where id=$1", [leadId]);
+      if (m === "GET" && !lead) return html("<h1>Afgemeld</h1><p>Je ontvangt geen berichten meer van StrakWerk.</p>");
+      if (m === "GET") return html(`<h1>Afmelden</h1><p>Wil je geen berichten meer van StrakWerk ontvangen?</p><form method="post"><button>Ja, afmelden</button></form>`);
+      if (lead) await tx(async (db) => {
+        await suppress({ lead, reason: "afmelding", note: "Via afmeldlink" }, db);
+        await db.query("update hq.leads set status='afgemeld', awaiting_reply_since=null, updated_at=now() where id=$1", [lead.id]);
+        await db.query("insert into hq.interactions (lead_id, direction, channel, kind, body, is_test, created_label) values ($1,'in','email','afmelding','Afgemeld via de link in de mail',$2,'afmeldlink')", [lead.id, lead.is_test]);
+      });
+      // One-click (RFC 8058) verwacht alleen een 2xx.
+      return html("<h1>Afgemeld</h1><p>Je ontvangt geen berichten meer van StrakWerk. Sorry voor het storen.</p>");
+    }
+
+    if (path === "inbound" && m === "POST") {
+      if (!secretOk(request.headers.get("x-hq-inbound-secret"))) throw new HttpError(401, "geheim", "Niet toegestaan.");
+      const b = await readJson(request, 256 * 1024);
+      const r = await processInbound({ from: str(b.from, 254), subject: str(b.subject, 300), text: str(b.text, 8000) || "", inReplyTo: str(b.in_reply_to, 300), references: Array.isArray(b.references) ? b.references.map(x => str(x, 300)) : str(b.references, 2000), messageId: str(b.message_id, 300) });
+      return json({ ok: true, ...r });
+    }
+
+    if (path === "intake") {
+      const t = url.searchParams.get("t");
+      if (m === "GET") return json(await intakeView(t));
+      if (m === "POST") {
+        if (!sameSite(request)) throw new HttpError(403, "herkomst", "Verzoek geweigerd.");
+        if (await rateLimited(clientIp(request), "intake", 60)) throw new HttpError(429, "limiet", "Even wachten en opnieuw proberen.");
+        return json(await saveIntake(t, await readJson(request, 4_400_000)));
+      }
+    }
+
+    // Gratis websitecheck (leadmagneet op /websitecheck).
+    if (path === "websitecheck" && m === "POST") {
+      if (!sameSite(request)) throw new HttpError(403, "herkomst", "Verzoek geweigerd.");
+      const body = await readJson(request, 4 * 1024);
+      if (body.hp || body.website_url) return json({ ok: true, token: null, status: "bezig" }); // honeypot: stil negeren
+      if (await rateLimited(clientIp(request), "websitecheck", 10)) throw new HttpError(429, "limiet", "Even wachten en opnieuw proberen, of stuur je adres via WhatsApp.");
+      return json({ ok: true, ...(await startCheck({ url: body.url, ip: clientIp(request), isTest: url.searchParams.get("sw_test") === "1" || body.sw_test === true })) });
+    }
+    if (path === "websitecheck" && m === "GET") {
+      if (await rateLimited(clientIp(request), "websitecheck_poll", 600)) throw new HttpError(429, "limiet", "Even wachten en opnieuw proberen.");
+      return json(await checkView(url.searchParams.get("t")));
+    }
+    if (path === "websitecheck/contact" && m === "POST") {
+      if (!sameSite(request)) throw new HttpError(403, "herkomst", "Verzoek geweigerd.");
+      const body = await readJson(request, 8 * 1024);
+      if (body.hp || body.website_url) return json({ ok: true }); // honeypot
+      if (await rateLimited(clientIp(request), "websitecheck_contact", 6)) throw new HttpError(429, "limiet", "Te veel verzoeken; stuur gerust een WhatsApp.");
+      return json(await checkContact(body.t, body));
+    }
+
+    // Persoonlijke voorbeeldsite (HTML) en het "echt bekeken"-signaal van de pagina zelf.
+    let mv;
+    if ((mv = path.match(/^voorbeeld\/([a-z0-9-]{3,60})$/)) && (m === "GET" || m === "HEAD")) {
+      const r = await previewHtml(mv[1]);
+      return new Response(m === "HEAD" ? null : r.html, { status: r.status, headers: {
+        "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "x-robots-tag": "noindex, nofollow", "referrer-policy": "strict-origin-when-cross-origin",
+        "x-content-type-options": "nosniff", "x-frame-options": "DENY",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'" } });
+    }
+    if ((mv = path.match(/^voorbeeld\/([a-z0-9-]{3,60})\/gezien$/)) && m === "POST") {
+      if (!sameSite(request)) throw new HttpError(403, "herkomst", "Verzoek geweigerd.");
+      if (await rateLimited(clientIp(request), "voorbeeld", 30)) return json({ ok: true });
+      return json(await previewSeen(mv[1], { owner: hasHqSession(request) }));
+    }
+
+    if (path === "offerte") {
+      const t = url.searchParams.get("t");
+      // Kijkt Rayan zelf (ingelogd in HQ), dan telt het niet als "klant bekijkt je offerte".
+      if (m === "GET") return json(await quoteView(t, { countView: !hasHqSession(request) }));
+      if (m === "POST") {
+        if (!sameSite(request)) throw new HttpError(403, "herkomst", "Verzoek geweigerd.");
+        if (await rateLimited(clientIp(request), "offerte", 20)) throw new HttpError(429, "limiet", "Even wachten en opnieuw proberen.");
+        return json(await quoteAccept(t, await readJson(request, 8 * 1024), { ip: clientIp(request) }));
+      }
+    }
+    return json({ error: "niet_gevonden" }, 404);
+  } catch (e) {
+    return errorResponse(e);
+  }
+}
+
+export const GET = handle, POST = handle;

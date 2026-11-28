@@ -121,6 +121,9 @@ export function field(label, input, { full, help } = {}) {
 
 export const ICON = {
   overzicht: "M3 3h6v6H3zM11 3h6v4h-6zM11 9h6v8h-6zM3 11h6v6H3z",
+  vandaag: "M3 5h14v12H3zM3 9h14M7 3v4M13 3v4",
+  klanten: "M4 4h12v12H4zM7 8h6M7 11h6M7 14h3",
+  kantoor: "M3 17V7l7-4 7 4v10M7 17v-5h6v5",
   bezoekers: "M3 16V9M8 16V4M13 16v-6M18 16V7",
   agentwereld: "M10 2l7 4v8l-7 4-7-4V6zM10 2v8m0 0l7-4m-7 4L3 6m7 4v8",
   studio: "M3 5h10v10H3zM13 8l4-2.5v9L13 12",

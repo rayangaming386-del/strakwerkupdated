@@ -7,6 +7,7 @@ import { EXECUTORS, connection } from "./agents/registry.js";
 import { LlmError, refreshAi, aiContext } from "./agents/llm.js";
 import { departmentOf } from "./budget.js";
 import { FetchError } from "./agents/fetcher.js";
+import { maxTaskMs, isWorkers } from "./runtime.js";
 
 export function stableHash(obj) {
   const canon = (v) => Array.isArray(v) ? `[${v.map(canon).join(",")}]`
@@ -26,14 +27,15 @@ async function runOne(claim, workerId) {
   const conn = connection(task.agent_key);
   let cost = 0, steps = 0, usage = { input_tokens: 0, output_tokens: 0 };
   const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(new Error("timeout")), task.timeout_s * 1000);
+  const timeoutMs = Math.min(task.timeout_s * 1000, maxTaskMs());
+  const timer = setTimeout(() => ac.abort(new Error("timeout")), timeoutMs);
   const ctx = {
     signal: ac.signal,
     chain: await chainResults(task),
     async step(message, data = {}) {
       steps++;
       if (steps > limits.max_steps) throw new LimitError(`Stappenlimiet bereikt (${limits.max_steps}).`);
-      if (ac.signal.aborted) throw new LimitError(`Tijdslimiet bereikt (${task.timeout_s} s).`);
+      if (ac.signal.aborted) throw new LimitError(`Tijdslimiet bereikt (${Math.round(timeoutMs / 1000)} s).`);
       await event(getPool(), task.id, "stap", { toAgent: task.agent_key, message, data });
       await ctx.checkControl();
     },
@@ -87,7 +89,7 @@ async function runOne(claim, workerId) {
     if (e.budget) {
       // AI-budget op of tegoed onvoldoende: taak bewaren (gepauzeerd) en later dezelfde taak hervatten.
       await finish(task, runId, workerId, { status: "gepauzeerd", costUsd: cost, usage, steps, message: `Wacht op AI-budget: ${e.message}`,
-        after: async (db) => { await db.query("update hq.tasks set max_attempts=max_attempts+1, pause_reason='budget', error=$2 where id=$1", [task.id, e.message]); } });
+        after: async (db) => { await db.query("update hq.tasks set max_attempts=max_attempts+1, pause_reason=$3, error=$2 where id=$1", [task.id, e.message, e.reason === "post" ? "budget_post" : "budget"]); } });
       return;
     }
     if (e instanceof ControlStop) {
@@ -110,17 +112,17 @@ let lastKick = 0;
 // De serverloze worker pakt nooit video-taken op: die vragen ffmpeg/Chromium (render-worker).
 export const SERVERLESS_FILTER = { exclude: ["video"] };
 
-export async function runWorker({ budgetMs = 50_000, source = "onbekend", filter = SERVERLESS_FILTER } = {}) {
+export async function runWorker({ budgetMs = 50_000, source = "onbekend", filter = SERVERLESS_FILTER, maxTasks = Infinity } = {}) {
   const workerId = `${source}:${randomUUID().slice(0, 8)}`;
   const started = Date.now();
   let processed = 0, reason = "leeg";
   await sweepStale();
-  while (Date.now() - started < budgetMs) {
+  while (Date.now() - started < budgetMs && processed < maxTasks) {
     const remaining = budgetMs - (Date.now() - started);
     const f = agentFilter(filter);
     const peek = await one(`select timeout_s from hq.tasks where status='in_wachtrij' and control is null and run_after<=now() ${f.sql} order by run_after, created_at limit 1`, f.vals);
     if (!peek) { reason = "leeg"; break; }
-    if (peek.timeout_s * 1000 > remaining) { reason = "tijdsbudget"; break; }
+    if (Math.min(peek.timeout_s * 1000, maxTaskMs()) > remaining) { reason = "tijdsbudget"; break; }
     const claim = await claimNext(workerId, filter);
     if (!claim.task) { reason = claim.reason; break; }
     await runOne(claim, workerId);
@@ -135,7 +137,7 @@ export async function kickIfNeeded(waitUntil) {
   const pending = await one("select 1 from hq.tasks where agent_key<>'video' and ((status='in_wachtrij' and run_after<=now() and control is null) or (status='bezig' and lease_until < now())) limit 1");
   if (!pending) return false;
   lastKick = Date.now();
-  waitUntil(runWorker({ source: "poll", budgetMs: 50_000 }).catch(e => console.error(`[worker] ${e.message}`)));
+  waitUntil(runWorker({ source: "poll", budgetMs: isWorkers ? 25_000 : 50_000 }).catch(e => console.error(`[worker] ${e.message}`)));
   return true;
 }
 

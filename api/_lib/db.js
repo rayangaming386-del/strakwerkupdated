@@ -1,9 +1,13 @@
 import pg from "pg";
 import { env } from "./env.js";
+import { store, bindings, isWorkers } from "./runtime.js";
 
-// Eén kleine pool per functie-instantie. Gebruik op Supabase de "transaction pooler"
-// (poort 6543) als DATABASE_URL: serverless functies openen anders te veel verbindingen.
+// Node: één kleine pool per proces. Cloudflare Workers: één pool per verzoek (verbindingen
+// mogen daar niet tussen verzoeken worden gedeeld; runtime.js sluit hem na afloop).
+// Gebruik op Supabase de "transaction pooler" (poort 6543) als DATABASE_URL, of een
+// Hyperdrive-binding (gratis) die de verbindingen voor Workers bundelt.
 let pool = null;
+const connectionString = () => bindings().HYPERDRIVE?.connectionString || env.databaseUrl;
 
 export function sslFor(cs) {
   if (/localhost|127\.0\.0\.1|sslmode=disable/.test(cs || "")) return false;
@@ -11,24 +15,35 @@ export function sslFor(cs) {
   return { rejectUnauthorized: false };
 }
 
+function makePool(cs, max) {
+  const p = new pg.Pool({
+    connectionString: cs,
+    ssl: bindings().HYPERDRIVE ? false : sslFor(cs),
+    max,
+    idleTimeoutMillis: 10_000,
+    connectionTimeoutMillis: 8_000,
+    statement_timeout: 15_000,
+  });
+  p.on("error", () => {}); // losse verbindingsfouten niet laten crashen; de volgende query meldt het
+  return p;
+}
+
 export function getPool() {
+  const s = store();
+  if (s && isWorkers) {
+    if (!connectionString()) {
+      const err = new Error("Database niet gekoppeld: DATABASE_URL ontbreekt.");
+      err.status = 503; err.code = "niet_gekoppeld"; err.missing = ["DATABASE_URL"];
+      throw err;
+    }
+    return (s.pool ||= makePool(connectionString(), Number(process.env.HQ_DB_POOL_MAX || 2)));
+  }
   if (!env.databaseUrl) {
     const err = new Error("Database niet gekoppeld: DATABASE_URL ontbreekt.");
     err.status = 503; err.code = "niet_gekoppeld"; err.missing = ["DATABASE_URL"];
     throw err;
   }
-  if (!pool) {
-    pool = new pg.Pool({
-      connectionString: env.databaseUrl,
-      ssl: sslFor(env.databaseUrl),
-      max: Number(process.env.HQ_DB_POOL_MAX || 3),
-      idleTimeoutMillis: 10_000,
-      connectionTimeoutMillis: 8_000,
-      statement_timeout: 15_000,
-    });
-    pool.on("error", () => {}); // losse verbindingsfouten niet laten crashen; de volgende query meldt het
-  }
-  return pool;
+  return (pool ||= makePool(env.databaseUrl, Number(process.env.HQ_DB_POOL_MAX || 3)));
 }
 
 export async function q(text, params = []) {

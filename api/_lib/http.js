@@ -75,6 +75,9 @@ export function cookie(name, value, { maxAge, httpOnly = true, path = "/", sameS
 }
 
 export function clientIp(request) {
+  // Cloudflare zet het echte adres in cf-connecting-ip (niet door de bezoeker te vervalsen).
+  const cf = request.headers.get("cf-connecting-ip");
+  if (cf) return cf.trim();
   const xf = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "";
   return xf.split(",")[0].trim() || "0.0.0.0";
 }

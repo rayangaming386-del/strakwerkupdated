@@ -9,7 +9,7 @@ def lastmod(f):
     if f in dirty or any(f.startswith(d.rstrip('/') + '/') for d in dirty if d.endswith('/')): return today
     d = subprocess.run(['git', 'log', '-1', '--format=%cs', '--', f], capture_output=True, text=True).stdout.strip()
     return d or today
-order = ['index.html', 'diensten.html', 'werk.html', 'prijzen.html', 'over-mij.html', 'contact.html']
+order = ['index.html', 'diensten.html', 'werk.html', 'prijzen.html', 'over-mij.html', 'contact.html', 'websitecheck.html']
 files = order + sorted(glob.glob('diensten/*.html')) + sorted(glob.glob('werk/*.html')) + ['kennisbank.html'] + sorted(glob.glob('kennisbank/*.html')) + ['demo.html', 'privacy.html']
 out = []
 for f in files:

@@ -282,3 +282,20 @@ dialog.full{width:min(920px, calc(100vw - 16px))}
 .live.on{border-color:var(--gold); border-style:solid}
 .live input, .row > label > input{width:auto}
 label.row > input{width:auto; flex:none}
+/* Salesmotor: meldingen, bel- en bezoeklijst, belcoach. Geen groen; goud voor wat aandacht vraagt. */
+.note-item.unread{border-color:rgba(207,174,105,.55)}
+.note-item p{overflow-wrap:anywhere}
+.call-card.done{opacity:.86}
+.call-card .row{flex-wrap:wrap}
+.brief{border:1px solid var(--line); border-radius:var(--r); padding:10px 12px; background:var(--card-2)}
+.brief > summary{cursor:pointer; font-weight:600; font-size:.88rem; color:var(--gold-hi)}
+.brief .stack{margin-top:10px; gap:10px}
+.brief-p small{display:block; font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:var(--faint); margin-bottom:2px}
+.brief-p p{margin:0; overflow-wrap:anywhere}
+.brief-p.hl p{color:var(--gold-hi)}
+.brief-kv{display:grid; grid-template-columns:minmax(0,1fr); gap:2px; margin:0}
+.brief-kv dt{font-weight:600}
+.brief-kv dd{margin:0 0 8px; color:var(--muted); overflow-wrap:anywhere}
+.outcome .chips{flex-wrap:wrap; overflow:visible}
+.check{display:inline-flex; gap:8px; align-items:center; font-size:.9rem; cursor:pointer}
+.check input{width:18px; height:18px; accent-color:var(--gold); margin:0}
