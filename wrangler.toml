@@ -32,6 +32,8 @@ service = "strakwerk"
 HQ_SITE_URL = "https://www.strakwerkk.nl"
 HQ_STORAGE = "supabase"
 MAIL_FROM = "strakwerkk@gmail.com"
+MAIL_REPLY_TO = "antwoord@reply.strakwerkk.nl"
+MAIL_FORWARD_TO = "strakwerkk@gmail.com"
 
 [observability]
 enabled = true
