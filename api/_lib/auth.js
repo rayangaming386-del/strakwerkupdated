@@ -21,6 +21,10 @@ const PERMS = {
   "settings.write":     ["eigenaar"],
   "members.manage":     ["eigenaar"],
   "data.delete":        ["eigenaar"],
+  "content.write":      ["eigenaar", "medewerker"],   // opdrachten, scènes, captions, renders
+  "content.approve":    ["eigenaar"],                 // video goedkeuren en inplannen (gaat naar jouw accounts)
+  "content.settings":   ["eigenaar"],                 // automatisering, kostenplafond, koppelingen
+  "assets.release":     ["eigenaar"],                 // beelden vrijgeven voor social media
 };
 
 export function can(role, perm) {

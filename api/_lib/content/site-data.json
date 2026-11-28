@@ -1,0 +1,351 @@
+{
+  "_bron": "Gemaakt door scripts/sync-site-data.mjs uit index.html (CONFIG), tools/v2/projects.json en assets/work. Niet met de hand aanpassen.",
+  "site": "strakwerkk.nl",
+  "whatsapp": "31623462397",
+  "brand": {
+    "name": "StrakWerk",
+    "site": "strakwerkk.nl",
+    "url": "https://www.strakwerkk.nl",
+    "email": "strakwerkk@gmail.com",
+    "phone": "+31623462397",
+    "whatsapp": "31623462397",
+    "place": "Zoetermeer"
+  },
+  "brand_assets": [
+    {
+      "path": "/brand/configurator-mobiel.mp4",
+      "kind": "video",
+      "label": "Configurator (schermopname)",
+      "alt": "Schermopname van de configurator op strakwerkk.nl: pakket kiezen, optie aanzetten, offerte",
+      "width": 780,
+      "height": 1688,
+      "duration_s": 11.6,
+      "moments": {
+        "pakketten": 1.3,
+        "premium": 2.7,
+        "opties": 6.2,
+        "offerte": 9.2
+      }
+    },
+    {
+      "path": "/brand/pakketten.png",
+      "kind": "mobiel",
+      "label": "Pakketten",
+      "alt": "De vier pakketten met prijzen op strakwerkk.nl",
+      "width": 780,
+      "height": 1688
+    },
+    {
+      "path": "/brand/offerte.png",
+      "kind": "mobiel",
+      "label": "Offerte",
+      "alt": "Offerte met totaalprijs in de configurator",
+      "width": 780,
+      "height": 1688
+    }
+  ],
+  "bases": {
+    "nieuw": {
+      "name": "Starter",
+      "price_eur": 200,
+      "pitch": "Complete website tot 3 pagina's"
+    },
+    "premium": {
+      "name": "Premium",
+      "price_eur": 350,
+      "pitch": "Zelf aanpassen, aanvragen via WhatsApp en vindbaar in Google"
+    },
+    "pro": {
+      "name": "Pro",
+      "price_eur": 500,
+      "pitch": "Geavanceerd beheer, extra taal, blog, logo en regiopagina's"
+    },
+    "redesign": {
+      "name": "Redesign",
+      "price_eur": 175,
+      "pitch": "Je bestaande site strak vernieuwd"
+    }
+  },
+  "promo": {
+    "until": "2026-12-01T00:00:00+01:00",
+    "label": "Actie t/m 30 november",
+    "free": [
+      "logo",
+      "gbp"
+    ]
+  },
+  "projects": [
+    {
+      "slug": "glow",
+      "name": "Glow & Laser For You",
+      "sector": "Beautysalon",
+      "city": "Zoetermeer",
+      "live": "https://www.glowenlaserforyou.nl",
+      "text": "Een rustige salon voor laserontharing, HIFU, gezichtsbehandelingen en wimpers. Bezoekers zien vooraf wat hun behandeling kost en vragen in een paar stappen online een afspraak aan.",
+      "made": [
+        "Afspraak aanvragen in stappen",
+        "Prijslijst met zoeken",
+        "Pagina per behandeling",
+        "Live openingsstatus"
+      ],
+      "shots": [
+        {
+          "path": "/assets/work/glow.webp",
+          "label": "Home",
+          "alt": "Homepage van Glow & Laser For You",
+          "kind": "desktop",
+          "width": 1600,
+          "height": 905
+        },
+        {
+          "path": "/assets/work/glow-behandelingen.webp",
+          "label": "Behandelingen",
+          "alt": "Behandelingen van Glow & Laser For You",
+          "kind": "desktop",
+          "width": 1600,
+          "height": 905
+        },
+        {
+          "path": "/assets/work/glow-prijzen.webp",
+          "label": "Prijzen",
+          "alt": "Prijslijst van Glow & Laser For You met zoekfunctie",
+          "kind": "desktop",
+          "width": 1600,
+          "height": 905
+        },
+        {
+          "path": "/assets/work/glow-boeken.webp",
+          "label": "Afspraak",
+          "alt": "Afspraak aanvragen bij Glow & Laser For You",
+          "kind": "desktop",
+          "width": 1600,
+          "height": 905
+        },
+        {
+          "path": "/assets/work/glow-contact.webp",
+          "label": "Contact",
+          "alt": "Contactpagina van Glow & Laser For You met openingstijden",
+          "kind": "desktop",
+          "width": 1600,
+          "height": 905
+        },
+        {
+          "path": "/assets/work/glow-mobiel.webp",
+          "label": "Mobiel",
+          "alt": "Glow & Laser For You op een telefoon",
+          "kind": "mobiel",
+          "width": 640,
+          "height": 1265
+        },
+        {
+          "path": "/assets/work/glow-salon.webp",
+          "label": "Salon",
+          "alt": "Glow & Laser For You: glow-salon",
+          "kind": "desktop",
+          "width": 1600,
+          "height": 905
+        }
+      ]
+    },
+    {
+      "slug": "vagpro",
+      "name": "VAGPRO",
+      "sector": "Autospecialist",
+      "city": "Den Haag",
+      "live": "https://vagpro.nl",
+      "text": "Onafhankelijk VAG-specialist voor achteruitrijcamera's, CarPlay, codering en storingsdiagnose. Bezoekers checken hun kenteken en sturen direct een WhatsApp.",
+      "made": [
+        "Kentekencheck (RDW)",
+        "Aanvraag via WhatsApp",
+        "Pagina per dienst",
+        "Zakelijke pagina"
+      ],
+      "shots": [
+        {
+          "path": "/assets/work/vagpro.webp",
+          "label": "Home",
+          "alt": "Homepage van VAGPRO op desktop",
+          "kind": "desktop",
+          "width": 1600,
+          "height": 905
+        },
+        {
+          "path": "/assets/work/vagpro-over.webp",
+          "label": "Over",
+          "alt": "Over VAGPRO-pagina op desktop",
+          "kind": "desktop",
+          "width": 1600,
+          "height": 905
+        },
+        {
+          "path": "/assets/work/vagpro-zakelijk.webp",
+          "label": "Zakelijk",
+          "alt": "Samenwerken-pagina van VAGPRO op desktop",
+          "kind": "desktop",
+          "width": 1600,
+          "height": 905
+        },
+        {
+          "path": "/assets/work/vagpro-contact.webp",
+          "label": "Contact",
+          "alt": "Contactpagina van VAGPRO met kentekenformulier",
+          "kind": "desktop",
+          "width": 1600,
+          "height": 905
+        },
+        {
+          "path": "/assets/work/vagpro-mobiel.webp",
+          "label": "Mobiel",
+          "alt": "VAGPRO op een telefoon",
+          "kind": "mobiel",
+          "width": 640,
+          "height": 1266
+        }
+      ]
+    },
+    {
+      "slug": "detak",
+      "name": "Sleepdienst De Tak",
+      "sector": "Sleep- en bergingsdienst",
+      "city": "Den Haag",
+      "live": "https://sleepdienstdetak.nl",
+      "text": "Het aanvraagformulier vult merk en model in via het kenteken en stuurt alles kant-en-klaar door naar WhatsApp. In drie talen, met pagina's per regio.",
+      "made": [
+        "Kentekencheck en herkenning",
+        "Locatie delen",
+        "Nederlands, Engels en Duits",
+        "Regiopagina's"
+      ],
+      "shots": [
+        {
+          "path": "/assets/work/detak.webp",
+          "label": "NL",
+          "alt": "Homepage van Sleepdienst De Tak, Nederlands",
+          "kind": "desktop",
+          "width": 1600,
+          "height": 905
+        },
+        {
+          "path": "/assets/work/detak-de.webp",
+          "label": "DE",
+          "alt": "Homepage van Sleepdienst De Tak, Duits",
+          "kind": "desktop",
+          "width": 1600,
+          "height": 905
+        },
+        {
+          "path": "/assets/work/detak-aanvraag.webp",
+          "label": "Aanvraag",
+          "alt": "Aanvraagformulier van Sleepdienst De Tak met kentekencheck",
+          "kind": "desktop",
+          "width": 1600,
+          "height": 905
+        },
+        {
+          "path": "/assets/work/detak-werkgebied.webp",
+          "label": "Werkgebied",
+          "alt": "Werkgebied van Sleepdienst De Tak met kaart",
+          "kind": "desktop",
+          "width": 1600,
+          "height": 905
+        },
+        {
+          "path": "/assets/work/detak-onderweg.webp",
+          "label": "Onderweg",
+          "alt": "Fotosectie van Sleepdienst De Tak",
+          "kind": "desktop",
+          "width": 1600,
+          "height": 905
+        },
+        {
+          "path": "/assets/work/detak-mobiel.webp",
+          "label": "Mobiel",
+          "alt": "Sleepdienst De Tak op een telefoon",
+          "kind": "mobiel",
+          "width": 640,
+          "height": 1263
+        }
+      ]
+    },
+    {
+      "slug": "cartronic",
+      "name": "CarTronic",
+      "sector": "Retrofit & webshop",
+      "city": "Rijswijk",
+      "live": "https://cartronic.nl",
+      "text": "Retrofit-specialist voor VW, Audi, SEAT en Škoda. Met webshop, voertuigzoeker en een eigen beheerpaneel waarin de eigenaar zelf producten en teksten aanpast.",
+      "made": [
+        "Webshop met iDEAL",
+        "Voertuigzoeker",
+        "Geavanceerd beheerpaneel",
+        "Pagina's per merk"
+      ],
+      "shots": [
+        {
+          "path": "/assets/work/cartronic.webp",
+          "label": "Home",
+          "alt": "Homepage van CarTronic op desktop",
+          "kind": "desktop",
+          "width": 1600,
+          "height": 905
+        },
+        {
+          "path": "/assets/work/cartronic-merken.webp",
+          "label": "Merken",
+          "alt": "Merkenpagina van CarTronic",
+          "kind": "desktop",
+          "width": 1600,
+          "height": 905
+        },
+        {
+          "path": "/assets/work/cartronic-videos.webp",
+          "label": "Video's",
+          "alt": "Video's van CarTronic",
+          "kind": "desktop",
+          "width": 1600,
+          "height": 905
+        },
+        {
+          "path": "/assets/work/cartronic-contact.webp",
+          "label": "Contact",
+          "alt": "Contactpagina van CarTronic",
+          "kind": "desktop",
+          "width": 1600,
+          "height": 905
+        },
+        {
+          "path": "/assets/work/cartronic-dashboard.webp",
+          "label": "Beheer",
+          "alt": "Dashboard van het CarTronic-beheerpaneel",
+          "kind": "desktop",
+          "width": 1600,
+          "height": 905
+        },
+        {
+          "path": "/assets/work/cartronic-mobiel.webp",
+          "label": "Mobiel",
+          "alt": "CarTronic op een telefoon",
+          "kind": "mobiel",
+          "width": 640,
+          "height": 1265
+        },
+        {
+          "path": "/assets/work/cartronic-beheer.webp",
+          "label": "Beheer",
+          "alt": "CarTronic: cartronic-beheer",
+          "kind": "desktop",
+          "width": 520,
+          "height": 1574
+        },
+        {
+          "path": "/assets/work/cartronic-reviews.webp",
+          "label": "Reviews",
+          "alt": "CarTronic: cartronic-reviews",
+          "kind": "desktop",
+          "width": 1600,
+          "height": 905
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "hoek": "Van DM naar aanvraag",
+  "opening": "Saloneigenaar, plan jij nog alles via DM?",
+  "cta": "Wil je dit voor jouw salon? App ‘SALON’.",
+  "scenes": [
+    {
+      "id": "s1",
+      "sub": "Kijk hoe de website van Glow & Laser For You dat regelt.",
+      "text": "Saloneigenaar, **plan jij nog alles via DM?**",
+      "type": "hook",
+      "asset": "/assets/work/glow.webp",
+      "kicker": "Voor saloneigenaren",
+      "seconds": 3.6
+    },
+    {
+      "id": "s2",
+      "sub": "Rustige salon aan het Bredewater in Zoetermeer.",
+      "text": "Een eigen website voor de salon",
+      "type": "shot",
+      "asset": "/assets/work/glow.webp",
+      "asset2": "/assets/work/glow-mobiel.webp",
+      "kicker": "Glow & Laser For You · Zoetermeer",
+      "seconds": 3.4
+    },
+    {
+      "id": "s3",
+      "sub": "Laserontharing, gezicht en huid, wimpers en meer.",
+      "text": "Pagina per behandeling",
+      "type": "shot",
+      "asset": "/assets/work/glow-behandelingen.webp",
+      "kicker": "Behandelingen",
+      "seconds": 3.4
+    },
+    {
+      "id": "s4",
+      "sub": "Klanten zoeken hun behandeling en zien vooraf de prijs.",
+      "text": "Prijslijst met zoeken",
+      "type": "shot",
+      "asset": "/assets/work/glow-prijzen.webp",
+      "kicker": "Prijzen",
+      "seconds": 3.2
+    },
+    {
+      "id": "s5",
+      "sub": "Behandeling, dag en tijd, gegevens, overzicht.",
+      "text": "Afspraak aanvragen in stappen",
+      "type": "shot",
+      "asset": "/assets/work/glow-boeken.webp",
+      "kicker": "Afspraak",
+      "seconds": 3.4
+    },
+    {
+      "id": "s6",
+      "sub": "Via WhatsApp: 06 23 46 23 97",
+      "text": "Wil je dit voor **jouw salon?**",
+      "type": "cta",
+      "footer": "strakwerkk.nl · websites vanaf €200",
+      "kicker": "StrakWerk · webdesign uit Zoetermeer",
+      "keyword": "SALON",
+      "seconds": 4
+    }
+  ],
+  "captions": {
+    "instagram": "Saloneigenaar, plan jij nog alles via DM?\n\nVoor Glow & Laser For You in Zoetermeer maakte ik een website met:\n• Afspraak aanvragen in stappen\n• Prijslijst met zoeken\n• Pagina per behandeling\n• Live openingsstatus\n\nWil je dit voor jouw salon? App ‘SALON’ naar 06 23 46 23 97. Of kijk op strakwerkk.nl: websites vanaf €200.\n\nActie tot en met 30 november: logo-ontwerp en Google Bedrijfsprofiel gratis bij elke website.\n\n#salon #beautysalon #saloneigenaar #zoetermeer #websitelatenmaken #webdesign",
+    "tiktok": "Saloneigenaar, plan jij nog alles via DM? Zo pakte ik het aan voor Glow & Laser For You in Zoetermeer. Wil je dit voor jouw salon? App ‘SALON’ naar 06 23 46 23 97. #salon #beautysalon #saloneigenaar #zoetermeer #websitelatenmaken"
+  },
+  "render": {
+    "duur_s": 18.5,
+    "bytes": "5095438",
+    "breedte": 1080,
+    "hoogte": 1920
+  },
+  "campagne": {
+    "instagram": "https://www.strakwerkk.nl/?utm_source=instagram&utm_medium=social&utm_campaign=glow-saloneigenaren-1",
+    "tiktok": "https://www.strakwerkk.nl/?utm_source=tiktok&utm_medium=social&utm_campaign=glow-saloneigenaren-1",
+    "whatsapp": "https://wa.me/31623462397?text=SALON",
+    "keyword": "SALON"
+  }
+}

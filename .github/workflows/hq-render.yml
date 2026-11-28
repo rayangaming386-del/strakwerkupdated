@@ -1,0 +1,53 @@
+# Render-worker voor StrakWerk HQ: rendert video's uit de HQ-wachtrij met ffmpeg en
+# Chromium en zet ze in Supabase Storage. Start direct na een nieuwe render (HQ stuurt een
+# workflow_dispatch als GITHUB_RENDER_TOKEN is ingesteld) en drie keer per dag als vangnet.
+# Benodigde repository-secrets: HQ_DATABASE_URL, HQ_SUPABASE_URL, HQ_SUPABASE_SECRET_KEY.
+name: HQ render-worker
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 7,15 * * *"
+concurrency:
+  group: hq-render
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: ${{ secrets.HQ_DATABASE_URL }}
+      SUPABASE_URL: ${{ secrets.HQ_SUPABASE_URL }}
+      SUPABASE_SECRET_KEY: ${{ secrets.HQ_SUPABASE_SECRET_KEY }}
+      HQ_STORAGE: supabase
+    steps:
+      - name: Controleren of de secrets er zijn
+        id: cfg
+        run: |
+          if [ -z "$DATABASE_URL" ] || [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_SECRET_KEY" ]; then
+            echo "HQ-secrets ontbreken; niets te doen."; echo "ok=false" >> "$GITHUB_OUTPUT"
+          else echo "ok=true" >> "$GITHUB_OUTPUT"; fi
+      - name: Is er iets te renderen?
+        id: work
+        if: steps.cfg.outputs.ok == 'true'
+        run: |
+          n=$(psql "$DATABASE_URL" -tAc "select count(*) from hq.tasks where agent_key='video' and status='in_wachtrij' and run_after <= now()" 2>/dev/null || echo 1)
+          echo "Renders in de wachtrij: $n"
+          if [ "$n" = "0" ]; then echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/checkout@v4
+        if: steps.cfg.outputs.ok == 'true' && steps.work.outputs.go == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.cfg.outputs.ok == 'true' && steps.work.outputs.go == 'true'
+        with:
+          node-version: 22
+          cache: npm
+      - name: Afhankelijkheden
+        if: steps.cfg.outputs.ok == 'true' && steps.work.outputs.go == 'true'
+        run: |
+          npm ci --no-audit --no-fund
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          npx playwright-core install --with-deps chromium
+      - name: Renders uitvoeren
+        if: steps.cfg.outputs.ok == 'true' && steps.work.outputs.go == 'true'
+        run: npm run render-worker

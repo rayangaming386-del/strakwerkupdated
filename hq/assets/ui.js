@@ -123,6 +123,7 @@ export const ICON = {
   overzicht: "M3 3h6v6H3zM11 3h6v4h-6zM11 9h6v8h-6zM3 11h6v6H3z",
   bezoekers: "M3 16V9M8 16V4M13 16v-6M18 16V7",
   agentwereld: "M10 2l7 4v8l-7 4-7-4V6zM10 2v8m0 0l7-4m-7 4L3 6m7 4v8",
+  studio: "M3 5h10v10H3zM13 8l4-2.5v9L13 12",
   taken: "M4 5h12M4 10h12M4 15h8",
   leads: "M7 9a3 3 0 100-6 3 3 0 000 6zM2 17c0-3 2.5-5 5-5s5 2 5 5M14 8a2.5 2.5 0 100-5M15 12c2 .4 3 2.2 3 5",
   goedkeuringen: "M4 10l4 4 8-9",

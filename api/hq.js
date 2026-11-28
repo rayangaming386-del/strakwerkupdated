@@ -14,6 +14,10 @@ import { connection, TOOLS } from "./_lib/agents/registry.js";
 import { llmConfigured, llmModel } from "./_lib/agents/llm.js";
 import * as vercelSrc from "./_lib/analytics/vercel.js";
 import * as sb from "./_lib/supabase.js";
+import { handleStudio } from "./_lib/content/routes.js";
+import { dispatchRenderWorker, dispatchConfigured } from "./_lib/content/dispatch.js";
+import { driver as storageDriver } from "./_lib/content/storage.js";
+import { missingIg } from "./_lib/content/instagram.js";
 
 const waitUntil = (p) => { try { vercelWaitUntil(p); } catch {} return p; };
 const startWorker = () => waitUntil(runWorker({ source: "api", budgetMs: 50_000 }).catch(e => console.error(`[worker] ${e.message}`)));
@@ -114,7 +118,11 @@ function integrations() {
     { key: "vercel", label: "Vercel Web Analytics API", state: vm.length ? "niet_gekoppeld" : "gekoppeld", missing: vm, note: "Optioneel. Hobby: 1 maand historie; eigen events en UTM vragen een duurder abonnement." },
     { key: "claude", label: `Claude API (${llmModel()})`, state: llmConfigured() ? "gekoppeld" : "niet_gekoppeld", missing: llmConfigured() ? [] : ["ANTHROPIC_API_KEY"], note: "Optioneel. Zonder sleutel: alleen metingen en sjabloonconcepten." },
     { key: "pagespeed", label: "Google PageSpeed Insights", state: env.pagespeedKey ? "gekoppeld" : "beperkt", missing: env.pagespeedKey ? [] : ["PAGESPEED_API_KEY"], note: "Werkt zonder sleutel met een lage limiet." },
-    { key: "cron", label: "Geplande uitvoering (cron)", state: env.cronSecret ? "gekoppeld" : "niet_gekoppeld", missing: env.cronSecret ? [] : ["CRON_SECRET"], note: "Dagelijkse opruiming en vangnet voor vastgelopen taken." },
+    { key: "cron", label: "Geplande uitvoering (cron)", state: env.cronSecret ? "gekoppeld" : "niet_gekoppeld", missing: env.cronSecret ? [] : ["CRON_SECRET"], note: "Dagelijkse opruiming en vangnet voor vastgelopen taken. Voor publiceren op tijd: roep /api/worker elke 5 minuten aan (Vercel Pro-cron of een externe planner)." },
+    { key: "opslag", label: "Video-opslag (Supabase Storage)", state: storageDriver() === "supabase" ? "gekoppeld" : storageDriver() === "local" ? "beperkt" : "niet_gekoppeld", missing: storageDriver() === "supabase" ? [] : ["SUPABASE_SECRET_KEY"], note: "Privé-bucket hq-media; afspelen via kortlevende links." },
+    { key: "instagram", label: "Instagram API (professioneel account)", state: missingIg().length ? "niet_gekoppeld" : "beperkt", missing: missingIg(), note: "Na instellen: koppel je account in Contentstudio › Automatisering. Zonder koppeling: export." },
+    { key: "render", label: "Render-worker direct starten (GitHub Actions)", state: dispatchConfigured() ? "gekoppeld" : "beperkt", missing: dispatchConfigured() ? [] : ["GITHUB_RENDER_TOKEN", "GITHUB_RENDER_REPO"], note: "Zonder: de workflow draait 3× per dag, of start npm run render-worker zelf." },
+    { key: "tiktok", label: "TikTok-publicatie", state: "niet_gekoppeld", missing: [], note: "Export (MP4, cover, caption). Een publicatiedienst vraagt eerst jouw akkoord over prijs en voorwaarden." },
   ];
 }
 
@@ -265,6 +273,12 @@ export async function handle(request) {
     if ((p = route(path, "members/:id")) && m === "PATCH") { assertPerm(auth, "members.manage"); return json(await patchMember(p.id, body, auth)); }
     if (m === "GET" && path === "audit") { assertPerm(auth, "settings.write"); return json({ entries: (await q("select * from hq.audit_log order by at desc limit 200")).rows }); }
 
+    if (path.startsWith("studio/") || path.startsWith("ai/") || path.startsWith("media/") || path.startsWith("integrations/") || /^leads\/[^/]+\/campaign$/.test(path)) {
+      const kick = () => { startWorker(); waitUntil(dispatchRenderWorker()); };
+      if (m === "GET" && path === "studio/overview") kickIfNeeded(waitUntil).catch(() => {});
+      const r = await handleStudio({ m, path, url, body, auth, request, startWorker: kick });
+      if (r) return r;
+    }
     return json({ error: "niet_gevonden", message: "Onbekende route." }, 404);
   } catch (e) {
     return errorResponse(e);

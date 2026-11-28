@@ -1,0 +1,97 @@
+{
+  "onderwerp": "StrakWerk: Wat kost een website laten maken?",
+  "hoek": "De vraag die iedereen stelt",
+  "opening": "Wat kost een website laten maken?",
+  "cta": "Bereken jouw website op strakwerkk.nl",
+  "scenes": [
+    {
+      "id": "s1",
+      "sub": "Bij StrakWerk zie je het vooraf.",
+      "text": "Wat kost een **website laten maken?**",
+      "type": "hook",
+      "asset": "/brand/pakketten.png",
+      "kicker": "Voor ondernemers",
+      "seconds": 3.4
+    },
+    {
+      "id": "s2",
+      "text": "Vaste prijzen, **eenmalig**",
+      "type": "prices",
+      "items": [
+        {
+          "key": "nieuw",
+          "name": "Starter",
+          "pitch": "Complete website tot 3 pagina's",
+          "price_eur": 200
+        },
+        {
+          "key": "premium",
+          "name": "Premium",
+          "pitch": "Zelf aanpassen, aanvragen via WhatsApp en vindbaar in Google",
+          "price_eur": 350
+        },
+        {
+          "key": "pro",
+          "name": "Pro",
+          "pitch": "Geavanceerd beheer, extra taal, blog, logo en regiopagina's",
+          "price_eur": 500
+        }
+      ],
+      "kicker": "Pakketten van StrakWerk",
+      "seconds": 4.2
+    },
+    {
+      "id": "s3",
+      "clip": {
+        "start": 1
+      },
+      "text": "Stel je website **zelf samen**",
+      "type": "screen",
+      "asset": "/brand/configurator-mobiel.mp4",
+      "kicker": "De configurator op strakwerkk.nl",
+      "seconds": 7
+    },
+    {
+      "id": "s4",
+      "text": "Je ziet **direct je totaal**",
+      "type": "phone",
+      "asset": "/brand/offerte.png",
+      "kicker": "Jouw offerte",
+      "seconds": 3.2
+    },
+    {
+      "id": "s5",
+      "sub": "Vragen? WhatsApp 06 23 46 23 97",
+      "url": "strakwerkk.nl",
+      "text": "Bereken jouw website op **strakwerkk.nl**",
+      "type": "cta",
+      "kicker": "StrakWerk · webdesign uit Zoetermeer",
+      "seconds": 4
+    }
+  ],
+  "captions": {
+    "instagram": "Wat kost een website laten maken?\n\nBij StrakWerk zie je de prijs vooraf. Vaste pakketten, eenmalig:\n• Starter: €200. Complete website tot 3 pagina's\n• Premium: €350. Zelf aanpassen, aanvragen via WhatsApp en vindbaar in Google\n• Pro: €500. Geavanceerd beheer, extra taal, blog, logo en regiopagina's\n\nIn de configurator stel je zelf je website samen en zie je direct je totaal.\n\nBereken jouw website op strakwerkk.nl. Vragen? App ‘PRIJS’ naar 06 23 46 23 97.\n\n#websitelatenmaken #webdesign #ondernemer #zzp #mkb #strakwerk",
+    "tiktok": "Wat kost een website laten maken? Bij StrakWerk zie je het vooraf: websites vanaf €200. Bereken jouw website op strakwerkk.nl. #websitelatenmaken #webdesign #ondernemer #strakwerk",
+    "actieregel": "Actie tot en met 30 november: logo-ontwerp en Google Bedrijfsprofiel gratis bij elke website.",
+    "actie_tot": "2026-12-01T00:00:00+01:00"
+  },
+  "publicaties": [
+    {
+      "kanaal": "instagram",
+      "route": "export",
+      "status": "export_klaar",
+      "gepland": "2026-11-23T17:30:00.000Z"
+    }
+  ],
+  "render": {
+    "duur_s": 19.8,
+    "bytes": "4620729"
+  },
+  "campagne": {
+    "instagram": "https://www.strakwerkk.nl/?utm_source=instagram&utm_medium=social&utm_campaign=strakwerk-prijs-1",
+    "tiktok": "https://www.strakwerkk.nl/?utm_source=tiktok&utm_medium=social&utm_campaign=strakwerk-prijs-1",
+    "whatsapp": "https://wa.me/31623462397?text=PRIJS",
+    "keyword": "PRIJS"
+  },
+  "ai": "uit: vaste voorbeelddata (geen API-aanroep)"
+}
