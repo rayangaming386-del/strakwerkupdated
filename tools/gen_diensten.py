@@ -237,6 +237,7 @@ for p in P:
 <script type="application/ld+json">{ld}</script>
 <script>window.va=window.va||function(){{(window.vaq=window.vaq||[]).push(arguments)}};</script>
 <script defer src="/_vercel/insights/script.js"></script>
+<script defer src="/assets/sw-metrics.js"></script>
 </head>
 <body style="--tint:rgba(207,174,105,.16)">
 <a class="promo-strip" href="/#prijzen" data-until="2026-12-01T00:00:00+01:00"><b>Actie</b><span class="l">Gratis logo en Google Bedrijfsprofiel bij elke website</span><span class="s">Gratis logo + profiel</span><em data-cd>t/m 30 november</em></a><script>if(Date.now()>=Date.parse("2026-12-01T00:00:00+01:00"))document.currentScript.previousElementSibling.remove()</script>

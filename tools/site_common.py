@@ -117,7 +117,8 @@ HEAD_ICONS = '''<link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="manifest" href="/site.webmanifest">'''
 
 ANALYTICS = '''<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script>
-<script defer src="/_vercel/insights/script.js"></script>'''
+<script defer src="/_vercel/insights/script.js"></script>
+<script defer src="/assets/sw-metrics.js"></script>'''
 
 SCRIPTS = '''<script src="/assets/js/gsap.min.js"></script>
 <script src="/assets/js/ScrollTrigger.min.js"></script>

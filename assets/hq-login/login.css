@@ -1,0 +1,56 @@
+:root{
+  --bg:#0B0E13; --bg-2:#0F1319; --card:#141922; --card-2:#1A202B;
+  --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.14);
+  --text:#E8EDF3; --muted:#98A2B0; --gold:#CFAE69; --gold-hi:#EAD39C; --gold-ink:#17130B;
+  --ok:#5BD39A; --red-hi:#F87171;
+  --f-body:"Geist", system-ui, -apple-system, "Segoe UI", sans-serif; --f-mono:"Geist Mono", ui-monospace, Menlo, monospace;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{margin:0; min-height:100%}
+body{background:var(--bg); color:var(--text); font:16px/1.55 var(--f-body); -webkit-font-smoothing:antialiased}
+a{color:var(--gold)}
+:focus-visible{outline:2px solid var(--gold); outline-offset:3px; border-radius:6px}
+.muted{color:var(--muted)}
+.login{min-height:100vh; display:grid; grid-template-columns:minmax(340px, 480px) 1fr}
+.panel{padding:clamp(24px, 5vw, 56px); display:flex; flex-direction:column; gap:22px; border-right:1px solid var(--line); background:var(--bg)}
+.brand{font-weight:800; letter-spacing:.06em; font-size:22px; line-height:1; display:inline-flex; gap:5px; color:var(--text); text-decoration:none; align-self:flex-start}
+.brand .strak{position:relative}
+.brand .strak::after{content:""; position:absolute; left:0; right:0; height:3px; border-radius:2px; background:var(--gold); bottom:-7px}
+.head{margin-top:clamp(12px, 8vh, 80px)}
+.kicker{display:inline-flex; align-items:center; gap:10px; font:600 .75rem/1 var(--f-mono); letter-spacing:.16em; text-transform:uppercase; color:var(--gold)}
+.kicker::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--gold); box-shadow:0 0 0 4px rgba(207,174,105,.16)}
+h1{font-size:clamp(2rem, 4vw, 2.6rem); letter-spacing:-.03em; margin:14px 0 6px; line-height:1.1}
+.form{display:flex; flex-direction:column; gap:8px; max-width:380px}
+.form p{margin:0 0 6px}
+label{font-weight:600; font-size:.9rem; margin-top:8px}
+input{font:inherit; color:var(--text); background:var(--card); border:1px solid var(--line-2); border-radius:10px; padding:12px 14px; width:100%}
+input:focus{border-color:var(--gold); outline:none; box-shadow:0 0 0 3px rgba(207,174,105,.18)}
+.help{font-size:.82rem; color:var(--muted); margin:0}
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:10px; padding:13px 20px; border-radius:11px; font:700 .95rem/1 var(--f-body); cursor:pointer; border:1px solid var(--line-2); background:rgba(255,255,255,.03); color:var(--text); margin-top:14px}
+.btn--gold{background:var(--gold); color:var(--gold-ink); border-color:var(--gold)}
+.btn--gold:hover{background:var(--gold-hi)}
+.btn[disabled]{opacity:.6; cursor:progress}
+.link{background:none; border:0; color:var(--muted); font:inherit; font-size:.9rem; cursor:pointer; padding:6px 0; text-align:left; text-decoration:underline; text-underline-offset:3px}
+.link:hover{color:var(--text)}
+.alert{border:1px solid rgba(248,113,113,.4); background:rgba(248,113,113,.08); color:#FECACA; padding:12px 14px; border-radius:10px; max-width:380px}
+.note{border:1px solid var(--line-2); background:var(--card); padding:12px 14px; border-radius:10px; max-width:380px; margin:0}
+.busy{display:flex; align-items:center; gap:10px; color:var(--muted)}
+.spinner{width:16px; height:16px; border-radius:50%; border:2px solid var(--line-2); border-top-color:var(--gold); animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.qr{background:#fff; border-radius:12px; padding:10px; width:max-content}
+.qr img{display:block}
+.secret code{font:500 .85rem var(--f-mono); word-break:break-all; display:block; margin-top:8px; color:var(--gold-hi)}
+.secret summary{cursor:pointer; color:var(--muted); font-size:.9rem}
+.foot{margin-top:auto; font-size:.85rem}
+.preview{position:relative; display:grid; place-items:center; padding:40px; background:radial-gradient(800px 500px at 60% 40%, rgba(207,174,105,.07), transparent 70%), var(--bg-2); overflow:hidden}
+.preview-inner{width:min(860px, 100%); display:flex; flex-direction:column; gap:14px}
+.preview p{max-width:56ch; font-size:.92rem}
+.badge{align-self:flex-start; font:600 .72rem/1 var(--f-mono); letter-spacing:.1em; text-transform:uppercase; color:var(--muted); border:1px solid var(--line-2); padding:7px 10px; border-radius:999px}
+@media (max-width: 900px){
+  .login{grid-template-columns:1fr}
+  .panel{border-right:0}
+  .preview{padding:24px 16px 40px; border-top:1px solid var(--line)}
+}
+@media (prefers-reduced-motion: reduce){ .spinner{animation:none} }

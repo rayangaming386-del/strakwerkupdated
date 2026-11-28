@@ -1,0 +1,33 @@
+{
+  "name": "strakwerk",
+  "private": true,
+  "type": "module",
+  "description": "StrakWerk website (statisch) + StrakWerk HQ (afgeschermde beheeromgeving)",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "node scripts/dev-server.mjs",
+    "migrate": "node scripts/migrate.mjs",
+    "bootstrap-owner": "node scripts/bootstrap-owner.mjs",
+    "vendor": "node scripts/vendor.mjs",
+    "check": "node scripts/check.mjs",
+    "lint": "node scripts/check.mjs",
+    "test": "node --test --test-concurrency=1 tests/*.test.mjs",
+    "render-worker": "node scripts/render-worker.mjs",
+    "sync-site-data": "node scripts/sync-site-data.mjs",
+    "demo:glow": "node scripts/demo-glow.mjs",
+    "brand-assets": "node scripts/brand-assets.mjs",
+    "demo:strakwerk": "node scripts/demo-strakwerk.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.9.0",
+    "@vercel/functions": "^3.11.3",
+    "jose": "^6.2.17",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@supabase/supabase-js": "^2.119.0",
+    "playwright-core": "1.63.0"
+  }
+}
