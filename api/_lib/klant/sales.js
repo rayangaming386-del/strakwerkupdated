@@ -311,7 +311,9 @@ export async function paymentSettings(db) {
   const r = (await (db || { query: q }).query("select value from hq.settings where key='payment'")).rows[0]?.value || {};
   const pct = Number.isInteger(r.deposit_pct) && r.deposit_pct >= 0 && r.deposit_pct <= 100 ? r.deposit_pct : 50;
   const days = Number.isInteger(r.quote_valid_days) && r.quote_valid_days >= 1 && r.quote_valid_days <= 90 ? r.quote_valid_days : 14;
-  return { deposit_pct: pct, iban: r.iban || null, account_name: r.account_name || null, quote_valid_days: days };
+  // Betaalwijze: contant is de voorkeur van StrakWerk; overmaken alleen als Rayan dat kiest.
+  const method = ["contant", "beide", "bank"].includes(r.method) ? r.method : "contant";
+  return { deposit_pct: pct, iban: r.iban || null, account_name: r.account_name || null, quote_valid_days: days, method };
 }
 
 /** Openbare offertelink (ondertekend; werkt zonder account). */
@@ -437,7 +439,7 @@ export async function registerPayment(leadId, body, auth) {
     kind = qd?.deposit_cents && !before ? "aanbetaling" : before ? "restbetaling" : "volledig";
   }
   const p = await one(`insert into hq.payments (lead_id, quote_id, amount_cents, received_on, note, created_by, is_test, method, kind) values ($1,$2,$3,coalesce($4::date, current_date),$5,$6,$7,$8,$9) returning *`,
-    [leadId, body.quote_id || null, cents, /^\d{4}-\d{2}-\d{2}$/.test(body.received_on || "") ? body.received_on : null, str(body.note, 200) || (sim ? "TEST: gesimuleerde betaling" : ""), auth?.userId || null, lead.is_test || sim, sim ? "simulatie" : body.method === "bank" ? "bank" : "handmatig", kind]);
+    [leadId, body.quote_id || null, cents, /^\d{4}-\d{2}-\d{2}$/.test(body.received_on || "") ? body.received_on : null, str(body.note, 200) || (sim ? "TEST: gesimuleerde betaling" : body.method === "contant" ? "Contant ontvangen" : ""), auth?.userId || null, lead.is_test || sim, sim ? "simulatie" : body.method === "bank" ? "bank" : "handmatig", kind]);
   if (kind === "aanbetaling" || kind === "volledig") await q("update hq.projects set deposit_paid_at=coalesce(deposit_paid_at, now()), updated_at=now() where lead_id=$1", [leadId]);
   await audit(null, { actor: auth?.userId || null, label: auth?.email || "systeem", action: "betaling.vastgelegd", entity: "payment", entityId: p.id, details: { bedrag: cents, test: p.is_test } });
   return p;

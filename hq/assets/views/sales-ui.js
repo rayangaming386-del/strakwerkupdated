@@ -203,14 +203,15 @@ export function salesSettings(d, ctx, refresh) {
   const pay = d.settings.payment || {}, links = d.settings.links || {}, sa = d.settings.sales_ai || {};
   const inp = (attrs) => h("input", attrs);
   const f = {
-    iban: inp({ value: pay.iban || "", placeholder: "NL00 BANK 0123 4567 89", autocomplete: "off" }), account_name: inp({ value: pay.account_name || "", placeholder: "Tenaamstelling" }),
+    method: h("select", {}, [["contant", "Contant (voorkeur)"], ["beide", "Contant, of overmaken als het moet"], ["bank", "Alleen overmaken"]].map(([v, t]) => h("option", { value: v, selected: v === (pay.method || "contant") }, t))),
+    iban: inp({ value: pay.iban || "", placeholder: "Alleen nodig als overmaken mag", autocomplete: "off" }), account_name: inp({ value: pay.account_name || "", placeholder: "Tenaamstelling" }),
     deposit_pct: inp({ type: "number", min: 0, max: 100, value: pay.deposit_pct ?? 50 }), quote_valid_days: inp({ type: "number", min: 1, max: 90, value: pay.quote_valid_days ?? 14 }),
     notify_email: inp({ type: "email", value: sa.notify_email || "", placeholder: "Adres voor meldingen (niet het afzendadres)" }),
     google_review_url: inp({ value: links.google_review_url || "", placeholder: "https://g.page/r/…/review" }), referral_reward: inp({ value: links.referral_reward || "", placeholder: "Bijv. een maand gratis onderhoud (leeg = geen beloning)" }),
     calls_per_day: inp({ type: "number", min: 0, max: 30, value: sa.calls_per_day ?? 5 }), visits_per_day: inp({ type: "number", min: 0, max: 20, value: sa.visits_per_day ?? 5 }), checks_per_day: inp({ type: "number", min: 0, max: 200, value: sa.checks_per_day ?? 40 }),
   };
   const save = async (e) => { e.preventDefault(); try {
-    await api("kantoor/instellingen/payment", { method: "PUT", body: { iban: f.iban.value.trim() || null, account_name: f.account_name.value, deposit_pct: Number(f.deposit_pct.value), quote_valid_days: Number(f.quote_valid_days.value) } });
+    await api("kantoor/instellingen/payment", { method: "PUT", body: { method: f.method.value, iban: f.iban.value.trim() || null, account_name: f.account_name.value, deposit_pct: Number(f.deposit_pct.value), quote_valid_days: Number(f.quote_valid_days.value) } });
     await api("kantoor/instellingen/links", { method: "PUT", body: { google_review_url: f.google_review_url.value.trim() || null, referral_reward: f.referral_reward.value.trim() || null } });
     await api("kantoor/instellingen/sales_ai", { method: "PUT", body: { notify_email: f.notify_email.value.trim() || null, calls_per_day: Number(f.calls_per_day.value), visits_per_day: Number(f.visits_per_day.value), checks_per_day: Number(f.checks_per_day.value) } });
     toast("Opgeslagen."); refresh(); } catch (err) { toast(err.message, "bad"); } };
@@ -219,7 +220,8 @@ export function salesSettings(d, ctx, refresh) {
   return [
     card("Verkoop", d.websitecheck ? h("p", { class: "muted", style: { margin: 0 } }, `Gratis websitecheck: ${d.websitecheck.dag} vandaag, ${d.websitecheck.week} deze week, waarvan ${d.websitecheck.aanvragen_week} met gegevens (aanvraag).`) : null,
       h("form", { class: "fgrid", onsubmit: save },
-      field("IBAN (op de offertepagina)", f.iban), field("Tenaamstelling", f.account_name), field("Aanbetaling (%)", f.deposit_pct), field("Offerte geldig (dagen)", f.quote_valid_days),
+      field("Betaalwijze aanbetaling", f.method, { help: "Contant: de klant betaalt bij de start en krijgt een betaalbewijs. Leg de betaling daarna vast op de klantkaart (Betaling › Contant)." }),
+      field("IBAN (alleen bij overmaken)", f.iban), field("Tenaamstelling", f.account_name), field("Aanbetaling (%)", f.deposit_pct), field("Offerte geldig (dagen)", f.quote_valid_days),
       field("Meldingen naar", f.notify_email, { full: true, help: "Kies een ander adres dan het afzendadres: mail aan jezelf geeft vaak geen pushmelding." }),
       field("Google-reviewlink", f.google_review_url, { full: true, help: "Uit je Google Bedrijfsprofiel (Vraag om reviews). Nooit een beloning voor een review." }),
       field("Beloning voor een verwijzing", f.referral_reward, { full: true }),

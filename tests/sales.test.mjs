@@ -167,7 +167,14 @@ test("offertepagina: bekijken telt (niet als Rayan kijkt), akkoord met naam en v
   const acc = await pub(`/api/public/offerte?t=${encodeURIComponent(t)}`, { method: "POST", body: { name: "Mila Jansen", agree: true } });
   assert.equal(acc.status, 200, JSON.stringify(acc.json));
   assert.equal(acc.json.accepted.name, "Mila Jansen");
-  assert.equal(acc.json.payment.iban, "NL91 ABNA 0417 1643 00"); assert.equal(acc.json.payment.amount_eur, qu.deposit_cents / 100);
+  // Standaard contant: geen IBAN op de pagina, wel bedrag en uitleg.
+  assert.equal(acc.json.payment.method, "contant"); assert.equal(acc.json.payment.iban, null); assert.match(acc.json.payment.note, /contant/);
+  assert.equal(acc.json.payment.amount_eur, qu.deposit_cents / 100);
+  // Mag overmaken ook: dan staat het IBAN erbij, met contant als eerste keuze.
+  assert.equal((await req("/api/hq/kantoor/instellingen/payment", { method: "PUT", body: { method: "beide" } })).status, 200);
+  assert.equal((await req("/api/hq/kantoor/instellingen/payment", { method: "PUT", body: { method: "pinnen" } })).status, 400);
+  const both = (await pub(`/api/public/offerte?t=${encodeURIComponent(t)}`)).json.payment;
+  assert.equal(both.iban, "NL91 ABNA 0417 1643 00"); assert.match(both.note, /Contant/);
   assert.match(acc.json.payment.reference, /^SW-[0-9A-F]{8}$/);
   assert.match(acc.json.intake_url, /^\/intake\?t=[a-f0-9]{48}$/, "intake-link direct na akkoord");
   const q2 = await one("select status, accepted_via, accepted_name from hq.quotes where id=$1", [quoteId]);

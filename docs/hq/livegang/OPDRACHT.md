@@ -183,7 +183,7 @@ Alleen uitvoeren als Rayan PR #5 heeft gemerged en Workers Builds de nieuwe vers
    bestand slaat 001 t/m 005 over ("Al gedaan") en voert 006, 007 en 008 uit. Controle:
    `select name from public.hq_schema_migrations order by name;` toont acht regels.
 2. **Instellingen** (HQ › Kantoor › Instellingen › Verkoop), samen met Rayan:
-   - IBAN en tenaamstelling (staan op de offertepagina bij de aanbetaling);
+   - betaalwijze: Rayan wil het liefst **contant** (standaard). IBAN en tenaamstelling alleen als hij "contant of overmaken" kiest;
    - e-mailadres voor meldingen: een ander adres dan het afzendadres (mail aan jezelf geeft vaak geen pushmelding);
    - Google-reviewlink uit zijn Bedrijfsprofiel (als dat er al is);
    - beloning voor een verwijzing alleen als Rayan die wil.

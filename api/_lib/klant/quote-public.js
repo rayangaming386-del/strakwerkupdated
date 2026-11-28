@@ -13,6 +13,18 @@ import { SITE } from "../content/studio.js";
 const cents = (c) => Math.round(Number(c) || 0) / 100;
 export const paymentReference = (quoteId) => `SW-${String(quoteId).slice(0, 8).toUpperCase()}`;
 
+/** Betaalgegevens na akkoord: contant (standaard), contant of overmaken, of alleen overmaken. */
+function paymentBlock(pay, deposit, id) {
+  const amount = cents(deposit);
+  const showIban = pay.method !== "contant" && Boolean(pay.iban);
+  const cash = "Je betaalt de aanbetaling contant aan Rayan, bij de start van je project. Je krijgt een betaalbewijs.";
+  const note = pay.method === "contant" ? cash
+    : pay.method === "beide" ? (showIban ? "Contant betalen bij de start kan ook; je krijgt dan een betaalbewijs. Liever overmaken? Gebruik de gegevens hieronder." : cash)
+    : (showIban ? null : "Je ontvangt binnen één werkdag een betaalverzoek van Rayan.");
+  return { method: pay.method, amount_eur: amount, iban: showIban ? pay.iban : null, account_name: showIban ? pay.account_name : null,
+    reference: paymentReference(id), note };
+}
+
 function quoteIdFrom(token) {
   const id = checkLinkToken("offerte", token);
   if (!id) throw new HttpError(404, "niet_gevonden", "Deze offertelink klopt niet. Vraag Rayan om een nieuwe link.");
@@ -49,8 +61,7 @@ export async function quoteView(token, { countView = true } = {}) {
     terms: qu.terms || "", info_needed: qu.info_needed || [], next_step: qu.next_step || "", earliest_start: qu.earliest_start,
     valid_until: qu.valid_until, expired: Boolean(expired), status: qu.status,
     accepted: accepted ? { at: qu.accepted_at, name: qu.accepted_name } : null,
-    payment: accepted ? { amount_eur: cents(deposit), iban: pay.iban, account_name: pay.account_name, reference: paymentReference(id),
-      note: pay.iban ? null : "Je ontvangt binnen één werkdag een betaalverzoek van Rayan." } : null,
+    payment: accepted ? paymentBlock(pay, deposit, id) : null,
     intake_url: intake,
     contact: { whatsapp: SITE.brand.whatsapp, phone: SITE.brand.phone, email: SITE.brand.email },
     test: qu.is_test,

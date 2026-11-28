@@ -134,10 +134,21 @@ async function card(root, ctx, id) {
       { label: "Vastleggen", cls: "btn-gold", onClick: async (close) => { await api(`klanten/${leadId}/toestemming`, { method: "POST", body: { channel: ch.value, basis: basis.value, source: src.value, scope: scope.value, evidence: ev.value } }); toast("Contactgrond vastgelegd."); close(); ok(); } }]));
   }
   function payDialog(leadId, lead, quote) {
-    const amt = h("input", { type: "number", min: 1, value: quote ? quote.price_cents / 100 : "" });
-    const method = h("select", {}, [["bank", "Bankoverschrijving (echt)"], ["contant", "Contant (echt)"], ...(lead.is_test ? [["simulatie", "Simulatie (alleen test)"]] : [])].map(([v, l]) => h("option", { value: v }, l)));
+    const amt = h("input", { type: "number", min: 1, step: "0.01", value: quote ? (quote.deposit_cents || quote.price_cents) / 100 : "" });
+    const method = h("select", {}, [["contant", "Contant (echt)"], ["bank", "Bankoverschrijving (echt)"], ...(lead.is_test ? [["simulatie", "Simulatie (alleen test)"]] : [])].map(([v, l]) => h("option", { value: v }, l)));
     return new Promise((ok) => modal("Betaling vastleggen", h("div", { class: "fgrid" }, field("Bedrag (€)", amt), field("Soort", method)), [
-      { label: "Vastleggen", cls: "btn-gold", onClick: async (close) => { await api(`klanten/${leadId}/betaling`, { method: "POST", body: { amount_eur: amt.value, method: method.value, quote_id: quote?.id } }); toast("Betaling vastgelegd."); close(); ok(); } }]));
+      { label: "Vastleggen", cls: "btn-gold", onClick: async (close) => {
+        const p = await api(`klanten/${leadId}/betaling`, { method: "POST", body: { amount_eur: amt.value, method: method.value, quote_id: quote?.id } });
+        toast("Betaling vastgelegd."); close(); ok();
+        if (method.value === "contant") receipt(lead, p, quote);
+      } }]));
+  }
+  // Betaalbewijs bij contant: kopiëren of via WhatsApp sturen (geen KvK of btw, zie CLAUDE.md).
+  function receipt(lead, p, quote) {
+    const eurC = new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR" }).format(p.amount_cents / 100);
+    const text = `Betaalbewijs StrakWerk\n\nOntvangen van: ${lead.company}${lead.contact_name ? ` (${lead.contact_name})` : ""}\nBedrag: ${eurC}, contant\nVoor: ${p.kind === "aanbetaling" ? "aanbetaling " : p.kind === "restbetaling" ? "restbetaling " : ""}website${quote ? ` (offerte SW-${String(quote.id).slice(0, 8).toUpperCase()})` : ""}\nDatum: ${new Date(p.received_on).toLocaleDateString("nl-NL")}\n\nBedankt!\nRayan, StrakWerk`;
+    modal("Betaalbewijs", h("div", { class: "stack" }, h("pre", { class: "pre" }, text),
+      h("div", { class: "row" }, copyBtn(text), lead.contact_phone ? h("a", { class: "btn btn-sm btn-gold", href: waHref(lead.contact_phone, text), target: "_blank", rel: "noopener" }, "Stuur via WhatsApp") : null)));
   }
   await refresh();
   return { refresh };

@@ -252,6 +252,7 @@ export async function handleKlant({ m, path, url, body, auth, startWorker }) {
         else { const ok = validIban(body.iban); if (!ok) throw new HttpError(400, "ongeldig", "Dit IBAN klopt niet (controlecijfers). Controleer het nummer."); v.iban = ok; }
       }
       if ("account_name" in body) v.account_name = str(body.account_name, 80) || null;
+      if ("method" in body) { if (!["contant", "beide", "bank"].includes(body.method)) throw new HttpError(400, "ongeldig", "Betaalwijze: contant, beide of bank."); v.method = body.method; }
     }
     if (p.key === "links") {
       if ("google_review_url" in body) {

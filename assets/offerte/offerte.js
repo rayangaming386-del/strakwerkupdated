@@ -46,6 +46,7 @@
     $("pay").hidden = !(p && p.iban);
     if (p && p.iban) { text("payAmount", eur(p.amount_eur)); text("payIban", p.iban); text("payName", p.account_name || "StrakWerk"); text("payRef", p.reference); }
     $("payNote").hidden = !(p && p.note); text("payNote", p?.note || "");
+    if (p && !p.iban && p.amount_eur) text("payNote", `${p.note} Bedrag: ${eur(p.amount_eur)}.`);
     if (d.intake_url) { $("intake").hidden = false; $("intake").href = d.intake_url; }
   }
 

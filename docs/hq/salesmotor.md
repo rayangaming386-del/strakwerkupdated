@@ -18,7 +18,9 @@ Alles hieronder draait in HQ (`/hq`). Versturen, geld en beslissingen blijven al
    voorstel (prijs uit CONFIG). WhatsApp verstuur je zelf met de knop, e-mail met één klik vanuit HQ.
    Na 7 dagen staat een opvolging voor je klaar; reageert de klant, dan vervalt die.
 5. **Offerte**: de klant krijgt een link naar `/offerte`, ziet wat hij krijgt, geeft online akkoord
-   (naam + vinkje) en ziet de aanbetaling (standaard 50%, met je IBAN) en de intake-link.
+   (naam + vinkje) en ziet de aanbetaling (standaard 50%) en de intake-link. Betaalwijze standaard
+   **contant** bij de start (met betaalbewijs vanuit HQ); "contant of overmaken" of "alleen
+   overmaken" (met IBAN) kies je in de instellingen.
 6. **Meldingen** (Vandaag, en per e-mail binnen 5 minuten, behalve in je stille uren): nieuwe
    aanvraag, offerte bekeken, akkoord, voorbeeldsite geopend, reactie met interesse, verwijzing.
 
@@ -67,7 +69,7 @@ Alles hieronder draait in HQ (`/hq`). Versturen, geld en beslissingen blijven al
 
 ## Instellingen (Kantoor › Instellingen › Verkoop)
 
-IBAN en tenaamstelling (offertepagina), aanbetaling en geldigheid, e-mailadres voor meldingen
+Betaalwijze (contant als standaard; IBAN en tenaamstelling alleen als overmaken mag), aanbetaling en geldigheid, e-mailadres voor meldingen
 (niet het afzendadres: mail aan jezelf geeft vaak geen pushmelding), Google-reviewlink, beloning
 voor een verwijzing, belafspraken/bezoeken/websitechecks per dag.
 
