@@ -580,3 +580,16 @@ test("bestaande klanten: invoeren met bevestiging, berichten alleen met grond en
   assert.equal(nt.lead_id, oud.id); assert.match(nt.title, /Via Garage Oud B\.V\.: Bloemen Sanne/); assert.match(nt.body, /een maand gratis onderhoud/);
   assert.deepEqual(await basis(sanne.id), [], "vinkje 'liever geen berichten' → geen grond voor berichten over andere diensten");
 });
+
+test("e-mailantwoord: het geciteerde origineel (met 'Afmelden' in de voettekst) telt niet mee", async () => {
+  const { classify, replyText } = await import("../api/_lib/klant/sales.js");
+  const gmail = "Wat kost dat?\n\nOp za 28 nov 2026 om 06:09 schreef Rayan van StrakWerk <\nstrakwerkk@gmail.com>:\n\n> Hoi,\n> Geen berichten meer van mij? Afmelden.\n";
+  assert.equal(replyText(gmail), "Wat kost dat?");
+  assert.equal(classify(gmail), "vraag");
+  assert.equal(classify("Ja graag!\n\nOn Sat, Nov 28, 2026 at 6:09 AM Rayan <a@b.nl> wrote:\n> Afmelden"), "interesse");
+  assert.equal(classify("Leuk.\n-----Oorspronkelijk bericht-----\nAfmelden"), "interesse");
+  // Een echte afmelding blijft een afmelding, ook met citaat eronder.
+  assert.equal(classify("Graag afmelden.\n\n> Hoi"), "afmelding");
+  assert.equal(classify("stop"), "afmelding");
+  assert.equal(classify("Op zich prima, wat kost het?"), "vraag");
+});

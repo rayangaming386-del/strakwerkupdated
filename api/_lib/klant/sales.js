@@ -196,8 +196,28 @@ export async function intakeRequest(input, actor = null) {
 }
 
 // ── Reacties ───────────────────────────────────────────────────────────────────
+/**
+ * Alleen het nieuwe deel van een e-mailantwoord: alles vanaf het geciteerde origineel
+ * ("Op … schreef …:", "On … wrote:", "> …", doorgestuurde kop) valt weg. Zonder dit telt de
+ * afmeldregel onder ons eigen bericht ("Afmelden") als afmelding van de klant.
+ */
+export function replyText(text) {
+  const t = String(text || "");
+  const marks = [
+    /^[ \t]*>/m,
+    /^[ \t]*Op [^\n]{0,200}schreef\b[\s\S]{0,300}?:[ \t]*$/m,
+    /^[ \t]*On [^\n]{0,200}[\s\S]{0,300}?wrote:[ \t]*$/m,
+    /^[ \t]*-{2,}[ \t]*(Original Message|Oorspronkelijk bericht|Doorgestuurd bericht|Forwarded message)/mi,
+    /^[ \t]*(Van|From):[^\n]*\n[ \t]*(Verzonden|Sent|Datum|Date):/mi,
+  ];
+  let cut = t.length;
+  for (const re of marks) { const m = re.exec(t); if (m && m.index < cut) cut = m.index; }
+  const fresh = t.slice(0, cut).trim();
+  return fresh || t.trim();
+}
+
 export function classify(text) {
-  const t = String(text || "").toLowerCase();
+  const t = replyText(text).toLowerCase();
   // "stop" als heel bericht (zo staat het in elke WhatsApp van HQ) telt als afmelding.
   if (/^[\s"'.!]*stop[\s"'.!]*$/.test(t)) return "afmelding";
   if (/\b(afmelden|uitschrijven|unsubscribe|geen berichten meer|stop met mailen|niet meer mailen|niet meer appen|niet meer benaderen)\b/.test(t)) return "afmelding";
@@ -224,7 +244,8 @@ export async function registerReply({ lead_id, text, channel = "email", external
     if (!lead) throw new HttpError(404, "niet_gevonden", "Geen klantkaart gevonden voor deze reactie.");
     if (external_id && (await db.query("select 1 from hq.interactions where external_id=$1", [external_id])).rows[0]) return { lead_id: lead.id, duplicate: true };
     const bounce = /mailer-daemon|postmaster|undeliverable|delivery status notification|niet afgeleverd|onbestelbaar/i.test(`${from || ""} ${subject || ""}`);
-    const cls = bounce ? "afmelding" : classify(text);
+    const fresh = replyText(text);
+    const cls = bounce ? "afmelding" : classify(fresh);
     const kind = bounce ? "bounce" : cls === "afmelding" ? "afmelding" : "antwoord";
     const quote = outreach?.quote_id ? { id: outreach.quote_id } : (await db.query("select id from hq.quotes where lead_id=$1 and status in ('verstuurd','concept') order by created_at desc limit 1", [lead.id])).rows[0];
     await db.query(`insert into hq.interactions (lead_id, direction, channel, kind, classification, subject, body, external_id, outreach_id, quote_id, is_test, created_by, created_label)
@@ -248,12 +269,12 @@ export async function registerReply({ lead_id, text, channel = "email", external
       await db.query("update hq.leads set awaiting_reply_since=coalesce(awaiting_reply_since, now()), last_inbound_at=now(), priority='hoog', priority_reason='Klant reageerde en wacht op antwoord', status=case when status in ('benaderd','nieuw','onderzocht','goedgekeurd') then 'gesprek' else status end, updated_at=now() where id=$1", [lead.id]);
       if (quote?.id && cls === "interesse") await db.query("update hq.quotes set interest=true where id=$1", [quote.id]);
       await notify({ key: `reactie:${external_id || `${lead.id}:${Date.now()}`}`, kind: "reactie", title: `${lead.company} reageerde (${cls})`,
-        body: `${String(text || "").slice(0, 300)}\nEen antwoord staat klaar in HQ.`, leadId: lead.id, url: `/hq/klanten?id=${lead.id}`, isTest: lead.is_test || is_test }, db);
+        body: `${fresh.slice(0, 300)}\nEen antwoord staat klaar in HQ.`, leadId: lead.id, url: `/hq/klanten?id=${lead.id}`, isTest: lead.is_test || is_test }, db);
       // Antwoordconcept klaarzetten (Rayan controleert en verstuurt). Prijzen uit de actuele prijslijst.
       const opp = (await db.query("select service_text from hq.opportunities where lead_id=$1 and strength='concreet' and verified<>'klopt_niet' order by created_at desc limit 1", [lead.id])).rows[0];
-      const a = analyzeNeed({ message: text, company: lead.company });
+      const a = analyzeNeed({ message: fresh, company: lead.company });
       const cap = await capacity(db, { test: lead.is_test });
-      const priceQ = /kost|prijs|tarie|budget|wat betaal/i.test(String(text));
+      const priceQ = /kost|prijs|tarie|budget|wat betaal/i.test(fresh);
       const line = opp ? `Voor jouw situatie zou ik dit voorstellen: ${opp.service_text}.` : `Mijn voorstel: pakket ${BASE[a.package].name} (${eur(BASE[a.package].price_eur)}).`;
       const body = `${lead.contact_name ? `Hoi ${lead.contact_name.split(" ")[0]},` : "Hoi,"}\n\nDank voor je reactie! ${priceQ ? line : `Leuk dat je interesse hebt. ${line}`} Alle prijzen staan ook op ${SITE.brand.site}/prijzen.\n\nZal ik een korte offerte voor je klaarzetten, of bel je liever even? Ik kan starten vanaf ${new Date(cap.earliest_start).toLocaleDateString("nl-NL", { day: "numeric", month: "long" })}.\n\nGroet,\nRayan\nStrakWerk`;
       await db.query(`insert into hq.outreach (lead_id, quote_id, channel, kind, status, subject, body, to_address, idempotency_key, is_test) values ($1,$2,$3,'antwoord','concept',$4,$5,$6,$7,$8) on conflict (idempotency_key) do nothing`,
