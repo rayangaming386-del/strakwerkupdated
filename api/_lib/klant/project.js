@@ -9,6 +9,7 @@ import { HttpError, assertUuid, str } from "../http.js";
 import { enqueue } from "../queue.js";
 import { SITE, patchProject } from "../content/studio.js";
 import * as storage from "../content/storage.js";
+import { WA_OPT_OUT } from "./contact.js";
 
 // Wat StrakWerk van de klant nodig heeft. "nodig" = verplicht om te kunnen bouwen.
 export const INTAKE_FIELDS = [
@@ -202,10 +203,15 @@ export async function afterDelivery(projectId) {
   await q(`insert into hq.outreach (lead_id, project_id, channel, kind, status, subject, body, to_address, scheduled_at, idempotency_key, is_test)
     values ($1,$2,$3,'nazorg','gepland','Hoe bevalt je nieuwe website?',$4,$5,now() + interval '14 days',$6,$7) on conflict (idempotency_key) do nothing`,
     [p.lid, projectId, ch, `Hoi${first},\n\nJe site staat nu twee weken live. Loopt alles goed, of wil je iets aangepast hebben? Laat het gerust weten.\n\nGroet,\nRayan\nStrakWerk`, to, `nazorg:${projectId}:1`, p.is_test]);
-  // Reviewverzoek: concept, nooit automatisch, en zonder beloning tenzij Rayan een regel instelt.
+  // Reviewverzoek: concept, nooit automatisch en nooit met een beloning (Google-regels). Met je
+  // Google-reviewlink (Kantoor › Instellingen) staat die er meteen in.
+  const links = (await one("select value from hq.settings where key='links'"))?.value || {};
+  const ask = links.google_review_url
+    ? `Fijn dat je site live staat. Zou je een korte, eerlijke review willen achterlaten op Google? Dat helpt andere ondernemers bij hun keuze:\n${links.google_review_url}\n\nAlleen als je het wilt, natuurlijk.`
+    : "Fijn dat je site live staat. Zou je in een paar zinnen willen vertellen hoe de samenwerking was? Dat helpt andere ondernemers bij hun keuze. Alleen als je het wilt, natuurlijk.";
   await q(`insert into hq.outreach (lead_id, project_id, channel, kind, status, subject, body, to_address, idempotency_key, is_test)
     values ($1,$2,$3,'review_verzoek','concept','Wil je iets over StrakWerk vertellen?',$4,$5,$6,$7) on conflict (idempotency_key) do nothing`,
-    [p.lid, projectId, ch, `Hoi${first},\n\nFijn dat je site live staat. Zou je in een paar zinnen willen vertellen hoe de samenwerking was? Dat helpt andere ondernemers bij hun keuze. Alleen als je het wilt, natuurlijk.\n\nGroet,\nRayan`, to, `review:${projectId}`, p.is_test]);
+    [p.lid, projectId, ch, `Hoi${first},\n\n${ask}\n\nGroet,\nRayan${ch === "whatsapp" ? `\n\n${WA_OPT_OUT}` : ""}`, to, `review:${projectId}`, p.is_test]);
   return { ok: true };
 }
 

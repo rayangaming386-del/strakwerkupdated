@@ -5,3 +5,7 @@ node_modules/
 !.env.example
 test-results/
 .data/
+dist/
+worker/generated/
+.wrangler/
+.dev.vars

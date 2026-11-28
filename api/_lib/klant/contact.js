@@ -4,6 +4,7 @@
 import { q, one } from "../db.js";
 import { HttpError, assertUuid, str } from "../http.js";
 import { audit } from "../db.js";
+import { LEGAL_FORMS, RECHTSPERSONEN, isRechtspersoon, PHONE_RULE } from "./legalform.js";
 
 export const normEmail = (v) => (v ? String(v).trim().toLowerCase() : null);
 export const normPhone = (v) => { if (!v) return null; let d = String(v).replace(/[^\d+]/g, ""); if (d.startsWith("00")) d = "+" + d.slice(2); if (d.startsWith("06")) d = "+316" + d.slice(2); if (/^0\d{9}$/.test(d)) d = "+31" + d.slice(1); return d || null; };
@@ -13,8 +14,22 @@ export const BASIS_LABEL = {
   toestemming: "Toestemming gegeven",
   zelf_contact_gezocht: "Klant zocht zelf contact (reactie op aanvraag)",
   bestaande_klant: "Bestaande klant (eigen vergelijkbare dienst)",
-  gerechtvaardigd_belang_zakelijk: "Gerechtvaardigd belang, zakelijk (alleen met onderbouwing)",
+  gerechtvaardigd_belang_zakelijk: "Gerechtvaardigd belang, zakelijk (alleen bellen naar een bv, nv, stichting, vereniging of coöperatie, of langsgaan; met onderbouwing)",
 };
+
+// Elektronische berichten (e-mail, WhatsApp) voor marketing vragen in Nederland vooraf
+// toestemming, ook bij bedrijven (Telecommunicatiewet art. 11.7); uitzonderingen: de klant
+// zocht zelf contact, of een bestaande klant (eigen vergelijkbare dienst, met afmeldoptie).
+// "Gerechtvaardigd belang" telt daarom alleen voor bellen of langsgaan, nooit voor mail/app.
+export const ELECTRONIC = new Set(["email", "whatsapp"]);
+export const ELECTRONIC_RULE = "Voor mail en WhatsApp is vooraf toestemming nodig, ook bij bedrijven (Telecommunicatiewet). Vraag het eerst telefonisch of persoonlijk (\"Mag ik je een voorbeeld sturen?\") en leg het vast als toestemming.";
+// Bellen voor verkoop: sinds 1 juli 2021 alleen naar een rechtspersoon (bv, nv, stichting,
+// vereniging, coöperatie), of met toestemming, of naar een (oud-)klant. Een eenmanszaak, vof of
+// maatschap is een natuurlijk persoon: niet ongevraagd bellen (zie legalform.js).
+export { PHONE_RULE };
+// WhatsApp heeft geen afmeldlink: elk bericht zegt daarom zelf hoe je bezwaar maakt
+// (bij e-mail staat de afmeldlink in de voettekst).
+export const WA_OPT_OUT = "Liever geen berichten meer van mij? Stuur dan 'stop', dan hoor je niets meer.";
 
 export async function getRoutes(db) {
   const r = (await (db || { query: q }).query("select value from hq.settings where key='routes'")).rows[0]?.value || {};
@@ -53,12 +68,16 @@ export async function unpauseRoute(channel) {
   await q("insert into hq.settings (key, value, updated_at) values ('routes',$1,now()) on conflict (key) do update set value=excluded.value, updated_at=now()", [r]);
 }
 
-/** Staat dit adres, nummer, domein of deze klant op de afmeldlijst? */
-export async function suppressedFor(lead, db) {
+/**
+ * Staat dit adres, nummer, domein of deze klant op de afmeldlijst? Met `channel` alleen wat
+ * voor dat kanaal geldt: een onbestelbaar e-mailadres blokkeert bellen niet.
+ */
+export async function suppressedFor(lead, db, channel = null) {
   const d = db || { query: q };
   const email = normEmail(lead.contact_email), phone = normPhone(lead.contact_phone), dom = domainOf(email);
-  const r = (await d.query(`select kind, value, reason, at from hq.suppressions where (kind='lead' and value=$1) or (kind='email' and value=$2) or (kind='telefoon' and value=$3) or (kind='domein' and value=$4) limit 1`,
-    [lead.id, email || "-", phone || "-", dom || "-"])).rows[0];
+  const kinds = channel === "email" ? ["lead", "email", "domein"] : channel === "whatsapp" || channel === "telefoon" ? ["lead", "telefoon"] : ["lead", "email", "telefoon", "domein"];
+  const r = (await d.query(`select kind, value, reason, at from hq.suppressions where kind = any($5::text[]) and ((kind='lead' and value=$1) or (kind='email' and value=$2) or (kind='telefoon' and value=$3) or (kind='domein' and value=$4)) order by at limit 1`,
+    [lead.id, email || "-", phone || "-", dom || "-", kinds])).rows[0];
   return r || null;
 }
 
@@ -68,16 +87,26 @@ export async function suppress({ lead, reason, note = null, kind = null }, db) {
   if (normEmail(lead.contact_email)) rows.push(["email", normEmail(lead.contact_email)]);
   if (normPhone(lead.contact_phone)) rows.push(["telefoon", normPhone(lead.contact_phone)]);
   for (const [k, v] of rows) {
-    if (kind && k !== kind && k !== "lead") continue;
+    if (kind && k !== kind) continue; // kanaal-specifiek (bounce: alleen e-mail); zonder kind: alles
     await d.query("insert into hq.suppressions (value, kind, reason, lead_id, note) values ($1,$2,$3,$4,$5) on conflict (kind, value) do nothing", [v, k, reason, lead.id, note]);
   }
-  // Alles wat nog gepland staat voor deze klant vervalt (alle afdelingen).
-  await d.query("update hq.outreach set status='geannuleerd', cancel_reason=$2, updated_at=now() where lead_id=$1 and status in ('concept','gepland','klaar_handmatig')", [lead.id, `Afgemeld/bezwaar: ${reason}`]);
-  await d.query("update hq.consents set revoked_at=now(), revoke_reason=$2 where lead_id=$1 and revoked_at is null", [lead.id, reason]);
+  // Alles wat nog gepland staat voor deze klant vervalt (alle afdelingen). Een bounce of een
+  // bezwaar tegen één kanaal raakt alleen dat kanaal; een afmelding raakt alles.
+  const ch = kind === "email" ? "email" : kind === "telefoon" ? "telefoon" : null;
+  await d.query("update hq.outreach set status='geannuleerd', cancel_reason=$2, updated_at=now() where lead_id=$1 and status in ('concept','gepland','klaar_handmatig') and ($3::text is null or channel=$3)", [lead.id, `Afgemeld/bezwaar: ${reason}`, ch]);
+  await d.query("update hq.consents set revoked_at=now(), revoke_reason=$2 where lead_id=$1 and revoked_at is null and ($3::text is null or channel=$3)", [lead.id, reason, ch]);
+  // Voorbeeldsite offline en niet meer bellen (een bounce op e-mail raakt bellen niet).
+  if (!kind || kind === "lead") await d.query("update hq.previews set status='ingetrokken' where lead_id=$1 and status<>'ingetrokken'", [lead.id]);
+  if (!kind || kind === "telefoon" || kind === "lead") await d.query("update hq.calls set outcome='niet_bellen', done_at=now(), notes=coalesce(notes,'') || $2 where lead_id=$1 and outcome is null", [lead.id, ` [${reason}]`]);
 }
 
 export async function validConsent(leadId, channel, db) {
-  return (await (db || { query: q }).query("select * from hq.consents where lead_id=$1 and channel=$2 and revoked_at is null order by recorded_at desc limit 1", [leadId, channel])).rows[0] || null;
+  // Voor mail en WhatsApp telt "gerechtvaardigd belang" nooit als grond (zie ELECTRONIC_RULE).
+  // Voor bellen telt het alleen bij een rechtspersoon (eenmanszaak, vof, maatschap: nooit).
+  return (await (db || { query: q }).query(`select c.* from hq.consents c where c.lead_id=$1 and c.channel=$2 and c.revoked_at is null
+      and not ($2 in ('email','whatsapp') and c.basis = 'gerechtvaardigd_belang_zakelijk')
+      and not ($2 = 'telefoon' and c.basis = 'gerechtvaardigd_belang_zakelijk' and not exists (select 1 from hq.leads l where l.id=c.lead_id and l.legal_form = any($3::text[])))
+      order by c.recorded_at desc limit 1`, [leadId, channel, RECHTSPERSONEN])).rows[0] || null;
 }
 
 export async function recordConsent(leadId, body, auth, db) {
@@ -85,6 +114,11 @@ export async function recordConsent(leadId, body, auth, db) {
   const channel = String(body.channel || ""), basis = String(body.basis || "");
   if (!["email", "whatsapp", "telefoon"].includes(channel)) throw new HttpError(400, "ongeldig", "Onbekend kanaal.");
   if (!BASIS_LABEL[basis]) throw new HttpError(400, "ongeldig", "Onbekende contactgrond.");
+  if (ELECTRONIC.has(channel) && basis === "gerechtvaardigd_belang_zakelijk") throw new HttpError(400, "ongeldig", ELECTRONIC_RULE);
+  if (channel === "telefoon" && basis === "gerechtvaardigd_belang_zakelijk") {
+    const l = (await (db || { query: q }).query("select legal_form from hq.leads where id=$1", [leadId])).rows[0];
+    if (!isRechtspersoon(l?.legal_form)) throw new HttpError(400, "ongeldig", `${PHONE_RULE} Rechtsvorm nu: ${LEGAL_FORMS[l?.legal_form || "onbekend"].label.toLowerCase()}. Controleer die in het KvK-register en leg hem vast op de klantkaart.`);
+  }
   const source = str(body.source, 300), scope = str(body.scope, 300), evidence = str(body.evidence, 1000);
   if (!source || !scope || !evidence) throw new HttpError(400, "ongeldig", "Vul bron, reikwijdte en onderbouwing in. Een openbaar e-mailadres alleen is geen contactgrond.");
   if (basis === "gerechtvaardigd_belang_zakelijk" && evidence.length < 40) throw new HttpError(400, "ongeldig", "Onderbouw het gerechtvaardigd belang concreet (afweging, waarom dit bedrijf, waarom dit kanaal).");
@@ -96,6 +130,23 @@ export async function recordConsent(leadId, body, auth, db) {
 }
 
 /**
+ * Mag Rayan dit bedrijf bellen voor verkoop? Ja bij een rechtspersoon (met recht van bezwaar
+ * in het gesprek), of met een geldige grond voor bellen (toestemming, zelf contact gezocht,
+ * bestaande klant). Nooit bij een afmelding of een bezwaar tegen bellen.
+ */
+export async function phoneAllowed(lead, db) {
+  if (!normPhone(lead.contact_phone)) return { allowed: false, reason: "geen telefoonnummer bekend" };
+  const sup = await suppressedFor(lead, db, "telefoon");
+  if (sup) return { allowed: false, reason: `wil niet benaderd worden (${sup.reason})` };
+  if (lead.status === "afgemeld") return { allowed: false, reason: "heeft zich afgemeld" };
+  const c = await validConsent(lead.id, "telefoon", db);
+  if (c) return { allowed: true, basis: c.basis, label: BASIS_LABEL[c.basis] };
+  if (isRechtspersoon(lead.legal_form)) return { allowed: true, basis: "rechtspersoon", label: `${LEGAL_FORMS[lead.legal_form].label}: zakelijk bellen mag, met de mogelijkheid om bezwaar te maken` };
+  const form = lead.legal_form || "onbekend";
+  return { allowed: false, reason: form === "onbekend" ? "rechtsvorm onbekend: controleer hem in het KvK-register (bv/nv/stichting/vereniging mag je bellen)" : `${LEGAL_FORMS[form].label.toLowerCase()}: alleen bellen met toestemming of als klant; ga langs of wacht op hun aanvraag` };
+}
+
+/**
  * Mag HQ deze klant nu via dit kanaal benaderen? Geeft alle redenen terug.
  * Wordt vlak voor elke verzending opnieuw gecontroleerd.
  */
@@ -104,12 +155,12 @@ export async function contactCheck(lead, channel, { kind = "eerste_contact", db 
   const reasons = [];
   const routes = await getRoutes(d);
   const route = routes[channel];
-  const sup = await suppressedFor(lead, d);
+  const sup = await suppressedFor(lead, d, channel);
   if (sup) reasons.push(`afgemeld/geblokkeerd (${sup.reason}, ${new Date(sup.at).toLocaleDateString("nl-NL")})`);
   if (lead.status === "afgemeld") reasons.push("klant heeft zich afgemeld");
   const consent = await validConsent(lead.id, channel, d);
   // Reactie op een eigen aanvraag of een bestaande klant: grond moet wel vastgelegd zijn.
-  if (!consent) reasons.push(`geen geldige contactgrond voor ${channel} vastgelegd`);
+  if (!consent) reasons.push(ELECTRONIC.has(channel) ? "geen toestemming voor mail of WhatsApp vastgelegd: vraag het eerst telefonisch of persoonlijk" : `geen geldige contactgrond voor ${channel} vastgelegd`);
   if (channel === "email" && !normEmail(lead.contact_email)) reasons.push("geen e-mailadres");
   if (route?.paused) reasons.push(`route ${channel} gepauzeerd: ${route.pause_reason || "fout"}`);
   if (route && kind !== "antwoord") {

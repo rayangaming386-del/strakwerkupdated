@@ -8,15 +8,19 @@ import * as sales from "./sales.js";
 import * as content from "./content.js";
 import * as publisher from "./publisher.js";
 import * as acquisitie from "../klant/acquisition.js";
-import { runDiscover, runSalesCheck } from "../klant/agents.js";
+import { runDiscover, runSalesCheck, runCheckLead } from "../klant/agents.js";
+import { runPreviewTask } from "../klant/preview.js";
+import { runBriefingTask } from "../klant/calls.js";
 import { missingIg } from "../content/instagram.js";
+import { mailConfigured, mailRoute, missingMail } from "../klant/mail.js";
 
 // "video" heeft hier bewust geen uitvoerder: renders draaien in de render-worker
 // (scripts/render-worker.mjs) met ffmpeg en Chromium, niet in een Vercel-functie.
 // Scout en Auditor kiezen per taaksoort: ontdekken (OpenStreetMap) en verkoopkans (mobiele klantroute).
-const scoutX = { run: (a) => (a.task.kind === "ontdekken" ? runDiscover(a) : scout.run(a)) };
+const scoutX = { run: (a) => (a.task.kind === "ontdekken" ? runDiscover(a) : a.task.kind === "websitestatus" ? runCheckLead(a) : scout.run(a)) };
 const auditorX = { run: (a) => (a.task.kind === "verkoopkans" ? runSalesCheck(a) : auditor.run(a)) };
-export const EXECUTORS = { scout: scoutX, auditor: auditorX, sales, content, publisher, acquisitie };
+const salesX = { run: (a) => (a.task.kind === "voorbeeldsite" ? runPreviewTask(a) : a.task.kind === "belcoach" ? runBriefingTask(a) : sales.run(a)) };
+export const EXECUTORS = { scout: scoutX, auditor: auditorX, sales: salesX, content, publisher, acquisitie };
 
 export const TOOLS = {
   scout:   ["OpenStreetMap (Overpass API, open data)", "web.get (alleen publieke homepage + robots.txt)", "crm.lezen (lead)"],
@@ -24,7 +28,7 @@ export const TOOLS = {
   sales:   ["taalmodel (optioneel, zonder tools)", "crm.lezen (goedgekeurd onderzoek)"],
   content: ["projectgegevens + vrijgegeven beelden (lezen)", "pakketprijzen (hq.packages) en actie uit CONFIG", "taalmodel (optioneel, zonder tools)"],
   video:   ["Chromium (scènes tekenen)", "ffmpeg (montage)", "opslag (Supabase Storage of lokaal)"],
-  acquisitie: ["contactregels (toestemming, afmeldingen, frequentie)", "e-mail via SMTP vanaf het StrakWerk-adres (alleen als jij de route activeert)"],
+  acquisitie: ["contactregels (toestemming, afmeldingen, frequentie)", "e-mail vanaf het StrakWerk-adres via de Gmail API (alleen als jij de route activeert)"],
   publisher: ["Instagram API (officieel, professioneel account)", "opslag (tijdelijke link voor Instagram)"],
 };
 
@@ -57,9 +61,9 @@ export function connection(key) {
         note: m.length ? "Instagram-koppeling niet ingesteld: publicaties worden als export (MP4, cover, caption) klaargezet. TikTok: altijd export." : "Plaatst op Instagram via de officiële API; TikTok via export." };
     }
     case "acquisitie": {
-      const smtp = Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
-      return { connected: true, partial: !smtp, missing: smtp ? [] : ["SMTP_HOST", "SMTP_USER", "SMTP_PASS"],
-        note: smtp ? "Verstuurt alleen toegestane berichten via SMTP als jij de e-mailroute live zet; anders proefstand." : "Zonder SMTP: berichten klaarzetten met kopieerknop (proefstand). Contactregels gelden altijd." };
+      const ok = mailConfigured();
+      return { connected: true, partial: !ok, missing: missingMail(),
+        note: ok ? `Verstuurt alleen toegestane berichten (${mailRoute() === "gmail_api" ? "Gmail API" : "SMTP"}) als jij de e-mailroute live zet; anders proefstand.` : "Zonder mailkoppeling: berichten klaarzetten met kopieerknop (proefstand). Contactregels gelden altijd." };
     }
     case "teamleider": case "groei":
       return { connected: true, partial: !llm, missing: [], note: "Ochtendoverleg en acties uit gewone code; hooguit één AI-samenvatting met bevestigd tegoed." };

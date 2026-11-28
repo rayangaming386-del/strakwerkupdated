@@ -3,6 +3,7 @@
 import { h, fmt, errorBox, skeleton, toast, empty, modal, field } from "../ui.js";
 import { api } from "../api.js";
 import { put, envSwitch, getEnv, envQs, copyBtn, waHref, mailHref } from "./klant-ui.js";
+import { salesCardSections, quoteExtras, outreachButtons } from "./sales-ui.js";
 
 const STATUS = { nieuw: "Nieuw", onderzocht: "Onderzocht", goedgekeurd: "Goedgekeurd", benaderd: "Benaderd", aanvraag: "Aanvraag", gekwalificeerd: "Gekwalificeerd", gesprek: "In gesprek", afspraak: "Afspraak", offerte: "Offerte", gewonnen: "Klant", verloren: "Verloren", afgemeld: "Afgemeld" };
 const WS = { gevonden: "Website gevonden", alleen_sociaal: "Alleen sociaal profiel", onzeker: "Onzeker", geen_gevonden: "Geen eigen website gevonden na deze controles" };
@@ -56,7 +57,7 @@ async function card(root, ctx, id) {
       const sec = (title, ...c) => h("section", { class: "card stack" }, h("h2", { style: { fontSize: "1.02rem", margin: 0 } }, title), ...c);
       const reply = d.outreach.find(o => o.kind === "antwoord" && o.status === "concept");
       const quote = d.quotes[0];
-      const manual = d.outreach.filter(o => o.status === "klaar_handmatig");
+      const manual = d.outreach.filter(o => o.status === "klaar_handmatig" || (o.status === "concept" && (["review_verzoek", "verwijzing", "onderhoud"].includes(o.kind) || String(o.prompt_version || "").startsWith("na_gesprek"))));
       put(box, 
         h("div", { class: "stack" }, h("div", { class: "row", style: { justifyContent: "space-between" } }, h("h2", { style: { margin: 0 } }, l.company), h("span", { class: "badge b-gold" }, STATUS[l.status] || l.status)),
           h("p", { class: "muted", style: { margin: 0 } }, [l.contact_name, l.contact_email, l.contact_phone, l.city].filter(Boolean).join(" · ")),
@@ -69,7 +70,7 @@ async function card(root, ctx, id) {
           h("div", { class: "row" }, copyBtn(reply.body), l.contact_phone ? h("a", { class: "btn btn-sm", href: waHref(l.contact_phone, reply.body), target: "_blank", rel: "noopener" }, "WhatsApp") : null,
             l.contact_email ? h("a", { class: "btn btn-sm", href: mailHref(l.contact_email, reply.subject, reply.body) }, "Mail") : null,
             act("Ik heb geantwoord", () => api(`klanten/${id}/beantwoord`, { method: "POST", body: { outreach_id: reply.id } }), "btn-gold"))) : null,
-        manual.length ? sec("Klaar om zelf te versturen", ...manual.map(o => h("div", { class: "stack" }, h("pre", { class: "pre" }, o.body), h("div", { class: "row" }, copyBtn(o.body), act("Verstuurd", () => api(`outreach/${o.id}/verstuurd`, { method: "POST", body: {} }), "btn-gold"), act("Annuleren", () => api(`outreach/${o.id}/annuleren`, { method: "POST", body: {} })))))) : null,
+        manual.length ? sec("Klaar om zelf te versturen", ...manual.map(o => h("div", { class: "stack" }, h("pre", { class: "pre" }, o.body), h("div", { class: "row" }, outreachButtons(o, refresh), act("Annuleren", () => api(`outreach/${o.id}/annuleren`, { method: "POST", body: {} })))))) : null,
         sec("Offerte", quote ? h("div", { class: "stack" },
           h("div", { class: "row", style: { justifyContent: "space-between" } }, h("strong", {}, fmt.eur(quote.price_cents)), h("span", { class: "badge" }, quote.status)),
           h("p", { style: { margin: 0 } }, quote.description),
@@ -80,7 +81,9 @@ async function card(root, ctx, id) {
             quote.status === "verstuurd" && !quote.interest ? act("Belangstelling getoond", () => api(`offertes/${quote.id}/belangstelling`, { method: "POST", body: {} })) : null,
             quote.status === "verstuurd" && ctx.can("approvals.money") ? act("Akkoord ontvangen", async () => { const r = await api(`offertes/${quote.id}/akkoord`, { method: "POST", body: {} }); if (r.intake_url) modal("Intake-link", h("div", { class: "stack" }, h("p", {}, "Stuur deze persoonlijke link naar de klant. Hij is alleen nu zichtbaar."), h("pre", { class: "pre" }, location.origin + r.intake_url), copyBtn(location.origin + r.intake_url))); }, "btn-gold") : null))
           : h("p", { class: "muted", style: { margin: 0 } }, "Nog geen offerte."),
+          quoteExtras(d, quote, ctx, refresh),
           ctx.can("quotes.write") && (!quote || ["afgewezen", "vervallen"].includes(quote.status)) ? act("Offerteconcept maken (prijzen uit de prijslijst)", () => api(`klanten/${id}/offerte`, { method: "POST", body: {} }), "btn-gold") : null),
+        ...salesCardSections(d, id, ctx, refresh),
         d.project ? sec("Project", h("dl", { class: "kv" }, h("dt", {}, "Status"), h("dd", {}, d.project.status.replace(/_/g, " ")), h("dt", {}, "Prijs"), h("dd", {}, fmt.eur(d.project.price_cents)), h("dt", {}, "Intake"), h("dd", {}, d.project.intake_complete_at ? `compleet ${fmt.dt(d.project.intake_complete_at)}` : "nog niet compleet"), h("dt", {}, "Briefing"), h("dd", {}, d.project.briefing_at ? "klaar" : "—")),
           h("div", { class: "row" }, act("Nieuwe intake-link", async () => { const r = await api(`projecten/${d.project.id}/intake-link`, { method: "POST", body: {} }); modal("Nieuwe intake-link", h("div", { class: "stack" }, h("pre", { class: "pre" }, location.origin + r.intake_url), copyBtn(location.origin + r.intake_url))); }),
             d.project.briefing_at ? act("Briefing bekijken", async () => { const r = await api(`projecten/${d.project.id}/briefing`); modal("Bouwbriefing", h("div", { class: "stack" }, h("pre", { class: "pre" }, r.briefing.text), copyBtn(r.briefing.text, "Kopieer voor Claude"))); }) : null)) : null,
@@ -122,16 +125,30 @@ async function card(root, ctx, id) {
   }
   function consentDialog(leadId) {
     const ch = h("select", {}, ["email", "whatsapp", "telefoon"].map(c => h("option", { value: c }, c)));
-    const basis = h("select", {}, [["toestemming", "Toestemming gegeven"], ["zelf_contact_gezocht", "Klant zocht zelf contact"], ["bestaande_klant", "Bestaande klant"], ["gerechtvaardigd_belang_zakelijk", "Gerechtvaardigd belang (zakelijk, onderbouwd)"]].map(([v, l]) => h("option", { value: v }, l)));
+    const basis = h("select", {}, [["toestemming", "Toestemming gegeven"], ["zelf_contact_gezocht", "Klant zocht zelf contact"], ["bestaande_klant", "Bestaande klant"], ["gerechtvaardigd_belang_zakelijk", "Gerechtvaardigd belang (alleen bellen of langsgaan)"]].map(([v, l]) => h("option", { value: v }, l)));
+    // Mail en WhatsApp: nooit op gerechtvaardigd belang (Telecommunicatiewet).
+    const syncBasis = () => { const legit = basis.querySelector('option[value="gerechtvaardigd_belang_zakelijk"]'); legit.disabled = ch.value !== "telefoon"; if (legit.disabled && basis.value === legit.value) basis.value = "toestemming"; };
+    ch.addEventListener("change", syncBasis); syncBasis();
     const src = h("input", { placeholder: "Waar komt dit vandaan? (link, gesprek, formulier)" }), scope = h("input", { placeholder: "Waarvoor precies? (bijv. één bericht over …)" }), ev = h("textarea", { rows: 3, placeholder: "Onderbouwing. Een openbaar e-mailadres alleen is onvoldoende." });
     return new Promise((ok) => modal("Contactgrond vastleggen", h("div", { class: "fgrid" }, field("Kanaal", ch), field("Grond", basis), field("Bron", src, { full: true }), field("Reikwijdte", scope, { full: true }), field("Onderbouwing", ev, { full: true, help: "Datum en wie het vastlegt worden automatisch bewaard. Handmatig versturen verandert de contactregels niet." })), [
       { label: "Vastleggen", cls: "btn-gold", onClick: async (close) => { await api(`klanten/${leadId}/toestemming`, { method: "POST", body: { channel: ch.value, basis: basis.value, source: src.value, scope: scope.value, evidence: ev.value } }); toast("Contactgrond vastgelegd."); close(); ok(); } }]));
   }
   function payDialog(leadId, lead, quote) {
-    const amt = h("input", { type: "number", min: 1, value: quote ? quote.price_cents / 100 : "" });
-    const method = h("select", {}, [["bank", "Bankoverschrijving (echt)"], ["contant", "Contant (echt)"], ...(lead.is_test ? [["simulatie", "Simulatie (alleen test)"]] : [])].map(([v, l]) => h("option", { value: v }, l)));
+    const amt = h("input", { type: "number", min: 1, step: "0.01", value: quote ? (quote.deposit_cents || quote.price_cents) / 100 : "" });
+    const method = h("select", {}, [["contant", "Contant (echt)"], ["bank", "Bankoverschrijving (echt)"], ...(lead.is_test ? [["simulatie", "Simulatie (alleen test)"]] : [])].map(([v, l]) => h("option", { value: v }, l)));
     return new Promise((ok) => modal("Betaling vastleggen", h("div", { class: "fgrid" }, field("Bedrag (€)", amt), field("Soort", method)), [
-      { label: "Vastleggen", cls: "btn-gold", onClick: async (close) => { await api(`klanten/${leadId}/betaling`, { method: "POST", body: { amount_eur: amt.value, method: method.value, quote_id: quote?.id } }); toast("Betaling vastgelegd."); close(); ok(); } }]));
+      { label: "Vastleggen", cls: "btn-gold", onClick: async (close) => {
+        const p = await api(`klanten/${leadId}/betaling`, { method: "POST", body: { amount_eur: amt.value, method: method.value, quote_id: quote?.id } });
+        toast("Betaling vastgelegd."); close(); ok();
+        if (method.value === "contant") receipt(lead, p, quote);
+      } }]));
+  }
+  // Betaalbewijs bij contant: kopiëren of via WhatsApp sturen (geen KvK of btw, zie CLAUDE.md).
+  function receipt(lead, p, quote) {
+    const eurC = new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR" }).format(p.amount_cents / 100);
+    const text = `Betaalbewijs StrakWerk\n\nOntvangen van: ${lead.company}${lead.contact_name ? ` (${lead.contact_name})` : ""}\nBedrag: ${eurC}, contant\nVoor: ${p.kind === "aanbetaling" ? "aanbetaling " : p.kind === "restbetaling" ? "restbetaling " : ""}website${quote ? ` (offerte SW-${String(quote.id).slice(0, 8).toUpperCase()})` : ""}\nDatum: ${new Date(p.received_on).toLocaleDateString("nl-NL")}\n\nBedankt!\nRayan, StrakWerk`;
+    modal("Betaalbewijs", h("div", { class: "stack" }, h("pre", { class: "pre" }, text),
+      h("div", { class: "row" }, copyBtn(text), lead.contact_phone ? h("a", { class: "btn btn-sm btn-gold", href: waHref(lead.contact_phone, text), target: "_blank", rel: "noopener" }, "Stuur via WhatsApp") : null)));
   }
   await refresh();
   return { refresh };

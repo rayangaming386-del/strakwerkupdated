@@ -27,7 +27,7 @@ async function get(url) {
   const t0 = Date.now();
   try {
     const p = await fetchPublic(url, { timeoutMs: 9000, maxBytes: 600_000, userAgent: MOBILE_UA });
-    return { ok: p.status < 400, status: p.status, url: p.url, body: p.body, ms: Date.now() - t0 };
+    return { ok: p.status < 400, status: p.status, url: p.url, body: p.body, ms: Date.now() - t0, bytes: p.bytes, truncated: p.truncated };
   } catch (e) { return { ok: false, status: null, url, error: String(e.message).slice(0, 120), ms: Date.now() - t0 }; }
 }
 
@@ -42,7 +42,12 @@ function linksWithText(html, base) {
   return out;
 }
 
-export async function salesCheck(url, { step = async () => {} } = {}) {
+/**
+ * `deadline` (tijdstip in ms, optioneel): daarna worden geen links meer gevolgd (eerlijk gemeld
+ * als "niet gecontroleerd"), zodat een openbare check binnen de limieten van de host blijft.
+ * Naast de observaties komen de gemeten feiten van de homepage terug (`facts`).
+ */
+export async function salesCheck(url, { step = async () => {}, deadline = null } = {}) {
   const u = normalizeUrl(url);
   await step("robots.txt controleren");
   const robots = await robotsAllows(u);
@@ -54,7 +59,7 @@ export async function salesCheck(url, { step = async () => {} } = {}) {
   const push = (o) => obs.push({ ...o, evidence: { ...o.evidence, gemeten_op: at, user_agent: "mobiel (iPhone Safari)" } });
   if (!home.ok) {
     push({ goal: "diensten", page_url: u.toString(), observation: `De homepage gaf ${home.status ? `HTTP ${home.status}` : `geen antwoord (${home.error})`} op mobiel.`, strength: "concreet", evidence: { status: home.status, fout: home.error || null }, service: svc("redesign") });
-    return { home: { status: home.status }, observations: obs };
+    return { home: { status: home.status }, observations: obs, facts: { reachable: false, url: u.toString(), status: home.status, error: home.error || null, gemeten_op: at } };
   }
   const x = extract(home.body, home.url);
   if (!x.viewport) push({ goal: "diensten", page_url: home.url, observation: "De pagina heeft geen viewport-instelling: op een telefoon verschijnt hij als verkleinde desktopsite.", strength: "concreet", evidence: { meta_viewport: "ontbreekt" }, service: svc("redesign") });
@@ -62,8 +67,10 @@ export async function salesCheck(url, { step = async () => {} } = {}) {
   // Volg de links voor afspraak, prijs en contact zoals een bezoeker zou doen.
   const links = linksWithText(home.body, home.url);
   const host = new URL(home.url).hostname;
+  const followed = [], notFollowed = [];
   for (const [goal, g] of Object.entries(GOALS)) {
     const l = links.find(k => g.re.test(k.text) || g.re.test(k.url));
+    if (l && deadline && Date.now() > deadline - 7000) { notFollowed.push(l.text || g.label); continue; }
     if (!l) {
       if (goal === "afspraak") push({ goal, page_url: home.url, observation: "Er is op de homepage geen link om een afspraak te maken.", strength: "zwak", evidence: { gezocht_op: "afspraak, boeken, reserveren" }, service: svc("booking") });
       if (goal === "prijs") push({ goal, page_url: home.url, observation: "Er is op de homepage geen link naar prijzen of tarieven.", strength: "zwak", evidence: { gezocht_op: "prijs, prijzen, tarieven" }, service: svc("calculator") });
@@ -72,11 +79,15 @@ export async function salesCheck(url, { step = async () => {} } = {}) {
     // Externe boekingssystemen (andere host) worden alleen opgevraagd, niet gebruikt.
     await step(`Link "${l.text || goal}" volgen`);
     const r = await get(l.url);
+    followed.push({ goal, label: g.label, text: l.text || null, url: l.url, ok: r.ok, status: r.status });
     if (!r.ok) push({ goal, page_url: l.url, observation: `De link "${l.text || g.label}" op de homepage gaat op mobiel naar ${r.status ? `een foutpagina (HTTP ${r.status})` : `een pagina die niet laadt (${r.error})`}.`, strength: "concreet",
       evidence: { link_tekst: l.text, link: l.url, status: r.status, fout: r.error || null, vanaf: home.url, extern: new URL(l.url).hostname !== host }, service: svc(goal === "afspraak" ? "booking" : goal === "contact" ? "aanvraag" : goal === "prijs" ? "calculator" : "redesign") });
   }
   if (x.copyrightYear && x.copyrightYear < new Date().getFullYear() - 3) push({ goal: "diensten", page_url: home.url, observation: `Het copyrightjaar is ${x.copyrightYear}. Een oudere uitstraling of datum is alleen een zwak signaal.`, strength: "zwak", evidence: { copyright: x.copyrightYear }, service: svc("redesign") });
-  return { home: { status: 200, url: home.url, ms: home.ms }, observations: obs };
+  const facts = { reachable: true, url: home.url, https: home.url.startsWith("https:"), ms: home.ms, bytes: home.bytes ?? null, gemeten_op: at,
+    title: x.title || null, description: x.description || null, h1Count: x.h1Count, viewport: Boolean(x.viewport), tel: x.tel.length, whatsapp: Boolean(x.whatsapp), mail: x.mail.length,
+    imgCount: x.imgCount, imgNoAlt: x.imgNoAlt, copyrightYear: x.copyrightYear, followed, notFollowed };
+  return { home: { status: 200, url: home.url, ms: home.ms }, observations: obs, facts };
 }
 
 /** Briefing voor een kansrijk bedrijf: probleem, bewijs, één passende dienst. */

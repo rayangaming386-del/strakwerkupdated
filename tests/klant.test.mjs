@@ -154,9 +154,27 @@ test("scenario B: concreet mobiel probleem, toegestane route, testmail, reactie 
   // Zonder contactgrond: niets automatisch.
   let ap = await req(`/api/hq/klanten/${leadB}/benaderen`, { method: "POST", body: {} });
   assert.equal(ap.json.decision, "geen_contactgrond");
-  // Contactgrond vastleggen (bron, datum, reikwijdte, onderbouwing).
-  const c = await req(`/api/hq/klanten/${leadB}/toestemming`, { method: "POST", body: { channel: "email", basis: "gerechtvaardigd_belang_zakelijk", source: "Zakelijk adres op eigen website, contactpagina", scope: "Eén bericht over de kapotte afspraaklink, één opvolging",
-    evidence: "Concreet probleem op hun eigen site (afspraaklink 404), zakelijk adres voor klantvragen, eenmalig en met afmeldlink; afweging vastgelegd." } });
+  // Mail of WhatsApp op "gerechtvaardigd belang" mag niet (Telecommunicatiewet); bellen wel.
+  const legit = { basis: "gerechtvaardigd_belang_zakelijk", source: "Zakelijk nummer op eigen website", scope: "Eén belletje over de kapotte afspraaklink",
+    evidence: "Concreet probleem op hun eigen site (afspraaklink 404); zakelijk nummer voor klantvragen; eenmalig, stoppen bij bezwaar." };
+  for (const channel of ["email", "whatsapp"]) {
+    const r = await req(`/api/hq/klanten/${leadB}/toestemming`, { method: "POST", body: { channel, ...legit } });
+    assert.equal(r.status, 400, `${channel} op gerechtvaardigd belang moet geweigerd worden`); assert.match(r.json.message, /toestemming/);
+  }
+  // Bellen op gerechtvaardigd belang: alleen bij een rechtspersoon (sinds 1 juli 2021). Rechtsvorm nog onbekend → nee.
+  const tel = await req(`/api/hq/klanten/${leadB}/toestemming`, { method: "POST", body: { channel: "telefoon", ...legit } });
+  assert.equal(tel.status, 400); assert.match(tel.json.message, /eenmanszaak/);
+  assert.ok((await one("select website_checks from hq.leads where id=$1", [leadB])).website_checks.some(c => /Rechtsvorm/.test(c.controle)), "Scout meldt de rechtsvorm");
+  const rv = await req(`/api/hq/klanten/${leadB}/rechtsvorm`, { method: "POST", body: { legal_form: "bv", source: "kvk" } });
+  assert.equal(rv.status, 200, JSON.stringify(rv.json)); assert.equal(rv.json.legal_form, "bv");
+  assert.equal((await req(`/api/hq/klanten/${leadB}/rechtsvorm`, { method: "POST", body: { legal_form: "bv", source: "gok" } })).status, 400);
+  assert.equal((await req(`/api/hq/klanten/${leadB}/toestemming`, { method: "POST", body: { channel: "telefoon", ...legit } })).status, 201);
+  // Een oud vastgelegd "gerechtvaardigd belang" voor e-mail telt niet als grond.
+  await mods.db.q("insert into hq.consents (lead_id, channel, basis, source, scope, evidence) values ($1,'email','gerechtvaardigd_belang_zakelijk','oud','oud','oud')", [leadB]);
+  assert.equal((await req(`/api/hq/klanten/${leadB}/benaderen`, { method: "POST", body: {} })).json.decision, "geen_contactgrond");
+  // Echte route: tijdens een belletje "Mag ik je een voorbeeld mailen?" → ja → vastleggen.
+  const c = await req(`/api/hq/klanten/${leadB}/toestemming`, { method: "POST", body: { channel: "email", basis: "toestemming", source: "Telefoongesprek met de eigenaar", scope: "Voorbeeld en voorstel over de afspraaklink mailen, één opvolging",
+    evidence: "Eigenaar zei tijdens het gesprek ja op de vraag of Rayan een voorbeeld mocht mailen; genoteerd door Rayan." } });
   assert.equal(c.status, 201);
   // Route activeren vraagt eerst de controle van de voorwaarden.
   assert.equal((await req("/api/hq/kantoor/routes", { method: "PUT", body: { email: { auto: true } } })).status, 409);
@@ -323,7 +341,7 @@ test("eigen fout: verzonden na afmelding → score omlaag, correctietaak en rout
 test("ontbrekende koppeling, kostenplafond en hervatten na een fout", async () => {
   // Geen SMTP: acquisitie meldt deels gekoppeld; live zetten verstuurt nog steeds niets echt.
   const conn = (await import("../api/_lib/agents/registry.js")).connection("acquisitie");
-  assert.equal(conn.partial, true); assert.deepEqual(conn.missing, ["SMTP_HOST", "SMTP_USER", "SMTP_PASS"]);
+  assert.equal(conn.partial, true); assert.deepEqual(conn.missing, ["GMAIL_CLIENT_ID", "GMAIL_CLIENT_SECRET", "GMAIL_REFRESH_TOKEN"]);
   // Overleg zonder AI-tegoed: samenvatting uit code, taken worden gewoon aangemaakt.
   await mods.budget.putBudget({ enabled: true, confirmed: true, granted_usd: 1, hq_limit_usd: 1 }, { userId: owner.id, email: owner.email }).catch(() => {});
   await mods.db.q("delete from hq.briefings where env='test'");
@@ -359,4 +377,51 @@ test("opdrachtveld: gewone taal → klantkaart en offerteconcept, geld blijft bi
   assert.ok(q.package_key === "premium" || q.items.some(i => i.key === "booking"), "afspraken herkend");
   const v = (await req("/api/hq/vandaag?env=test")).json;
   assert.ok(v.quotes.some(x => x.id === q.id), "startscherm toont de offerte die aandacht vraagt");
+});
+
+test("mailtest via Gmail API: echte verzending naar eigen adres, antwoord via Email Worker, opvolging stopt", async () => {
+  // Nagebootste Google: token + verzenden; Gmail vervangt de Message-ID (zoals in het echt kan).
+  const sent = [];
+  const google = http.createServer(async (rq, rs) => {
+    let body = ""; for await (const c of rq) body += c;
+    const send = (code, j) => { rs.writeHead(code, { "content-type": "application/json" }); rs.end(JSON.stringify(j)); };
+    if (rq.url === "/token") return /refresh_token=goed/.test(body) ? send(200, { access_token: "at-1", expires_in: 3600 }) : send(400, { error: "invalid_grant" });
+    if (rq.headers.authorization !== "Bearer at-1") return send(401, { error: { message: "unauth" } });
+    if (rq.url === "/gmail/v1/users/me/messages/send") { sent.push(Buffer.from(JSON.parse(body).raw, "base64url").toString("utf8")); return send(200, { id: "g1", threadId: "t1" }); }
+    if (rq.url.startsWith("/gmail/v1/users/me/messages/g1")) return send(200, { payload: { headers: [{ name: "Message-ID", value: "<CAGmail-echt-1@mail.gmail.com>" }] } });
+    send(404, {});
+  });
+  await new Promise(r => google.listen(0, "127.0.0.1", r));
+  const gb = `http://127.0.0.1:${google.address().port}`;
+  Object.assign(process.env, { GMAIL_CLIENT_ID: "cid", GMAIL_CLIENT_SECRET: "cs", GMAIL_REFRESH_TOKEN: "goed", GMAIL_API_BASE: gb, GMAIL_TOKEN_URL: `${gb}/token`, MAIL_REPLY_TO: "antwoord@reply.strakwerkk.nl" });
+  try {
+    assert.equal((await req("/api/hq/kantoor/mailtest", { method: "POST", user: staff, body: {} })).status, 403, "alleen de eigenaar");
+    const r = await req("/api/hq/kantoor/mailtest", { method: "POST", body: {} });
+    assert.equal(r.status, 200, JSON.stringify(r.json));
+    assert.equal(r.json.route, "gmail_api");
+    assert.equal(r.json.message_id, "<CAGmail-echt-1@mail.gmail.com>", "echte Message-ID teruggelezen");
+    assert.equal(sent.length, 1);
+    const mime = sent[0];
+    assert.match(mime, /^To: eigenaar@test\.nl$/m, "alleen naar het eigen adres");
+    assert.match(mime, /^Reply-To: antwoord@reply\.strakwerkk\.nl$/m);
+    assert.match(mime, /^List-Unsubscribe: <https:\/\/www\.strakwerkk\.nl\/api\/public\/afmelden\?t=/m);
+    assert.match(mime, /^List-Unsubscribe-Post: List-Unsubscribe=One-Click$/m);
+    const fu = await one("select * from hq.outreach where lead_id=$1 and kind='opvolging'", [r.json.lead_id]);
+    assert.equal(fu.status, "gepland");
+    // Antwoord komt binnen via de Email Worker (zelfde verwerking als in productie).
+    const { handleEmailMessage } = await import("../api/_lib/klant/inbound.js");
+    const raw = `From: Eigenaar <eigenaar@test.nl>\r\nTo: antwoord@reply.strakwerkk.nl\r\nSubject: Re: Mailtest\r\nMessage-ID: <antw-9@test.nl>\r\nIn-Reply-To: <CAGmail-echt-1@mail.gmail.com>\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\nWat kost een website met afspraken?\r\n`;
+    const forwarded = [];
+    const res = await handleEmailMessage({ raw: new Blob([raw]).stream(), from: "eigenaar@test.nl", forward: async (to) => forwarded.push(to) }, { forwardTo: "strakwerkk@gmail.com" });
+    assert.equal(res.matched, true); assert.equal(res.lead_id, r.json.lead_id, "op de juiste klantkaart");
+    assert.deepEqual(forwarded, ["strakwerkk@gmail.com"], "ook doorgestuurd naar je inbox");
+    assert.equal((await one("select status from hq.outreach where id=$1", [fu.id])).status, "geannuleerd", "opvolging gestopt");
+    // Verkeerd vernieuwingstoken: duidelijke fout, niets als verzonden gemarkeerd.
+    process.env.GMAIL_REFRESH_TOKEN = "fout";
+    const bad = await req("/api/hq/kantoor/mailtest", { method: "POST", body: {} });
+    assert.equal(bad.status, 502); assert.match(bad.json.message, /GMAIL_REFRESH_TOKEN/);
+  } finally {
+    for (const k of ["GMAIL_CLIENT_ID", "GMAIL_CLIENT_SECRET", "GMAIL_REFRESH_TOKEN", "GMAIL_API_BASE", "GMAIL_TOKEN_URL", "MAIL_REPLY_TO"]) delete process.env[k];
+    google.close();
+  }
 });

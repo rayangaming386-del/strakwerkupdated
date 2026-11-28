@@ -1468,13 +1468,13 @@ Locatie: Rijswijk<small>09:41 ✓✓</small></div>
       <div class="speedcheck marks" id="speedcheck">
         <div class="sc-txt">
           <span class="kicker">Gratis check</span>
-          <h3>Hoe snel is jouw huidige website?</h3>
-          <p>Vul je adres in en Google meet de snelheid op mobiel en desktop. Is je site traag of verouderd? Stuur me de uitslag, dan kijk ik gratis met je mee.</p>
+          <h3>Hoe doet jouw website het op een telefoon?</h3>
+          <p>Vul je adres in en zie meteen of klanten je met één tik kunnen bellen of appen, of je knoppen werken en wat Google van je homepage ziet. Gratis, met concrete verbeterpunten.</p>
         </div>
         <form class="sc-form" id="scForm" novalidate>
           <label class="sr" for="scUrl">Adres van je website</label>
           <input id="scUrl" type="text" inputmode="url" placeholder="jouwbedrijf.nl" autocomplete="url" autocapitalize="none" spellcheck="false" aria-describedby="scMsg">
-          <button class="btn btn--gold" type="submit">Test mijn site</button>
+          <button class="btn btn--gold" type="submit">Check mijn site</button>
           <p class="sc-msg" id="scMsg" role="status" aria-live="polite"></p>
         </form>
       </div>
@@ -2243,7 +2243,7 @@ document.querySelectorAll("[data-copy]").forEach(b => b.addEventListener("click"
   const near = new IntersectionObserver(([e]) => { if (e.isIntersecting){ poster(); near.disconnect(); } }, { rootMargin: "900px 0px" }); near.observe(v);
   if (reduce) return;
   new IntersectionObserver(([e]) => { if (e.isIntersecting){ poster(); v.preload = "auto"; v.play().catch(() => {}); } else v.pause(); }, { threshold: .35 }).observe(v); })();
-/* Gratis snelheidscheck via Google PageSpeed Insights */
+/* Gratis websitecheck: naar /websitecheck, daar draait de check (HQ) en staat de uitslag */
 (() => { const f = document.getElementById("scForm"); if (!f) return;
   const inp = document.getElementById("scUrl"), msg = document.getElementById("scMsg");
   f.addEventListener("submit", e => { e.preventDefault();
@@ -2251,10 +2251,9 @@ document.querySelectorAll("[data-copy]").forEach(b => b.addEventListener("click"
     let u = null; try { u = new URL(v); } catch (x) {}
     if (!u || !/^[a-z0-9-]+(\.[a-z0-9-]+)+$/i.test(u.hostname)){ msg.className = "sc-msg err"; msg.textContent = "Vul een geldig adres in, bijvoorbeeld jouwbedrijf.nl"; inp.focus(); return; }
     const url = u.origin + (u.pathname === "/" ? "" : u.pathname);
-    window.open("https://pagespeed.web.dev/report?url=" + encodeURIComponent(url), "_blank", "noopener");
-    const wa = `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(`Hoi Rayan, ik heb de snelheid van ${url} getest. Kun je gratis met me meekijken?`)}`;
-    msg.className = "sc-msg ok"; msg.innerHTML = `De test opent in een nieuw tabblad en duurt ongeveer een halve minuut. Traag of rood? <a href="${wa}" target="_blank" rel="noopener">Stuur me de uitslag via WhatsApp</a>`;
     try { window.va && window.va("event", { name: "Snelheidscheck", data: {} }); } catch (x) {}
+    msg.className = "sc-msg ok"; msg.textContent = "De check opent…";
+    location.href = "/websitecheck?url=" + encodeURIComponent(url);
   }); })();
 /* Lokale tijd in de footer */
 (() => { const el = document.getElementById("clock"); if (!el) return;

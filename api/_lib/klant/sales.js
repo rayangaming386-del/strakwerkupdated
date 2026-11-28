@@ -1,12 +1,14 @@
 // SALES: intake, kwalificatie, offertes, opvolging, reacties, afspraken en betalingen.
 // Alles komt op één klantkaart (hq.leads + hq.interactions). Gewone code doet de regels;
 // AI mag later alleen de samenvatting en het antwoord verfijnen (binnen het AI-budget).
-import { randomUUID, createHash } from "node:crypto";
+import { createHash } from "node:crypto";
 import { q, one, tx, audit } from "../db.js";
 import { HttpError, assertUuid, str } from "../http.js";
 import { normalizeDomain, companyKey } from "../crm.js";
 import { SITE, amsParts, amsToUtc, projectFromQuote } from "../content/studio.js";
-import { normEmail, normPhone, suppress, contactCheck, recordConsent } from "./contact.js";
+import { normEmail, normPhone, suppress, contactCheck, recordConsent, phoneAllowed } from "./contact.js";
+import { notify } from "./notify.js";
+import { intakeToken, linkToken } from "./tokens.js";
 
 const OPT = Object.fromEntries((SITE.options || []).map(o => [o.id, o]));
 const BASE = SITE.bases;
@@ -181,14 +183,44 @@ export async function intakeRequest(input, actor = null) {
       values ($1,$2,'antwoord','concept',$3,$4,$5,$6,$7) on conflict (idempotency_key) do nothing`,
       [lead.id, email ? "email" : "whatsapp", `Je aanvraag bij StrakWerk${company ? ` (${company})` : ""}`, reply, email || phone, `antwoord:${externalId}`, isTest]);
     await audit(db, { actor: actor?.userId || null, label: actor?.email || "systeem", action: "aanvraag.ontvangen", entity: "lead", entityId: lead.id, details: { kanaal: channel, test: isTest } });
+    // Verkoopkanaal (eerste herleidbare bron; bestaand kanaal blijft staan).
+    const ch = ["websitecheck", "formulier", "opdracht"].includes(input.sales_channel) ? input.sales_channel
+      : attribution ? "video" : src.ref && (await db.query("select 1 from hq.leads where id=$1 and referral_partner_id is not null", [lead.id])).rows[0] ? "partner"
+      : src.ref && (await db.query("select 1 from hq.leads where id=$1 and referral_lead_id is not null", [lead.id])).rows[0] ? "verwijzing"
+      : channel === "gesprek" ? "opdracht" : "formulier";
+    await db.query("update hq.leads set sales_channel=coalesce(sales_channel,$2) where id=$1", [lead.id, ch]);
+    await notify({ key: `aanvraag:${externalId}`, kind: "aanvraag", title: `Nieuwe aanvraag: ${lead.company}`,
+      body: `${analysis.summary}\nEen antwoord staat klaar in HQ. Snel reageren wint opdrachten.`, leadId: lead.id, url: `/hq/klanten?id=${lead.id}`, isTest }, db);
     return { lead_id: lead.id, duplicate: false, analysis, attribution, capacity: cap };
   });
 }
 
 // ── Reacties ───────────────────────────────────────────────────────────────────
+/**
+ * Alleen het nieuwe deel van een e-mailantwoord: alles vanaf het geciteerde origineel
+ * ("Op … schreef …:", "On … wrote:", "> …", doorgestuurde kop) valt weg. Zonder dit telt de
+ * afmeldregel onder ons eigen bericht ("Afmelden") als afmelding van de klant.
+ */
+export function replyText(text) {
+  const t = String(text || "");
+  const marks = [
+    /^[ \t]*>/m,
+    /^[ \t]*Op [^\n]{0,200}schreef\b[\s\S]{0,300}?:[ \t]*$/m,
+    /^[ \t]*On [^\n]{0,200}[\s\S]{0,300}?wrote:[ \t]*$/m,
+    /^[ \t]*-{2,}[ \t]*(Original Message|Oorspronkelijk bericht|Doorgestuurd bericht|Forwarded message)/mi,
+    /^[ \t]*(Van|From):[^\n]*\n[ \t]*(Verzonden|Sent|Datum|Date):/mi,
+  ];
+  let cut = t.length;
+  for (const re of marks) { const m = re.exec(t); if (m && m.index < cut) cut = m.index; }
+  const fresh = t.slice(0, cut).trim();
+  return fresh || t.trim();
+}
+
 export function classify(text) {
-  const t = String(text || "").toLowerCase();
-  if (/\b(afmelden|uitschrijven|unsubscribe|geen berichten meer|stop met mailen|niet meer mailen)\b/.test(t)) return "afmelding";
+  const t = replyText(text).toLowerCase();
+  // "stop" als heel bericht (zo staat het in elke WhatsApp van HQ) telt als afmelding.
+  if (/^[\s"'.!]*stop[\s"'.!]*$/.test(t)) return "afmelding";
+  if (/\b(afmelden|uitschrijven|unsubscribe|geen berichten meer|stop met mailen|niet meer mailen|niet meer appen|niet meer benaderen)\b/.test(t)) return "afmelding";
   if (/\b(geen interesse|niet geïnteresseerd|nee bedankt|niet nodig|heb al een)\b/.test(t)) return "afwijzing";
   if (/\b(later|volgend jaar|na de zomer|over een (paar )?maand|nu even niet|kom ik op terug)\b/.test(t)) return "later";
   if (/\b(ja|graag|leuk|interesse|laat (maar )?zien|akkoord|doen|wanneer kun|kunnen we bellen|afspraak)\b/.test(t)) return "interesse";
@@ -200,17 +232,20 @@ export function classify(text) {
  * Binnenkomende reactie: koppelen aan het juiste gesprek, geplande standaardopvolging
  * stoppen, status bijwerken en de eerstvolgende actie klaarzetten.
  */
-export async function registerReply({ lead_id, text, channel = "email", external_id = null, subject = null, in_reply_to = null, from = null, is_test = false }, actor = null) {
+export async function registerReply({ lead_id, text, channel = "email", external_id = null, subject = null, in_reply_to = null, references = [], from = null, is_test = false }, actor = null) {
   return tx(async (db) => {
     let lead = lead_id ? (await db.query("select * from hq.leads where id=$1 for update", [lead_id])).rows[0] : null;
     let outreach = null;
-    if (in_reply_to) outreach = (await db.query("select * from hq.outreach where provider_id=$1", [in_reply_to])).rows[0] || null;
+    // Koppelen via In-Reply-To of References (de Message-ID's van onze eigen berichten).
+    const ids = [in_reply_to, ...(Array.isArray(references) ? references : [])].filter(Boolean).map(String).slice(0, 20);
+    if (ids.length) outreach = (await db.query("select * from hq.outreach where provider_id = any($1::text[]) order by sent_at desc nulls last limit 1", [ids])).rows[0] || null;
     if (!lead && outreach) lead = (await db.query("select * from hq.leads where id=$1 for update", [outreach.lead_id])).rows[0];
     if (!lead && from) lead = (await db.query("select * from hq.leads where lower(contact_email)=$1 order by updated_at desc limit 1 for update", [normEmail(from)])).rows[0];
     if (!lead) throw new HttpError(404, "niet_gevonden", "Geen klantkaart gevonden voor deze reactie.");
     if (external_id && (await db.query("select 1 from hq.interactions where external_id=$1", [external_id])).rows[0]) return { lead_id: lead.id, duplicate: true };
     const bounce = /mailer-daemon|postmaster|undeliverable|delivery status notification|niet afgeleverd|onbestelbaar/i.test(`${from || ""} ${subject || ""}`);
-    const cls = bounce ? "afmelding" : classify(text);
+    const fresh = replyText(text);
+    const cls = bounce ? "afmelding" : classify(fresh);
     const kind = bounce ? "bounce" : cls === "afmelding" ? "afmelding" : "antwoord";
     const quote = outreach?.quote_id ? { id: outreach.quote_id } : (await db.query("select id from hq.quotes where lead_id=$1 and status in ('verstuurd','concept') order by created_at desc limit 1", [lead.id])).rows[0];
     await db.query(`insert into hq.interactions (lead_id, direction, channel, kind, classification, subject, body, external_id, outreach_id, quote_id, is_test, created_by, created_label)
@@ -233,11 +268,13 @@ export async function registerReply({ lead_id, text, channel = "email", external
       // Interesse of vraag: de klant wacht op ons; krijgt voorrang op nieuw koud onderzoek.
       await db.query("update hq.leads set awaiting_reply_since=coalesce(awaiting_reply_since, now()), last_inbound_at=now(), priority='hoog', priority_reason='Klant reageerde en wacht op antwoord', status=case when status in ('benaderd','nieuw','onderzocht','goedgekeurd') then 'gesprek' else status end, updated_at=now() where id=$1", [lead.id]);
       if (quote?.id && cls === "interesse") await db.query("update hq.quotes set interest=true where id=$1", [quote.id]);
+      await notify({ key: `reactie:${external_id || `${lead.id}:${Date.now()}`}`, kind: "reactie", title: `${lead.company} reageerde (${cls})`,
+        body: `${fresh.slice(0, 300)}\nEen antwoord staat klaar in HQ.`, leadId: lead.id, url: `/hq/klanten?id=${lead.id}`, isTest: lead.is_test || is_test }, db);
       // Antwoordconcept klaarzetten (Rayan controleert en verstuurt). Prijzen uit de actuele prijslijst.
       const opp = (await db.query("select service_text from hq.opportunities where lead_id=$1 and strength='concreet' and verified<>'klopt_niet' order by created_at desc limit 1", [lead.id])).rows[0];
-      const a = analyzeNeed({ message: text, company: lead.company });
+      const a = analyzeNeed({ message: fresh, company: lead.company });
       const cap = await capacity(db, { test: lead.is_test });
-      const priceQ = /kost|prijs|tarie|budget|wat betaal/i.test(String(text));
+      const priceQ = /kost|prijs|tarie|budget|wat betaal/i.test(fresh);
       const line = opp ? `Voor jouw situatie zou ik dit voorstellen: ${opp.service_text}.` : `Mijn voorstel: pakket ${BASE[a.package].name} (${eur(BASE[a.package].price_eur)}).`;
       const body = `${lead.contact_name ? `Hoi ${lead.contact_name.split(" ")[0]},` : "Hoi,"}\n\nDank voor je reactie! ${priceQ ? line : `Leuk dat je interesse hebt. ${line}`} Alle prijzen staan ook op ${SITE.brand.site}/prijzen.\n\nZal ik een korte offerte voor je klaarzetten, of bel je liever even? Ik kan starten vanaf ${new Date(cap.earliest_start).toLocaleDateString("nl-NL", { day: "numeric", month: "long" })}.\n\nGroet,\nRayan\nStrakWerk`;
       await db.query(`insert into hq.outreach (lead_id, quote_id, channel, kind, status, subject, body, to_address, idempotency_key, is_test) values ($1,$2,$3,'antwoord','concept',$4,$5,$6,$7,$8) on conflict (idempotency_key) do nothing`,
@@ -263,9 +300,14 @@ export async function prepareQuote(leadId, body = {}, actor = null) {
     const pkg = BASE[body.package] ? body.package : analysis.package;
     const options = Array.isArray(body.options) ? body.options.filter(o => OPT[o.id || o]) : analysis.options;
     const extras = (Array.isArray(body.extras) ? body.extras : []).map(e => ({ omschrijving: str(e.omschrijving || e.description, 200), prijs_eur: Number(e.prijs_eur ?? e.price_eur) })).filter(e => e.omschrijving && Number.isFinite(e.prijs_eur));
-    const origin = body.origin_key || `offerte:${leadId}:${pkg}:${options.map(o => o.id || o).sort().join(",")}:${extras.length}`;
-    const ex = (await db.query("select id from hq.quotes where origin_key=$1", [origin])).rows[0];
+    const base = body.origin_key || `offerte:${leadId}:${pkg}:${options.map(o => o.id || o).sort().join(",")}:${extras.length}`;
+    // Alleen een lopende offerte met dezelfde inhoud telt als dubbel. Na afwijzen of vervallen
+    // mag een nieuwe (met een versienummer, want origin_key is uniek).
+    const same = "(origin_key = $1 or left(origin_key, length($1) + 2) = $1 || ':v')";
+    const ex = (await db.query(`select id from hq.quotes where ${same} and status in ('concept','verstuurd','geaccepteerd') order by created_at desc limit 1`, [base])).rows[0];
     if (ex) return { id: ex.id, duplicate: true };
+    const versions = (await db.query(`select count(*)::int n from hq.quotes where ${same}`, [base])).rows[0].n;
+    const origin = versions ? `${base}:v${versions + 1}` : base;
     const pk = (await db.query("select * from hq.packages where key=$1 and active", [pkg])).rows[0];
     if (!pk) throw new HttpError(400, "ongeldig", "Pakket niet actief.");
     if (Math.round(pk.price_cents / 100) !== BASE[pkg].price_eur) throw new HttpError(409, "prijs_afwijkend", `Prijs van ${pk.name} in HQ wijkt af van de website. Zet ze eerst gelijk.`);
@@ -285,23 +327,49 @@ export async function prepareQuote(leadId, body = {}, actor = null) {
   });
 }
 
+/** Betaalinstellingen: aanbetaling (standaard 50%), IBAN en geldigheid van een offerte. */
+export async function paymentSettings(db) {
+  const r = (await (db || { query: q }).query("select value from hq.settings where key='payment'")).rows[0]?.value || {};
+  const pct = Number.isInteger(r.deposit_pct) && r.deposit_pct >= 0 && r.deposit_pct <= 100 ? r.deposit_pct : 50;
+  const days = Number.isInteger(r.quote_valid_days) && r.quote_valid_days >= 1 && r.quote_valid_days <= 90 ? r.quote_valid_days : 14;
+  // Betaalwijze: contant is de voorkeur van StrakWerk; overmaken alleen als Rayan dat kiest.
+  const method = ["contant", "beide", "bank"].includes(r.method) ? r.method : "contant";
+  return { deposit_pct: pct, iban: r.iban || null, account_name: r.account_name || null, quote_valid_days: days, method };
+}
+
+/** Openbare offertelink (ondertekend; werkt zonder account). */
+export const quoteUrl = (quoteId) => `/offerte?t=${encodeURIComponent(linkToken("offerte", quoteId))}`;
+
 /** Offerte versturen (eigenaar). Plant opvolging volgens de instellingen. */
 export async function sendQuote(quoteId, body = {}, auth) {
   assertUuid(quoteId, "offerte");
   return tx(async (db) => {
     const qu = (await db.query("select * from hq.quotes where id=$1 for update", [quoteId])).rows[0];
     if (!qu) throw new HttpError(404, "niet_gevonden", "Offerte niet gevonden.");
-    if (qu.status !== "concept") return { status: qu.status, duplicate: true };
+    if (qu.status !== "concept") return { status: qu.status, duplicate: true, url: quoteUrl(quoteId) };
     if ((qu.extras || []).length && !body.extras_approved) throw new HttpError(409, "beoordelen", "Deze offerte bevat extra wensen of afwijkende prijzen. Bevestig dat je ze hebt beoordeeld.");
     if (!qu.terms && !body.terms_ok) throw new HttpError(409, "geen_voorwaarden", "Vul eerst de voorwaarden van dit pakket in (Instellingen › Pakketten), of bevestig dat je ze apart meestuurt.");
-    await db.query("update hq.quotes set status='verstuurd', sent_at=now(), interest=coalesce($2, interest) where id=$1", [quoteId, body.interest ?? null]);
+    const pay = await paymentSettings(db);
+    const deposit = Math.round(qu.price_cents * pay.deposit_pct / 100);
+    await db.query(`update hq.quotes set status='verstuurd', sent_at=now(), interest=coalesce($2, interest), deposit_pct=$3, deposit_cents=$4,
+        valid_until=now() + make_interval(days => $5) where id=$1`, [quoteId, body.interest ?? null, pay.deposit_pct, deposit, pay.quote_valid_days]);
     await db.query("update hq.leads set status=case when status in ('gewonnen','afgemeld') then status else 'offerte' end, awaiting_reply_since=null, last_outbound_at=now(), updated_at=now() where id=$1", [qu.lead_id]);
     await db.query("insert into hq.interactions (lead_id, direction, channel, kind, subject, body, quote_id, is_test, created_by, created_label) values ($1,'uit',$2,'bericht','Offerte verstuurd',$3,$4,$5,$6,$7)",
       [qu.lead_id, body.channel || "email", `Offerte ${qu.package_key} · €${qu.price_cents / 100}`, quoteId, qu.is_test, auth?.userId || null, auth?.email || "systeem"]);
     const planned = await scheduleQuoteFollowups(db, { ...qu, interest: body.interest ?? qu.interest });
     await audit(db, { actor: auth?.userId || null, label: auth?.email || "systeem", action: "offerte.verstuurd", entity: "quote", entityId: quoteId });
-    return { status: "verstuurd", followups: planned };
+    return { status: "verstuurd", followups: planned, url: quoteUrl(quoteId), deposit_cents: deposit, valid_days: pay.quote_valid_days };
   });
+}
+
+/** Verlopen (of bijna verlopen) offerte met één klik verlengen. */
+export async function extendQuote(quoteId, auth) {
+  assertUuid(quoteId, "offerte");
+  const pay = await paymentSettings();
+  const r = await one(`update hq.quotes set valid_until = greatest(now(), coalesce(valid_until, now())) + make_interval(days => $2) where id=$1 and status='verstuurd' returning valid_until, lead_id`, [quoteId, pay.quote_valid_days]);
+  if (!r) throw new HttpError(409, "ongeldige_overgang", "Alleen een verstuurde offerte kan worden verlengd.");
+  await audit(null, { actor: auth?.userId || null, label: auth?.email || "systeem", action: "offerte.verlengd", entity: "quote", entityId: quoteId, details: { tot: r.valid_until } });
+  return { valid_until: r.valid_until, url: quoteUrl(quoteId) };
 }
 
 export async function scheduleQuoteFollowups(db, quote) {
@@ -335,28 +403,42 @@ export async function markInterest(quoteId, auth) {
 }
 
 /** Akkoord: offerte geaccepteerd → project met afgesproken inhoud, prijs en intake-link. */
-export async function acceptQuote(quoteId, auth) {
+export async function acceptQuote(quoteId, auth, { via = "hq", name = null, ipHash = null } = {}) {
   assertUuid(quoteId);
   return tx(async (db) => {
     const qu = (await db.query("select * from hq.quotes where id=$1 for update", [quoteId])).rows[0];
     if (!qu) throw new HttpError(404, "niet_gevonden", "Offerte niet gevonden.");
     if (!["verstuurd", "geaccepteerd"].includes(qu.status)) throw new HttpError(409, "ongeldige_overgang", "Alleen een verstuurde offerte kan akkoord krijgen.");
     if (qu.status !== "geaccepteerd") {
-      await db.query("update hq.quotes set status='geaccepteerd', decided_at=now(), accepted_at=now() where id=$1", [quoteId]);
+      await db.query("update hq.quotes set status='geaccepteerd', decided_at=now(), accepted_at=now(), accepted_via=$2, accepted_name=$3, accepted_ip_hash=$4 where id=$1", [quoteId, via, name, ipHash]);
       await db.query("update hq.leads set status='gewonnen', awaiting_reply_since=null, updated_at=now() where id=$1 and status<>'gewonnen'", [qu.lead_id]);
       await db.query("insert into hq.lead_history (lead_id, actor, actor_label, to_status, note) values ($1,$2,$3,'gewonnen','Offerte geaccepteerd')", [qu.lead_id, auth?.userId || null, auth?.email || "systeem"]);
       // Opvolging van deze offerte is niet meer nodig.
       await db.query("update hq.outreach set status='geannuleerd', cancel_reason='Offerte geaccepteerd', updated_at=now() where quote_id=$1 and status in ('concept','gepland','klaar_handmatig')", [quoteId]);
     }
     const pid = await projectFromQuote(db, qu.lead_id, auth) || (await db.query("select id from hq.projects where lead_id=$1", [qu.lead_id])).rows[0]?.id;
-    const token = randomUUID().replace(/-/g, "") + randomUUID().replace(/-/g, "").slice(0, 16);
+    // Intake-link afgeleid van het project (ondertekend): HQ en de offertepagina kunnen hem
+    // altijd opnieuw tonen. "Nieuwe intake-link" in HQ maakt een willekeurige (oude vervalt).
+    const token = intakeToken(pid);
     const p = (await db.query(`update hq.projects set quote_id=coalesce(quote_id,$2), price_cents=coalesce(price_cents,$3), scope=case when scope='{}'::jsonb then $4 else scope end,
         intake_token_hash=coalesce(intake_token_hash,$5), status=case when status='akkoord' then 'intake' else status end, is_test=$6, updated_at=now() where id=$1 returning *`,
       [pid, quoteId, qu.price_cents, { omschrijving: qu.description, onderdelen: qu.items, extra: qu.extras, start_vanaf: qu.earliest_start }, createHash("sha256").update(token).digest("hex"), qu.is_test])).rows[0];
-    // Token alleen teruggeven als het net is aangemaakt (daarna niet meer op te vragen; opnieuw maken kan).
-    const fresh = p.intake_token_hash === createHash("sha256").update(token).digest("hex");
-    await audit(db, { actor: auth?.userId || null, label: auth?.email || "systeem", action: "offerte.akkoord", entity: "quote", entityId: quoteId, details: { project: pid } });
-    return { project_id: pid, intake_url: fresh ? `/intake?t=${token}` : null };
+    const current = p.intake_token_hash === createHash("sha256").update(token).digest("hex");
+    if (qu.status !== "geaccepteerd") {
+      const lead = (await db.query("select company from hq.leads where id=$1", [qu.lead_id])).rows[0];
+      await notify({ key: `offerte_akkoord:${quoteId}`, kind: "akkoord", title: `Akkoord: ${lead?.company || "klant"} (€${qu.price_cents / 100})`,
+        body: `${via === "klant_online" ? `Online geaccepteerd door ${name || "de klant"}.` : "Akkoord vastgelegd in HQ."}${qu.deposit_cents ? ` Aanbetaling gevraagd: €${(qu.deposit_cents / 100).toFixed(2)}.` : ""}`,
+        leadId: qu.lead_id, url: `/hq/klanten?id=${qu.lead_id}`, isTest: qu.is_test }, db);
+      // Kwam deze klant via de verwijslink van een andere klant? Dan niet vergeten te bedanken.
+      const ref = (await db.query("select r.id, r.company from hq.leads l join hq.leads r on r.id=l.referral_lead_id where l.id=$1", [qu.lead_id])).rows[0];
+      if (ref) {
+        const reward = (await db.query("select value->>'referral_reward' as r from hq.settings where key='links'")).rows[0]?.r;
+        await notify({ key: `verwijzing:${qu.lead_id}`, kind: "verwijzing", title: `Via ${ref.company}: ${lead?.company || "nieuwe klant"} is klant geworden`,
+          body: reward ? `Volgens je regel krijgt ${ref.company} nu: ${reward}.` : `Bedank ${ref.company} voor de verwijzing.`, leadId: ref.id, url: `/hq/klanten?id=${ref.id}`, isTest: qu.is_test }, db);
+      }
+    }
+    await audit(db, { actor: auth?.userId || null, label: auth?.email || "systeem", action: "offerte.akkoord", entity: "quote", entityId: quoteId, details: { project: pid, via } });
+    return { project_id: pid, intake_url: current ? `/intake?t=${token}` : null };
   });
 }
 
@@ -369,8 +451,17 @@ export async function registerPayment(leadId, body, auth) {
   if (!lead) throw new HttpError(404, "niet_gevonden", "Klant niet gevonden.");
   const sim = body.method === "simulatie";
   if (sim && !lead.is_test) throw new HttpError(409, "ongeldig", "Een gesimuleerde betaling kan alleen bij testgegevens.");
-  const p = await one(`insert into hq.payments (lead_id, quote_id, amount_cents, received_on, note, created_by, is_test, method) values ($1,$2,$3,coalesce($4::date, current_date),$5,$6,$7,$8) returning *`,
-    [leadId, body.quote_id || null, cents, /^\d{4}-\d{2}-\d{2}$/.test(body.received_on || "") ? body.received_on : null, str(body.note, 200) || (sim ? "TEST: gesimuleerde betaling" : ""), auth?.userId || null, lead.is_test || sim, sim ? "simulatie" : body.method === "bank" ? "bank" : "handmatig"]);
+  // Soort: aanbetaling, restbetaling of volledig. Zonder keuze: eerste betaling op een offerte
+  // met aanbetaling = aanbetaling, anders volledig.
+  let kind = ["aanbetaling", "restbetaling", "volledig", "overig"].includes(body.kind) ? body.kind : null;
+  if (!kind) {
+    const qd = body.quote_id ? await one("select deposit_cents from hq.quotes where id=$1 and lead_id=$2", [body.quote_id, leadId]) : null;
+    const before = (await one("select count(*)::int n from hq.payments where lead_id=$1", [leadId])).n;
+    kind = qd?.deposit_cents && !before ? "aanbetaling" : before ? "restbetaling" : "volledig";
+  }
+  const p = await one(`insert into hq.payments (lead_id, quote_id, amount_cents, received_on, note, created_by, is_test, method, kind) values ($1,$2,$3,coalesce($4::date, current_date),$5,$6,$7,$8,$9) returning *`,
+    [leadId, body.quote_id || null, cents, /^\d{4}-\d{2}-\d{2}$/.test(body.received_on || "") ? body.received_on : null, str(body.note, 200) || (sim ? "TEST: gesimuleerde betaling" : body.method === "contant" ? "Contant ontvangen" : ""), auth?.userId || null, lead.is_test || sim, sim ? "simulatie" : body.method === "bank" ? "bank" : "handmatig", kind]);
+  if (kind === "aanbetaling" || kind === "volledig") await q("update hq.projects set deposit_paid_at=coalesce(deposit_paid_at, now()), updated_at=now() where lead_id=$1", [leadId]);
   await audit(null, { actor: auth?.userId || null, label: auth?.email || "systeem", action: "betaling.vastgelegd", entity: "payment", entityId: p.id, details: { bedrag: cents, test: p.is_test } });
   return p;
 }
@@ -450,9 +541,14 @@ export async function customerCard(leadId) {
     (await import("./contact.js")).suppressedFor(lead),
     q("select * from hq.actions where lead_id=$1 and status in ('open','opgepakt') order by day desc, rank", [leadId]),
   ]);
+  const preview = await one("select id, slug, style, status, views, first_viewed_at, last_viewed_at, expires_at, content_by, created_at from hq.previews where lead_id=$1 and status<>'ingetrokken' order by created_at desc limit 1", [leadId]);
+  const calls = (await q("select id, day, kind, outcome, notes, callback_on, done_at from hq.calls where lead_id=$1 order by day desc limit 20", [leadId])).rows;
+  const previewTask = await one("select status, error from hq.tasks where lead_id=$1 and kind='voorbeeldsite' order by created_at desc limit 1", [leadId]);
   // Klant zocht zelf contact of reageerde: dan gaat het om antwoorden, niet om koud benaderen.
   const email = await contactCheck(lead, "email", { kind: lead.last_inbound_at ? "antwoord" : "eerste_contact" });
   return { lead, timeline: timeline.rows, consents: consents.rows, outreach: outreach.rows, quotes: quotes.rows, appointments: appts.rows, project, opportunities: opps.rows, payments: payments.rows,
-    suppressed: sup, actions: actions.rows, contact: { email }, capacity: await capacity(),
+    suppressed: sup, actions: actions.rows, contact: { email, whatsapp: await contactCheck(lead, "whatsapp", { kind: "eerste_contact" }), bellen: await phoneAllowed(lead) }, capacity: await capacity(),
+    preview: preview ? { ...preview, url: `/voorbeeld/${preview.slug}` } : null, preview_task: previewTask, calls,
+    quote_urls: Object.fromEntries(quotes.rows.filter(x => ["verstuurd", "geaccepteerd"].includes(x.status)).map(x => [x.id, quoteUrl(x.id)])),
     wa_link: lead.contact_phone ? `https://wa.me/${String(lead.contact_phone).replace(/\D/g, "")}` : null };
 }

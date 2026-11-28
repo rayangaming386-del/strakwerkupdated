@@ -1,0 +1,37 @@
+:root{--bg:#070708;--panel:#111114;--line:#26262b;--txt:#ececee;--mut:#9a9aa3;--gold:#B9975B;--gold-hi:#E2CA97;--r:2px}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.55 Geist,system-ui,sans-serif}
+.of{max-width:640px;margin:0 auto;padding:20px 16px 48px}
+.of-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.logo{font-weight:800;letter-spacing:.06em}.logo b{color:var(--gold)}
+.kicker{color:var(--gold-hi);font:500 12px/1.4 "Geist Mono",monospace;text-transform:uppercase;letter-spacing:.12em;margin:0 0 6px}
+.of-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:16px;min-width:0}
+h1{font-size:26px;line-height:1.2;margin:0 0 10px}
+h2{font-size:19px;margin:0 0 10px}
+h3{font-size:16px;margin:0 0 8px;color:var(--gold-hi)}
+.muted{color:var(--mut)}.small{font-size:14px}
+.pre{white-space:pre-wrap;overflow-wrap:anywhere}
+.lines{width:100%;border-collapse:collapse;margin:14px 0 6px}
+.lines td{padding:9px 0;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}
+.lines td:last-child{text-align:right;white-space:nowrap;padding-left:12px}
+.lines .note{display:block;color:var(--mut);font-size:13px}
+.total,.deposit{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-top:12px}
+.total b{font-size:24px}
+.deposit b{color:var(--gold-hi);font-size:19px}
+.list{margin:0;padding-left:20px}
+.terms summary{cursor:pointer;font-weight:600}
+label{display:block;font-weight:600;margin:12px 0 6px}
+input[type=text]{width:100%;background:#0b0b0d;border:1px solid var(--line);color:var(--txt);border-radius:var(--r);padding:12px;font:inherit}
+.check{display:flex;gap:10px;align-items:flex-start;font-weight:400;margin:14px 0}
+.check input{margin-top:5px;width:18px;height:18px;accent-color:var(--gold)}
+input:focus-visible,button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.btn{display:block;text-align:center;text-decoration:none;background:var(--gold);color:#070708;border:0;border-radius:var(--r);padding:14px 20px;font:600 16px/1.2 inherit;cursor:pointer;width:100%;margin-top:6px}
+.btn[disabled]{opacity:.6}
+.copy{background:transparent;color:var(--gold-hi);border:1px solid var(--line);border-radius:var(--r);padding:4px 8px;font:inherit;font-size:13px;cursor:pointer;margin-left:6px}
+.pay dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:8px 14px;margin:0}
+.pay dt{color:var(--mut)}.pay dd{margin:0;overflow-wrap:anywhere}
+.done{border-color:var(--gold)}
+.err{color:#f0a49c}
+a{color:var(--gold-hi)}
+.foot{margin-top:20px}

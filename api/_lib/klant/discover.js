@@ -6,6 +6,7 @@
 import { q, one, tx } from "../db.js";
 import { fetchPublic, robotsAllows, normalizeUrl } from "../agents/fetcher.js";
 import { extract } from "../agents/html.js";
+import { legalFromName, legalFromSite, LEGAL_FORMS, LEGAL_SOURCES } from "./legalform.js";
 import { normalizeDomain, companyKey } from "../crm.js";
 import { normEmail, normPhone } from "./contact.js";
 import { enqueue } from "../queue.js";
@@ -15,13 +16,13 @@ export const OSM_SOURCE = "OpenStreetMap (Overpass API) · © OpenStreetMap-bijd
 
 export function overpassQuery(tags, city, limit = 40) {
   const sel = tags.map(t => Object.entries(t).map(([k, v]) => `["${k}"="${v}"]`).join("")).flatMap(f => [`node(area.a)${f};`, `way(area.a)${f};`]).join("");
-  return `[out:json][timeout:25];area["name"="${city.replace(/"/g, "")}"]["boundary"="administrative"]->.a;(${sel});out center tags ${Math.min(limit, 100)};`;
+  return `[out:json][timeout:18];area["name"="${city.replace(/"/g, "")}"]["boundary"="administrative"]->.a;(${sel});out center tags ${Math.min(limit, 100)};`;
 }
 
 async function overpass(query) {
   let res;
   try {
-    res = await fetch(OVERPASS(), { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded", "user-agent": "StrakWerkHQ/1.0 (+https://www.strakwerkk.nl)" }, body: new URLSearchParams({ data: query }), signal: AbortSignal.timeout(40_000) });
+    res = await fetch(OVERPASS(), { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded", "user-agent": "StrakWerkHQ/1.0 (+https://www.strakwerkk.nl)" }, body: new URLSearchParams({ data: query }), signal: AbortSignal.timeout(20_000) });
   } catch (e) { throw Object.assign(new Error(`OpenStreetMap niet bereikbaar (${e.name}).`), { retryable: true }); }
   if (res.status === 429 || res.status === 504) throw Object.assign(new Error("OpenStreetMap is druk (limiet); later opnieuw."), { retryable: true });
   if (!res.ok) throw Object.assign(new Error(`OpenStreetMap gaf ${res.status}.`), { retryable: false });
@@ -31,10 +32,13 @@ async function overpass(query) {
 const slug = (s) => String(s || "").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/&/g, "en").replace(/[^a-z0-9]+/g, "").slice(0, 40);
 
 /** Websitestatus vaststellen met controleerbare stappen. Onzekerheid blijft zichtbaar. */
-export async function websiteStatus({ name, city, website, social }) {
+export async function websiteStatus({ name, city, website, social, budgetMs = 20_000 }) {
   const checks = [];
   const at = new Date().toISOString();
+  const deadline = Date.now() + budgetMs;
   const tryUrl = async (url, label) => {
+    // Tijd op (Workers: max. 30 s per taak): niet gokken, maar eerlijk "niet gecontroleerd".
+    if (Date.now() > deadline - 4000) { checks.push({ controle: label, url, uitkomst: "niet gecontroleerd (tijd op); later opnieuw", at }); return { error: true }; }
     try {
       const u = normalizeUrl(url);
       const robots = await robotsAllows(u).catch(() => ({ allowed: true, note: "robots.txt niet te lezen" }));
@@ -51,7 +55,7 @@ export async function websiteStatus({ name, city, website, social }) {
   };
   if (website) {
     const r = await tryUrl(website, "Website uit OpenStreetMap");
-    if (r.ok) return { status: "gevonden", website: r.page.url, checks, active: true };
+    if (r.ok) return { status: "gevonden", website: r.page.url, checks, active: true, legal: legalFromSite(name, r.page.body) };
   } else checks.push({ controle: "Websitevelden in OpenStreetMap (website, contact:website, url)", uitkomst: "leeg", at });
   // Bedrijfsnaam met plaatsnaam als domein (vaak gebruikt door kleine ondernemers).
   let uncertain = false;
@@ -62,7 +66,7 @@ export async function websiteStatus({ name, city, website, social }) {
     if (r.ok) {
       const title = `${r.x.title || ""} ${r.x.h1.join(" ")}`.toLowerCase();
       const words = String(name).toLowerCase().split(/\s+/).filter(w => w.length > 3);
-      if (words.some(w => title.includes(w))) return { status: "gevonden", website: r.page.url, checks: [...checks, { controle: "Naam op gevonden site", uitkomst: "komt overeen met bedrijfsnaam", at }], active: true };
+      if (words.some(w => title.includes(w))) return { status: "gevonden", website: r.page.url, checks: [...checks, { controle: "Naam op gevonden site", uitkomst: "komt overeen met bedrijfsnaam", at }], active: true, legal: legalFromSite(name, r.page.body) };
       checks.push({ controle: "Naam op gevonden site", uitkomst: "bedrijfsnaam niet herkend: waarschijnlijk een ander bedrijf", at });
     }
     if (r.error) uncertain = true;
@@ -88,10 +92,12 @@ export function scoreLead({ segmentActive = true, websiteStatus: ws, concrete = 
 }
 
 /**
- * Eén ontdekronde voor één segment en plaats. Dubbele vondsten (zelfde OSM-object, domein
- * of naam+plaats) worden niet opnieuw aangemaakt; bestaande gesprekken blijven leidend.
+ * Eén ontdekronde voor één segment en plaats. Stap 1 (deze functie): OpenStreetMap bevragen,
+ * dubbelen herkennen (zelfde OSM-object, domein of naam+plaats; bestaande gesprekken blijven
+ * leidend) en nieuwe bedrijven vastleggen met bron en datum. Stap 2 (per bedrijf een eigen,
+ * korte taak "websitestatus"): website controleren, prioriteit bepalen, eventueel Auditor.
  */
-export async function discover({ segment, city, limit = 20, isTest = false, actorLabel = "agent:scout" }) {
+export async function discover({ segment, city, limit = 20, isTest = false, actorLabel = "agent:scout", inline = false }) {
   const seg = await one("select * from hq.segments where key=$1", [segment]);
   if (!seg) throw Object.assign(new Error("Onbekend segment."), { retryable: false });
   const els = await overpass(overpassQuery(seg.osm_tags, city, limit * 2));
@@ -110,21 +116,54 @@ export async function discover({ segment, city, limit = 20, isTest = false, acto
     const ex = await one(`select id, company, status from hq.leads where osm_id=$1 or (domain=$2 and $2 is not null) or (company_key=$3 and coalesce(city,'')=$4)`, [osmId, domain, companyKey(name), place]);
     if (ex) { out.existing.push({ id: ex.id, company: ex.company, status: ex.status, reden: "al in HQ" }); continue; }
     const closed = Object.keys(t).some(k => /^(disused|was|abandoned):/.test(k));
-    const ws = await websiteStatus({ name, city: place, website, social });
-    const active = closed ? false : ws.active ?? (t.opening_hours ? true : null);
-    const sc = scoreLead({ segmentActive: seg.active, websiteStatus: ws.status, hasContact: Boolean(email || phone), active });
-    const reason = ws.status === "geen_gevonden" ? "Geen eigen website gevonden na deze controles: een Starter-site kan helpen." : ws.status === "alleen_sociaal" ? "Alleen een sociaal profiel: een eigen site met contact en diensten kan helpen." : ws.status === "onzeker" ? "Websitestatus onzeker: handmatig controleren." : "Website gevonden: Auditor controleert de mobiele verkoopkans.";
     const lead = await tx(async (db) => {
-      const r = (await db.query(`insert into hq.leads (company, company_key, website, domain, source, source_url, city, contact_email, contact_phone, status, segment, website_status, website_checks, social_url, active_status, fit_score, priority, priority_reason, osm_id, notes, source_detail, is_test)
-        values ($1,$2,$3,$4,'scout_osm',$5,$6,$7,$8,'nieuw',$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20) on conflict do nothing returning *`,
-        [name, companyKey(name), ws.website, normalizeDomain(ws.website), `https://www.openstreetmap.org/${osmId}`, place, email, phone, segment, ws.status, JSON.stringify(ws.checks), social,
-         active === false ? "gesloten" : active ? "actief" : "onzeker", sc.score, sc.priority, `${reason} (${sc.reason})`, osmId, "", { bron: OSM_SOURCE, onderzocht_op: new Date().toISOString(), reden: reason }, isTest])).rows[0];
-      if (r) await db.query("insert into hq.lead_history (lead_id, actor_label, to_status, note) values ($1,$2,'nieuw',$3)", [r.id, actorLabel, `Gevonden via ${OSM_SOURCE}`]);
-      // Met website: Auditor controleert wat een echte klant op mobiel wil doen.
-      if (r && ws.status === "gevonden") await enqueue(db, { agent: "auditor", kind: "verkoopkans", title: `Verkoopkans ${name}`, input: { url: ws.website }, leadId: r.id, idempotencyKey: `verkoopkans:${r.id}:1` });
+      // Openbaar bedrijfsadres (voor de bezoekroute), alleen als OpenStreetMap het heeft.
+      const street = [t["addr:street"], t["addr:housenumber"]].filter(Boolean).join(" ");
+      const address = street ? [street, [t["addr:postcode"], t["addr:city"] || place].filter(Boolean).join(" ")].filter(Boolean).join(", ").slice(0, 200) : null;
+      const r = (await db.query(`insert into hq.leads (company, company_key, website, domain, source, source_url, city, contact_email, contact_phone, status, segment, social_url, active_status, osm_id, notes, source_detail, is_test, priority_reason, address)
+        values ($1,$2,$3,$4,'scout_osm',$5,$6,$7,$8,'nieuw',$9,$10,$11,$12,'',$13,$14,'Websitecontrole volgt',$15) on conflict do nothing returning *`,
+        [name, companyKey(name), website, domain, `https://www.openstreetmap.org/${osmId}`, place, email, phone, segment, social, closed ? "gesloten" : (t.opening_hours ? "actief" : "onzeker"), osmId,
+         { bron: OSM_SOURCE, onderzocht_op: new Date().toISOString(), osm: { website: website || null, social: social || null, openingstijden: t.opening_hours || null } }, isTest, address])).rows[0];
+      if (r) {
+        await db.query("insert into hq.lead_history (lead_id, actor_label, to_status, note) values ($1,$2,'nieuw',$3)", [r.id, actorLabel, `Gevonden via ${OSM_SOURCE}`]);
+        if (!inline) await enqueue(db, { agent: "scout", kind: "websitestatus", title: `Websitecontrole ${name}`, input: {}, leadId: r.id, idempotencyKey: `websitestatus:${r.id}`, timeoutS: 25 });
+      }
       return r;
     });
-    if (lead) out.new.push({ id: lead.id, company: name, website_status: ws.status, priority: sc.priority });
+    if (lead && inline) await checkLead(lead.id);
+    if (lead) out.new.push({ id: lead.id, company: name });
   }
   return out;
+}
+
+/** Stap 2 voor één bedrijf: websitestatus met zichtbare controles, prioriteit, Auditor. */
+export async function checkLead(leadId) {
+  const l = await one("select * from hq.leads where id=$1", [leadId]);
+  if (!l) throw Object.assign(new Error("Bedrijf bestaat niet meer."), { retryable: false });
+  const seg = l.segment ? await one("select active from hq.segments where key=$1", [l.segment]) : null;
+  const ws = await websiteStatus({ name: l.company, city: l.city, website: l.website, social: l.social_url });
+  const closed = l.active_status === "gesloten";
+  const active = closed ? false : ws.active ?? (l.active_status === "actief" ? true : null);
+  const sc = scoreLead({ segmentActive: seg?.active ?? true, websiteStatus: ws.status, hasContact: Boolean(l.contact_email || l.contact_phone), active });
+  const reason = ws.status === "geen_gevonden" ? "Geen eigen website gevonden na deze controles: een Starter-site kan helpen." : ws.status === "alleen_sociaal" ? "Alleen een sociaal profiel: een eigen site met contact en diensten kan helpen." : ws.status === "onzeker" ? "Websitestatus onzeker: handmatig controleren." : "Website gevonden: Auditor controleert de mobiele verkoopkans.";
+  // Rechtsvorm (bepaalt of bellen mag): alleen bij een sterk signaal; een eerdere vaststelling blijft staan.
+  const lf = legalFromName(l.company) || ws.legal || null;
+  const known = l.legal_form && l.legal_form !== "onbekend";
+  const checks = [...ws.checks, { controle: "Rechtsvorm (bepaalt of bellen mag)", at: new Date().toISOString(),
+    uitkomst: known ? `${LEGAL_FORMS[l.legal_form].label} (al vastgelegd: ${LEGAL_SOURCES[l.legal_form_source] || "onbekende bron"})`
+      : lf ? `${LEGAL_FORMS[lf.form].label} (${LEGAL_SOURCES[lf.source].toLowerCase()}: "${lf.evidence}")`
+      : "niet herkend op naam of eigen site: controleer in het KvK-register voordat je belt (eenmanszaak, vof of maatschap niet ongevraagd bellen)" }];
+  return tx(async (db) => {
+    const r = (await db.query(`update hq.leads set website=$2, domain=coalesce($3, domain), website_status=$4, website_checks=$5, active_status=$6, fit_score=$7, priority=$8, priority_reason=$9,
+        source_detail=source_detail || $10,
+        legal_form=case when $11::text is not null and (legal_form is null or legal_form='onbekend') then $11 else legal_form end,
+        legal_form_source=case when $11::text is not null and (legal_form is null or legal_form='onbekend') then $12 else legal_form_source end,
+        legal_form_evidence=case when $11::text is not null and (legal_form is null or legal_form='onbekend') then $13 else legal_form_evidence end,
+        legal_form_at=case when $11::text is not null and (legal_form is null or legal_form='onbekend') then now() else legal_form_at end,
+        updated_at=now() where id=$1 returning *`,
+      [leadId, ws.website || l.website, normalizeDomain(ws.website), ws.status, JSON.stringify(checks), active === false ? "gesloten" : active ? "actief" : "onzeker", sc.score, sc.priority, `${reason} (${sc.reason})`, { reden: reason },
+        lf?.form || null, lf?.source || null, lf?.evidence || null])).rows[0];
+    if (ws.status === "gevonden") await enqueue(db, { agent: "auditor", kind: "verkoopkans", title: `Verkoopkans ${l.company}`, input: { url: ws.website }, leadId, idempotencyKey: `verkoopkans:${leadId}:1`, timeoutS: 25 });
+    return { lead: r, status: ws.status, priority: sc.priority };
+  });
 }

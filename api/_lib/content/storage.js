@@ -8,20 +8,22 @@ import { mkdir, writeFile, stat, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { env } from "../env.js";
+import { isServerless } from "../runtime.js";
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
+// Alleen lokaal gebruikt; in Workers bestaat er geen schijf (en geen bestandspad van deze module).
+const root = () => path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 export const BUCKET = "hq-media";
 const KEY_RE = /^[a-z0-9][a-z0-9/_.-]{3,200}$/;
 
 export function driver() {
   const pick = (process.env.HQ_STORAGE || "").trim();
   const hasSb = Boolean(env.supabaseUrl && env.supabaseSecretKey);
-  if (pick === "local") return "local";
+  if (pick === "local") return isServerless() ? "niet_gekoppeld" : "local";
   if (pick === "supabase") return hasSb ? "supabase" : "niet_gekoppeld";
   if (hasSb) return "supabase";
-  return process.env.VERCEL ? "niet_gekoppeld" : "local";
+  return isServerless() ? "niet_gekoppeld" : "local"; // serverloos: geen lokale schijf
 }
-export const localDir = () => path.resolve(process.env.HQ_MEDIA_DIR || path.join(root, ".data", "media"));
+export const localDir = () => path.resolve(process.env.HQ_MEDIA_DIR || path.join(root(), ".data", "media"));
 
 function assertKey(key) {
   if (!KEY_RE.test(key) || key.includes("..")) throw new Error("Ongeldige opslagsleutel.");

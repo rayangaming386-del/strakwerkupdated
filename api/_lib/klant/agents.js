@@ -1,7 +1,7 @@
 // Uitvoerders voor de nieuwe taaksoorten van Scout (ontdekken) en Auditor (verkoopkans).
 // De bestaande taaksoorten (lead_onderzoek, website_analyse) blijven ongewijzigd werken.
 import { q, one } from "../db.js";
-import { discover } from "./discover.js";
+import { discover, checkLead } from "./discover.js";
 import { salesCheck, saveObservations, briefingFrom } from "./salescheck.js";
 import { scoreLead } from "./discover.js";
 
@@ -10,7 +10,14 @@ export async function runDiscover({ task, ctx }) {
   if (!segment || !city) throw Object.assign(new Error("Segment en plaats zijn verplicht."), { retryable: false });
   await ctx.step(`OpenStreetMap doorzoeken: ${segment} in ${city}`);
   const r = await discover({ segment, city, limit: Math.min(Number(limit) || 15, 40), isTest: Boolean(task.input?.is_test) });
-  return { status: "afgerond", result: { ...r, segment, city }, message: `${r.new.length} nieuw, ${r.existing.length} al in HQ, ${r.skipped.length} overgeslagen (van ${r.found} gevonden).` };
+  return { status: "afgerond", result: { ...r, segment, city }, message: `${r.new.length} nieuw (websitecontrole per bedrijf ingepland), ${r.existing.length} al in HQ, ${r.skipped.length} overgeslagen (van ${r.found} gevonden).` };
+}
+
+export async function runCheckLead({ task, lead, ctx }) {
+  if (!lead) throw Object.assign(new Error("Bedrijf bestaat niet meer."), { retryable: false });
+  await ctx.step(`Website van ${lead.company} controleren`);
+  const r = await checkLead(lead.id);
+  return { status: "afgerond", result: { website_status: r.status, priority: r.priority, checks: r.lead.website_checks }, message: `${lead.company}: ${r.status.replace(/_/g, " ")} · prioriteit ${r.priority}` };
 }
 
 export async function runSalesCheck({ task, lead, ctx }) {

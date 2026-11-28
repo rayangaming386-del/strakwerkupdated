@@ -3,6 +3,7 @@
 import { h, fmt, errorBox, skeleton, toast, empty, field } from "../ui.js";
 import { api } from "../api.js";
 import { put, envSwitch, envQs, DEPT } from "./klant-ui.js";
+import { salesSettings } from "./sales-ui.js";
 
 const TABS = [["overleg", "Overleg"], ["scores", "Scorekaarten"], ["routes", "Routes & fouten"], ["scout", "Scout"], ["exp", "Experimenten"], ["partners", "Partners"], ["resultaten", "Resultaten"], ["instellingen", "Instellingen"]];
 
@@ -42,6 +43,9 @@ export async function mount(root, ctx) {
           ctx.can("settings.write") ? h("div", { class: "row" },
             act(d.routes.email.auto ? "Automatisch uit" : "Automatisch aan", () => { const ok = d.routes.email.terms_checked_at || confirm("Heb je de voorwaarden van je verzenddienst (bijv. Gmail) gecontroleerd voor zakelijke berichten en limieten?"); if (!ok) return; return api("kantoor/routes", { method: "PUT", body: { email: { auto: !d.routes.email.auto, terms_checked: true } } }); }),
             act(d.routes.email.live ? "Live uit (proefstand)" : "Live aan", () => { if (!d.routes.email.live && !confirm("Live: berichten gaan echt naar ondernemers. Zeker weten?")) return; return api("kantoor/routes", { method: "PUT", body: { email: { live: !d.routes.email.live, terms_checked: true } } }); }, d.routes.email.live ? "" : "btn-gold")) : null),
+        card("Mailtest met je eigen adres", h("p", { class: "muted", style: { margin: 0 } }, "Verstuurt één echt bericht naar het e-mailadres waarmee je bent ingelogd. Antwoord erop: je antwoord hoort op de klantkaart \"Mailtest StrakWerk HQ\" te verschijnen en de geplande opvolging hoort te stoppen."),
+          ctx.can("settings.write") ? act("Testmail naar mezelf", async () => { const r = await api("kantoor/mailtest", { method: "POST", body: {} }); toast(`Verstuurd via ${r.route === "gmail_api" ? "Gmail API" : "SMTP"}. Antwoord erop en open daarna de klantkaart.`); }, "btn-gold") : null),
+        card("Geplande taken (cron)", d.cron?.length ? h("ul", { class: "acts" }, d.cron.map(c => h("li", {}, `${({ taken: "Takenwachtrij (elke minuut)", klant: "Klanten winnen (elke 5 min)", content: "Contentstudio (elke 10 min)", bewaren: "Bewaartermijnen (elk uur)" })[c.part] || c.part}: laatst ${fmt.ago(c.at)}`))) : empty("Nog geen cron-run gezien", "Na de livegang draait de cron elke minuut.")),
         card("WhatsApp en telefoon", h("p", { class: "muted", style: { margin: 0 } }, "Geen gratis automatische route: HQ zet berichten klaar met een kopieerknop en een link. Handmatig versturen verandert de contactregels niet.")),
         card("Eigen fouten", d.errors.length ? h("div", { class: "stack" }, d.errors.map(e => h("div", { class: "stack", style: { borderTop: "1px solid var(--line)", paddingTop: "8px" } },
           h("div", { class: "row" }, h("strong", {}, e.kind.replace(/_/g, " ")), h("span", { class: `badge ${e.resolved_at ? "b-ok" : "b-bad"}` }, e.resolved_at ? "hersteld" : "open"), e.route ? h("span", { class: "badge" }, `route ${e.route}`) : null),
@@ -81,7 +85,7 @@ export async function mount(root, ctx) {
           p.status === "voorstel" && ctx.can("settings.write") ? h("div", { class: "row" }, act("Goedkeuren", () => api(`voorstellen/${p.id}`, { method: "POST", body: { status: "goedgekeurd" } })), act("Afwijzen", () => api(`voorstellen/${p.id}`, { method: "POST", body: { status: "afgewezen" } }))) : null))) : empty("Nog geen voorstellen", "Maandag maakt HQ voorstellen uit echte bezoekersgegevens."),
           ctx.can("settings.write") ? act("Nu voorstellen maken", async () => { const r = await api("voorstellen/maken", { method: "POST", body: {} }); toast(r.note || `${r.created} nieuw voorstel/voorstellen.`); }) : null),
       ]; },
-      instellingen: () => [settingsForm()],
+      instellingen: () => [settingsForm(), ...salesSettings(d, ctx, refresh)],
     };
     put(box, ...T[tab]());
   }

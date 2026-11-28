@@ -55,8 +55,9 @@ export async function demoKlanten({ log = console.log } = {}) {
     { type: "node", id: 9001, tags: { name: "Kapsalon Anna (demo)", shop: "hairdresser", "addr:city": "Den Haag", phone: "070 000 0001", opening_hours: "Tu-Sa 09:00-17:00" } },
     { type: "node", id: 9002, tags: { name: "Haarstudio Bea (demo)", shop: "hairdresser", "addr:city": "Den Haag", "contact:instagram": "https://instagram.com/voorbeeld" } },
   ];
-  const a = await discover({ segment: "salons", city: "Den Haag", limit: 5, isTest: true });
-  for (const n of a.new) log(`Scout: ${n.company} → ${n.website_status} · prioriteit ${n.priority}`);
+  await discover({ segment: "salons", city: "Den Haag", limit: 5, isTest: true });
+  await drain();
+  for (const n of (await q("select company, website_status, priority from hq.leads where osm_id in ('node/9001','node/9002') order by osm_id")).rows) log(`Scout: ${n.company} → ${n.website_status} · prioriteit ${n.priority}`);
   const anna = await one("select * from hq.leads where osm_id='node/9001'");
   log(`Controles: ${anna.website_checks.map(c => `${c.controle}: ${c.uitkomst}`).join(" | ")}`);
   const ap = await acq.prepareApproach(anna.id, owner);
@@ -70,8 +71,9 @@ export async function demoKlanten({ log = console.log } = {}) {
   const bravo = await one("select * from hq.leads where osm_id='node/9101'");
   const opp = await one("select * from hq.opportunities where lead_id=$1 and strength='concreet'", [bravo.id]);
   log(`Auditor: ${opp.observation} · ${opp.page_url} → ${opp.service_text}`);
-  await contact.recordConsent(bravo.id, { channel: "email", basis: "gerechtvaardigd_belang_zakelijk", source: "Zakelijk adres op eigen website (demo)", scope: "Eén bericht over de afspraaklink, hooguit één opvolging",
-    evidence: "Concreet probleem op hun eigen site (afspraaklink geeft 404), zakelijk adres voor klantvragen, eenmalig en met afmeldlink. (DEMO)" }, owner);
+  // Eerst gebeld; de eigenaar zegt ja op "Mag ik je een voorbeeld mailen?" (mail zonder toestemming mag niet).
+  await contact.recordConsent(bravo.id, { channel: "email", basis: "toestemming", source: "Telefoongesprek met de eigenaar (demo)", scope: "Voorbeeld en voorstel over de afspraaklink mailen, hooguit één opvolging",
+    evidence: "Eigenaar zei tijdens het gesprek ja op de vraag of Rayan een voorbeeld mocht mailen; genoteerd door Rayan. (DEMO)" }, owner);
   const routes = await contact.getRoutes();
   await contact.putRoutes({ email: { auto: true, live: false, terms_checked: true } }, owner);
   const bp = await acq.prepareApproach(bravo.id, owner);
